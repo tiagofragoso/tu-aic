@@ -7,26 +7,30 @@ import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import java.util.List;
 
 
-@Data
 public class SensingEvent {
 
+
     @Id
+    @Getter
+    @Setter
     private String id;
+
+    @Getter
+    @Setter
     private String deviceIdentifier;
+
+    @Getter
+    @Setter
     private long timestamp;
+
+    @Getter
+    @Setter
     private List<Tag> tags;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private double longitude;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
+    private double longitude;
     private double latitude;
 
-
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     @GeoSpatialIndexed
     private double[] gpsLocation = new double[2];
 
