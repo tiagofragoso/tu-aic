@@ -1,10 +1,8 @@
-FROM python:3.7.4-slim
-# Alpine isn't used here intentionally because especially with python there are often major issues when compiling dependencies
-WORKDIR /app
-RUN apt-get update && apt-get install -y build-essential
-COPY ./requirements.txt ./
-RUN pip install -r /app/requirements.txt
-COPY . .
-EXPOSE 4000
-# The -u flag is important if you want to observe the logs, otherwise python buffers the output
-ENTRYPOINT [ "python", "-u", "main.py" ]
+FROM nexus.helvetia.group:8082/openjdk:8-jdk-alpine
+
+WORKDIR /opt/app
+ADD target/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
