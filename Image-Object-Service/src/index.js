@@ -1,26 +1,20 @@
 const express = require("express");
-const minio = require("minio");
-const app = express();
-const port = 8000;
 
-const minoClient = new minio.Client({
-    endPoint: "minio",
-    port: 9000,
-    useSSL: false,
-    accessKey: "minio",
-    secretKey: "minio123",
-});
+const loadApp = require("./loaders");
+const { port } = require("./config");
 
-app.get("/", async (req, res) => {
-    try {
-        const buckets = await minoClient.listBuckets();
-        res.send(JSON.stringify(buckets));
-    } catch (err) {
-        console.error(err);
-        res.send("Error fetching buckets. Check the console");
-    }
-});
+const startServer = async () => {
 
-app.listen(port, () => {
-    console.log(`Example app listening at- http://localhost:${port}`);
-});
+    // Create express app
+    const app = express();
+
+    // Apply loaders
+    await loadApp(app);
+
+    // Start listening for requests
+    app.listen(port, () => {
+        console.log(`Example app listening at- http://localhost:${port}`);
+    });
+};
+
+startServer();
