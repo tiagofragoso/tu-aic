@@ -1,13 +1,20 @@
 package group3.aic_middleware.restData;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetaDataEntity {
+public class SensingEventDTO {
+
+    @Getter
+    @Setter
+    private String base64EncodedImage;
+
     @Getter
     @Setter
     // "place_ident": "031909GRAS01"
