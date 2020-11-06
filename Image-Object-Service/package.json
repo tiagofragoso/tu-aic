@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "concat-stream": "^2.0.0",
     "eslint": "^7.12.1",
     "express": "^4.17.1",
     "minio": "^7.0.16",

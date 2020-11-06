@@ -8,6 +8,10 @@ const startServer = async () => {
     // Create express app
     const app = express();
 
+    app.get("/health", (_, res) => {
+        res.send("I'm alive");
+    });
+
     // Apply loaders
     await loadApp(app);
 

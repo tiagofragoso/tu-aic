@@ -14,17 +14,14 @@ class StorageService {
         // Do something if bucket can't be created
     }
 
-    static async storeImage(name, image) {
+    static storeImage(name, image) {
         console.log(`Storing image ${name}`);
-        // Process image
-        await minioClient.putObject("images", name, image);
-        // Return result
+        return minioClient.putObject("images", name, image);
     }
 
-    static async getImage(name) {
+    static getImage(name) {
         console.log(`Getting image ${name}`);
-        await minioClient.getObject("images", name);
-        // Return image
+        return minioClient.getObject("images", name);
     }
 
 }

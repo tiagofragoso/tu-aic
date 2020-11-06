@@ -1,10 +1,7 @@
 const { Router } = require("express");
-const imageRoutes = require("./routes/images");
+const imagesRouter = require("./routes/images");
 
-module.exports = () => {
-    const app = Router();
+const app = Router();
+app.use("/images", imagesRouter);
 
-    app.use("/images", imageRoutes);
-
-    return app;
-};
+module.exports = app;
