@@ -7,6 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class Tag {
     private String tagName;
-    private String imageFileHash;
-    private String imageObjectHash;
+    private String imageHash;
 }

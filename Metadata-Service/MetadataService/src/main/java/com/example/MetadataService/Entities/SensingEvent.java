@@ -1,5 +1,6 @@
 package com.example.MetadataService.Entities;
 
+import com.example.MetadataService.DTOs.EventDTO;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
@@ -14,6 +15,11 @@ public class SensingEvent {
     @Getter
     @Setter
     private String id;
+
+
+    @Getter
+    @Setter
+    private String name;
 
     @Getter
     @Setter
@@ -58,8 +64,9 @@ public class SensingEvent {
         this.latitude = latitude;
     }
 
-    public SensingEvent(String id, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude) {
+    public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude) {
         this.id = id;
+        this.name = name;
         this.deviceIdentifier = deviceIdentifier;
         this.timestamp = timestamp;
         this.tags = tags;
