@@ -1,15 +1,15 @@
-// .env configuration etc.
+require("dotenv").config();
 const minio = require("minio");
 
 const minioClient = new minio.Client({
     endPoint: "minio",
-    port: 9000,
+    port: parseInt(process.env.MINIO_PORT, 10),
     useSSL: false,
-    accessKey: "minio",
-    secretKey: "minio123",
+    accessKey: process.env.MINIO_ACCESS_KEY,
+    secretKey: process.env.MINIO_SECRET_KEY,
 });
 
 module.exports = {
-    port: 8000,
+    port: process.env.PORT,
     minioClient,
 };
