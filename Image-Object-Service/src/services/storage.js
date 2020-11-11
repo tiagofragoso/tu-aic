@@ -2,18 +2,25 @@ const { minioClient } = require("../config");
 const Base64Service = require("../services/base64");
 const { streamToBuffer } = require("../util/stream");
 
+class FileNotFoundError extends Error {}
+
+class StorageServiceInternalError extends Error {}
+
 class StorageService {
     constructor() {}
 
     static async init() {
-        const exists = await minioClient.bucketExists("images");
-        if (!exists) {
-            console.log("Creating images bucket");
-            await minioClient.makeBucket("images");
-        } else {
-            console.log("Images bucket already exists");
+        try {
+            const exists = await minioClient.bucketExists("images");
+            if (!exists) {
+                console.log("Creating images bucket");
+                await minioClient.makeBucket("images");
+            } else {
+                console.log("Images bucket already exists");
+            }
+        } catch (err) {
+            throw new StorageServiceInternalError();
         }
-        // Do something if bucket can't be created
     }
 
     static async storeImageBase64(name, image) {
@@ -25,7 +32,7 @@ class StorageService {
         try {
             await this._storeImage(name, imageBuffer);
         } catch (err) {
-            throw new Error();
+            throw new StorageServiceInternalError();
         }
     }
 
@@ -47,19 +54,15 @@ class StorageService {
 
         } catch (err) {
             if (err.code === "NoSuchKey" || err.code === "NotFound") { // MinIO slang for "This file does not exist"
-                return {
-                    imageFile: "The requested file does not exist",
-                };
+                throw new FileNotFoundError();
             } else {
-                return {
-                    imageFile: null,
-                };
+                throw new StorageServiceInternalError();
             }
         }
     }
 
     static async _getImageData(name) {
-        // Get the stream from the StorageService
+        // Get the stream from MinIO
         const stream = await minioClient.getObject("images", name);
 
         // Read the full stream and save contents to a Buffer
@@ -78,5 +81,7 @@ class StorageService {
     }
 
 }
+
+StorageService.errors = { FileNotFoundError, StorageServiceInternalError };
 
 module.exports = StorageService;
