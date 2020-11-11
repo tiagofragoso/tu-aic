@@ -39,5 +39,5 @@ docker-compose up
 
 ```bash
 GET /images/:name # Retrieve an image
-POST /images # Store an image
+PUT /images # Store an image
 ```

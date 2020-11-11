@@ -24,7 +24,7 @@ router.get("/:name", async (req, res, _next) => {
     }
 });
 
-router.post("/", async (req, res, _next) => {
+router.put("/", async (req, res, _next) => {
     // Validate request (maybe move this to a middleware later)
     const { name, imageFile } = req.body;
     if (!name || !imageFile) {
@@ -40,7 +40,7 @@ router.post("/", async (req, res, _next) => {
         return;
     }
 
-    res.status(201).send();
+    res.status(200).send();
 });
 
 module.exports = router;
