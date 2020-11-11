@@ -1,4 +1,4 @@
-const { minioClient } = require("../config");
+const { minioClient, defaultBucket } = require("../config");
 const Base64Service = require("../services/base64");
 const { streamToBuffer } = require("../util/stream");
 
@@ -11,12 +11,12 @@ class StorageService {
 
     static async init() {
         try {
-            const exists = await minioClient.bucketExists("images");
+            const exists = await minioClient.bucketExists(defaultBucket);
             if (!exists) {
-                console.log("Creating images bucket");
-                await minioClient.makeBucket("images");
+                console.log(`Creating ${defaultBucket} bucket`);
+                await minioClient.makeBucket(defaultBucket);
             } else {
-                console.log("Images bucket already exists");
+                console.log(`${defaultBucket} bucket already exists`);
             }
         } catch (err) {
             throw new StorageServiceInternalError();
@@ -63,7 +63,7 @@ class StorageService {
 
     static async _getImageData(name) {
         // Get the stream from MinIO
-        const stream = await minioClient.getObject("images", name);
+        const stream = await minioClient.getObject(defaultBucket, name);
 
         // Read the full stream and save contents to a Buffer
         const buffer = await streamToBuffer(stream);
@@ -73,11 +73,11 @@ class StorageService {
     }
 
     static _getImageMetadata(name) {
-        return minioClient.statObject("images", name);
+        return minioClient.statObject(defaultBucket, name);
     }
 
     static _storeImage(name, image) {
-        return minioClient.putObject("images", name, image);
+        return minioClient.putObject(defaultBucket, name, image);
     }
 
 }
