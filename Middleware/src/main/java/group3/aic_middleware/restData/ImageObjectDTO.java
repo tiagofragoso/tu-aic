@@ -5,7 +5,8 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ImageObjectEntity {
+public class ImageObjectDTO {
+
     @Getter
     @Setter
     // Pronounced as sweet
@@ -18,6 +19,5 @@ public class ImageObjectEntity {
     @Getter
     @Setter
     private MetaDataEntity metaData;
-
 
 }

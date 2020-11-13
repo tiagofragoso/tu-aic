@@ -6,7 +6,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImageEntity {
+
     @Getter
     @Setter
     private String base64EncodedImage;
+
 }

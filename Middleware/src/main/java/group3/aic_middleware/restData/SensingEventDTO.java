@@ -64,4 +64,5 @@ public class SensingEventDTO {
     @Setter
     // "device_id": "b3f129b8-59f2-458f-bf2f-f0c1af0032d3"
     private String deviceId;
+
 }

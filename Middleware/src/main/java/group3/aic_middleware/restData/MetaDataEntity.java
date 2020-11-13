@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MetaDataEntity {
+
     @Getter
     @Setter
     // "place_ident": "031909GRAS01"
@@ -57,4 +58,5 @@ public class MetaDataEntity {
     @Setter
     // "device_id": "b3f129b8-59f2-458f-bf2f-f0c1af0032d3"
     private String deviceId;
+
 }

@@ -3,7 +3,7 @@ package group3.aic_middleware.endpoints;
 import group3.aic_middleware.exceptions.ImageNotCreatedException;
 import group3.aic_middleware.exceptions.ImageNotFoundException;
 import group3.aic_middleware.restData.ImageEntity;
-import group3.aic_middleware.restData.ImageObjectEntity;
+import group3.aic_middleware.restData.ImageObjectDTO;
 import group3.aic_middleware.restData.MetaDataEntity;
 import group3.aic_middleware.restData.SensingEventDTO;
 import group3.aic_middleware.service.FederationService;
@@ -11,14 +11,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+
 /**
  * The Endpoint which handles stuff
  */
 @RestController
 @RequestMapping("/images")
-public class ApiController {
+public class GatewayController {
 
     FederationService federationService = new FederationService();
+
+    public GatewayController() throws NoSuchAlgorithmException {
+    }
 
     // TODO: Check if error messages are returned
     /**
@@ -27,7 +33,7 @@ public class ApiController {
     @PostMapping("/{sensingEvent}")
     @ResponseStatus(HttpStatus.CREATED) // 8
     public void create(@PathVariable("sensingEvent") SensingEventDTO sensingEvent){
-        ImageObjectEntity entity = new ImageObjectEntity();
+        ImageObjectDTO entity = new ImageObjectDTO();
 
         MetaDataEntity metaData = new MetaDataEntity(
                 sensingEvent.getPlaceIdent(),
@@ -50,7 +56,7 @@ public class ApiController {
             this.federationService.saveImage(entity);
         } catch (ImageNotCreatedException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_MODIFIED, "Image creation failed", e);
+                    HttpStatus.NOT_MODIFIED, "Image creation failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
@@ -62,19 +68,32 @@ public class ApiController {
      */
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK) //5
-    public ImageObjectEntity getById(@PathVariable("id") String id) { // 3
+    public ImageObjectDTO getById(@PathVariable("id") String id) { // 3
         try {
             return  this.federationService.readImage(id);
-                                     // findById(id) // 4
-                                     // .map(UserResource::new) // 5
-                                     // .map(ResponseEntity::ok) // 6
-                                     // .orElse(ResponseEntity.notFound().build()); // 7
         } catch (ImageNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Image not found", e);
         } catch (Exception exc) {
             throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
+                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
+        }
+    }
+
+    /**
+     * The call which queries images for a device
+     */
+    @GetMapping("/device/{id}")
+    @ResponseStatus(HttpStatus.OK) //5
+    public List<ImageObjectDTO> getByDeviceId(@PathVariable("id") String id) { // 3
+        try {
+            return  this.federationService.readImagesForDevice(id);
+        } catch (ImageNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Images for this device were not found", e);
+        } catch (Exception exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
 
         }
     }
