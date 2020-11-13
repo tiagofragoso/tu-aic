@@ -1,5 +1,6 @@
 package group3.aic_middleware.endpoints;
 
+import group3.aic_middleware.exceptions.DeviceNotFoundException;
 import group3.aic_middleware.exceptions.ImageNotCreatedException;
 import group3.aic_middleware.exceptions.ImageNotFoundException;
 import group3.aic_middleware.restData.ImageEntity;
@@ -73,7 +74,7 @@ public class GatewayController {
             return  this.federationService.readImage(id);
         } catch (ImageNotFoundException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Image not found", e);
+                    HttpStatus.NOT_FOUND, "Image not found. Reason: " + e.getMessage());
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
@@ -88,9 +89,9 @@ public class GatewayController {
     public List<ImageObjectDTO> getByDeviceId(@PathVariable("id") String id) { // 3
         try {
             return  this.federationService.readImagesForDevice(id);
-        } catch (ImageNotFoundException e) {
+        } catch (DeviceNotFoundException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Images for this device were not found", e);
+                    HttpStatus.NOT_FOUND, "Images for this device were not found. Reason: " + e.getMessage());
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
@@ -110,7 +111,7 @@ public class GatewayController {
             this.federationService.deleteImage(id);
         } catch (ImageNotFoundException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Image to delete not found", e);
+                    HttpStatus.NOT_FOUND, "Image deletion failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
