@@ -17,7 +17,8 @@ const startServer = async () => {
 
     // Start listening for requests
     app.listen(port, () => {
-        console.log(`Example app listening at- http://localhost:${port}`);
+        // eslint-disable-next-line no-console
+        console.log(`App listening in port ${port}`);
     });
 };
 

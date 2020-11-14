@@ -1,6 +1,7 @@
 const loadApi = require("./api");
 const loadMinIO = require("./minio");
 const loadLogger = require("./logger");
+const logger = require("../util/logger");
 
 module.exports = async (app) => {
     loadLogger(app); // always load logger before API routes
@@ -8,8 +9,8 @@ module.exports = async (app) => {
     try {
         await loadMinIO();
     } catch (err) {
-        console.error("MinIO fatal error");
-        console.error(err);
+        logger.error("MinIO fatal error");
+        logger.error(err);
         process.exit(-1);
     }
     return app;

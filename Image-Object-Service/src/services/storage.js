@@ -1,6 +1,7 @@
 const { minioClient, defaultBucket } = require("../config");
 const Base64Service = require("../services/base64");
 const { streamToBuffer } = require("../util/stream");
+const logger = require("../util/logger");
 
 class FileNotFoundError extends Error {}
 
@@ -13,10 +14,10 @@ class StorageService {
         try {
             const exists = await minioClient.bucketExists(defaultBucket);
             if (!exists) {
-                console.log(`Creating ${defaultBucket} bucket`);
+                logger.debug(`Creating ${defaultBucket} bucket`);
                 await minioClient.makeBucket(defaultBucket);
             } else {
-                console.log(`${defaultBucket} bucket already exists`);
+                logger.debug(`${defaultBucket} bucket already exists`);
             }
         } catch (err) {
             throw new StorageServiceInternalError();
@@ -24,7 +25,7 @@ class StorageService {
     }
 
     static async storeImageBase64(name, image) {
-        console.log(`Storing image ${name}`);
+        logger.debug(`Storing image ${name}`);
 
         // Create a binary Buffer from the base64 string
         const imageBuffer = Base64Service.toBuffer(image);
@@ -37,7 +38,7 @@ class StorageService {
     }
 
     static async getImage(name) {
-        console.log(`Getting image ${name}`);
+        logger.debug(`Getting image ${name}`);
         try {
 
             const [imageData, imageMetadata] = await Promise.all([
