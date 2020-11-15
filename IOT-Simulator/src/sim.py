@@ -29,6 +29,7 @@ def post(url_test, data_test = None):
 
 
 if __name__ == '__main__':
+    data_repo = "./iwildcam_synthesized_idaho/"
     if len(sys.argv) > 2 :
         print("Too many arguments")
         print("You should only put the directory of the pictures to send")
