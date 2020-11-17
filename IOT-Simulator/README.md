@@ -22,6 +22,7 @@ data
 ​	|____ images
 
 ​	| metadata.json
+little_data # temporar : sample of the data
 
 get_data.csh # the script to create the data folder
 .gitignore # the doc to ignore the data repo in the git
@@ -37,11 +38,9 @@ src
 * **For the moment :**
 
   ```
-  csh get_data.csh
-  
-  csh launch_sim.csh
+  python3 -u sim.py
   ```
-
+  
 * **After that my docker works :**
 
   ``docker build .``
