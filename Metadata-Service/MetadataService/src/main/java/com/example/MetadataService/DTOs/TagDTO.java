@@ -1,22 +1,17 @@
 package com.example.MetadataService.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class TagDTO {
-    private String sensingEventId;
+    @JsonProperty(required = true, value = "tag_name")
     private String tagName;
-    private String imageHash;
 
-    /**
-     * Constructor to return a tag.
-     * @param tagName The tag name.
-     * @param imageHash The image hash.
-     */
-    public TagDTO(String tagName, String imageHash) {
-        this.tagName = tagName;
-        this.imageHash = imageHash;
-    }
+    @JsonProperty(required = true, value = "image_hash")
+    private String imageHash;
 }
