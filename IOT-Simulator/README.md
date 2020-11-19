@@ -6,9 +6,9 @@ This IoT Simulator is meant to send random pictures to the middle-ware, to mimic
 
 ## Tech stack
 
-* **Docker** (not yet implemented)
+* **Docker** 
 
-* **Python 3.7**
+* **Python 3.7** (downloaded by docker)
 
 
 
@@ -23,31 +23,35 @@ data
 
 ​	| metadata.json
 little_data # temporar : sample of the data
+|____ iwildcam_synthesized_idaho
 
+​	|____ images
+
+​	| metadata.json
+.env # to define the port of the post(data)
 get_data.csh # the script to create the data folder
 .gitignore # the doc to ignore the data repo in the git
 src
-│  sim.py        					# The file that sends pictures to the middleware API
-| launch_sim.csh            # The script that calls several times sim.py```
+│  sim.py  # The file that sends pictures to the middleware API
+
 ```
 
 
 
 ## How to run
 
-* **For the moment :**
+* **With docker :**
 
   ```
-  python3 -u sim.py
+  docker build -t simulator-image .
+  docker run -it --rm --name simulator-container simulator-image
   ```
   
-* **After that my docker works :**
+  
 
-  ``docker build .``
+## API documentation
 
-## Api documentation
-
-For the moment, the simulator sends the data to localhost:3000/data with the following format :
+For the moment, the simulator sends the data to http://host.docker.internal:3000/data with the following format :
 
 ```
 {
