@@ -2,9 +2,9 @@ version: "3.7"
 
 services:
   mongodb:
-    container_name: mongodb
-    hostname: mongodb
     image: mongo:latest
+    environment:
+      - MONGO_INITDB_DATABASE=event_metadata
     ports:
       - 27017:27017
     expose:
