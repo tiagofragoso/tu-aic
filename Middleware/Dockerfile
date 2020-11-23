@@ -1,8 +1,11 @@
-FROM nexus.helvetia.group:8082/openjdk:8-jdk-alpine
+FROM maven:3.6.3-openjdk-8-slim as builder
+WORKDIR /tmp/
+COPY pom.xml /tmp/
+RUN mvn dependency:resolve
+COPY src /tmp/src
+RUN mvn package
 
-WORKDIR /opt/app
-ADD target/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar app.jar
-
+FROM openjdk:8-jre-alpine as runner
+COPY --from=builder /tmp/target/*.jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar
 EXPOSE 8080
-
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar"]
+CMD ["java", "-jar", "/app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar"]

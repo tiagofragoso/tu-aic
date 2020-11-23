@@ -32,7 +32,7 @@ public class FederationService {
     public void saveImage(ImageObjectDTO imageObjectDTO) throws ImageNotCreatedException {
         int seuid = -1;
         int oldHash = -1;
-        int hashedImage = this.hashingService.getHash(imageObjectDTO.getImageEntity().getBase64EncodedImage());
+        int hashedImage = this.hashingService.getHash(imageObjectDTO.getImage().getBase64EncodedImage());
         // TODO: check existence of an image using MetaDataService / ImageObjectStorageService
         if(seuid != -1) {
             // TODO: request old hash from MetadataService

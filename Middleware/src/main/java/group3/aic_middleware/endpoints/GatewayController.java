@@ -27,7 +27,6 @@ public class GatewayController {
     public GatewayController() throws NoSuchAlgorithmException {
     }
 
-    // TODO: Check if error messages are returned
     /**
      * The call which posts an image
      */
