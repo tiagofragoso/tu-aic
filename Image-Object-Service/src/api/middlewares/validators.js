@@ -18,11 +18,11 @@ const useValidators = (validators) => async (req, res, next) => {
 const store = useValidators([
     body("name")
         .exists({ checkNull: true, checkFalsy: true }) // make sure empty strings are not accepted
-        .withMessage("Image name must be provided")
+        .withMessage("'name' field must be provided")
         .bail(),
-    body("imageFile")
+    body("image_file")
         .exists({ checkNull: true, checkFalsy: true }) // make sure empty strings are not accepted
-        .withMessage("Image file must be provided in base64")
+        .withMessage("'image_file' must be provided (in base64)")
         .bail(),
 ]);
 

@@ -49,8 +49,8 @@ class StorageService {
             const { lastModified } = imageMetadata;
 
             return {
-                imageFile: imageData,
-                lastModified,
+                image_file: imageData,
+                last_modified: lastModified,
             };
 
         } catch (err) {

@@ -29,11 +29,11 @@ router.get("/:name", get_validator,
 
 router.put("/", store_validator,
     async (req, res, _next) => {
-        const { name, imageFile } = req.body;
+        const { name, image_file } = req.body;
 
         try {
         // Store the base64 image
-            await StorageService.storeImageBase64(name, imageFile);
+            await StorageService.storeImageBase64(name, image_file);
             res.status(200).send();
         } catch (err) {
             if (err instanceof StorageServiceInternalError) {
