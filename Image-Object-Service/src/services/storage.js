@@ -62,6 +62,15 @@ class StorageService {
         }
     }
 
+    static deleteImage(name) {
+        logger.debug(`Deleting image ${name}`);
+        try {
+            return minioClient.removeObject(defaultBucket, name);
+        } catch (err) {
+            throw new StorageServiceInternalError();
+        }
+    }
+
     static async _getImageData(name) {
         // Get the stream from MinIO
         const stream = await minioClient.getObject(defaultBucket, name);

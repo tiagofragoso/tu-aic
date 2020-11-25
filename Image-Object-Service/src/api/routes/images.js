@@ -44,4 +44,22 @@ router.put("/", store_validator,
         }
     });
 
+router.delete("/:name", get_validator,
+    async (req, res, _next) => {
+        const { name } = req.params;
+
+        try {
+            // Delete image from MinIO
+            await StorageService.deleteImage(name);
+            res.status(200).send();
+        } catch (err) {
+            if (err instanceof StorageServiceInternalError) {
+                res.status(500).send("An error occurred while deleting the image");
+            } else {
+                res.status(500).send("An error occurred");
+            }
+        }
+    },
+);
+
 module.exports = router;
