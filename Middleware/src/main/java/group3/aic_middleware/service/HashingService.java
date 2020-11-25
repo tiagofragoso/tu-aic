@@ -19,8 +19,7 @@ public class HashingService {
      * @return hashed value of the image
      */
     protected int getHash(String base64EncodedImage) {
-        int hashedImage = ByteBuffer.wrap(this.hasher.digest(base64EncodedImage.getBytes(StandardCharsets.UTF_8))).getInt();
-        return hashedImage;
+        return ByteBuffer.wrap(this.hasher.digest(base64EncodedImage.getBytes(StandardCharsets.UTF_8))).getInt();
     }
 
     /**
@@ -31,11 +30,7 @@ public class HashingService {
      * @return true when newImageHashed == oldImageHashed, false otherwise
      */
     protected boolean compareHash(int newImageHashed, int oldImageHashed) {
-        if(newImageHashed == oldImageHashed) {
-            return true;
-        } else {
-            return false;
-        }
+        return newImageHashed == oldImageHashed;
     }
 
 }
