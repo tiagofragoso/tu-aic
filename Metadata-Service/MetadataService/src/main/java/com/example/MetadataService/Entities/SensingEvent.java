@@ -1,32 +1,47 @@
 package com.example.MetadataService.Entities;
 
+import com.example.MetadataService.DTOs.EventDTO;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
 
-@Data
+@CompoundIndex(name="unique_tag_name", def = "{ 'tag.tagName' : 1 }", unique = true)
+@Document
 public class SensingEvent {
 
+
     @Id
+    @Getter
+    @Setter
     private String id;
+
+    @Getter
+    @Setter
+    private String name;
+
+    @Getter
+    @Setter
     private String deviceIdentifier;
+
+    @Getter
+    @Setter
     private long timestamp;
+//        if(event.getTags().stream().anyMatch(x -> x.getTagName().equals(tag.getTagName()))){
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "The given tag was already added to this event.");
+//        }
+    @Getter
+    @Setter
     private List<Tag> tags;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private double longitude;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
+    private double longitude;
     private double latitude;
 
-
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     @GeoSpatialIndexed
     private double[] gpsLocation = new double[2];
 
@@ -54,8 +69,9 @@ public class SensingEvent {
         this.latitude = latitude;
     }
 
-    public SensingEvent(String id, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude) {
+    public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude) {
         this.id = id;
+        this.name = name;
         this.deviceIdentifier = deviceIdentifier;
         this.timestamp = timestamp;
         this.tags = tags;

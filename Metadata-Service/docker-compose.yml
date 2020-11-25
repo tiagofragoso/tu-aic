@@ -1,14 +1,27 @@
 version: "3.7"
 
 services:
-  mongodb_container:
+  mongodb:
     image: mongo:latest
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      - MONGO_INITDB_DATABASE=event_metadata
     ports:
       - 27017:27017
+    expose:
+      - 27017
     volumes:
       - mongodb_data_container:/data/db
+
+  metadata-service:
+    build: ./MetadataService
+    image: metadata-service
+    container_name: metadata-service
+    env_file:
+      - MetadataService/metadataService.env
+    depends_on:
+      - mongodb
+    ports:
+      - 1331:8080
+
 volumes:
   mongodb_data_container:
