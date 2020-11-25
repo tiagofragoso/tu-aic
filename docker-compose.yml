@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  minio:
+    image: minio/minio:RELEASE.2020-10-28T08-16-50Z
+    volumes:
+      - minio_data:/data
+    ports: 
+      - "9000:${MINIO_PORT}"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    command: server /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${MINIO_PORT}/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  image-object-service:
+    build: ./Image-Object-Service
+    ports:
+      - "8000:${IMAGE_OBJECT_SERVICE_PORT}"
+    volumes: 
+      - "./Image-Object-Service/src:/usr/app/src"
+    environment: 
+      PORT: ${IMAGE_OBJECT_SERVICE_PORT}
+      MINIO_PORT: ${MINIO_PORT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+    depends_on: 
+      - minio
+
+volumes:
+  minio_data:

@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      host: mongodb
+      port: 27017
+      database: event_metadata
+      repositories:
+        enabled: true
+      auto-index-creation: true
+
+server:
+  error:
+    include-message: always

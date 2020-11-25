@@ -1,0 +1,25 @@
+{
+  "name": "image-object-service",
+  "version": "1.0.0",
+  "description": "Image Object Service using MinIO",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "concat-stream": "^2.0.0",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.12.1",
+    "express": "^4.17.1",
+    "express-validator": "^6.6.1",
+    "log4js": "^6.3.0",
+    "minio": "^7.0.16",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.6"
+  }
+}
