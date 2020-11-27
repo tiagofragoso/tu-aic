@@ -1,4 +1,4 @@
-package group3.aic_middleware.service.authorization;
+package group3.aic_middleware.services.authorization;
 
 import com.dropbox.core.DbxAppInfo;
 import com.dropbox.core.DbxAuthFinish;

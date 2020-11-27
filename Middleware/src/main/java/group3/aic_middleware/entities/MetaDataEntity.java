@@ -1,4 +1,4 @@
-package group3.aic_middleware.restData;
+package group3.aic_middleware.entities;
 
 import lombok.*;
 

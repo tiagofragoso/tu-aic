@@ -1,21 +1,17 @@
-package group3.aic_middleware.service;
+package group3.aic_middleware.services;
 
 import com.dropbox.core.*;
 import com.dropbox.core.oauth.DbxCredential;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
-import com.dropbox.core.v2.users.FullAccount;
 import group3.aic_middleware.exceptions.DropboxLoginException;
 import group3.aic_middleware.exceptions.ImageNotCreatedException;
 import group3.aic_middleware.exceptions.ImageNotFoundException;
-import group3.aic_middleware.restData.ImageEntity;
+import group3.aic_middleware.entities.ImageEntity;
 import com.dropbox.core.json.JsonReader;
 import group3.aic_middleware.restData.ImageObjectDTO;
-import group3.aic_middleware.restData.MetaDataEntity;
-import group3.aic_middleware.service.authorization.ShortLiveTokenAuthorize;
+import group3.aic_middleware.services.authorization.ShortLiveTokenAuthorize;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -116,7 +112,7 @@ public class ImageFileService {
             result = client.files().listFolderContinue(result.getCursor());
         }
         */
-        String filename = imageObjectDTO.getMetaData().getFilename();
+        String filename = imageObjectDTO.getMetaData().getSeqId() + ".jpg";
         byte[] bytes = Base64.decodeBase64(imageObjectDTO.getImage().getBase64EncodedImage().getBytes(StandardCharsets.UTF_8));
         Path destinationFile = Paths.get(assetsPath, filename);
         try {

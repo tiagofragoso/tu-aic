@@ -1,17 +1,19 @@
 package group3.aic_middleware.endpoints;
 
 import group3.aic_middleware.exceptions.DeviceNotFoundException;
+import group3.aic_middleware.exceptions.DropboxLoginException;
 import group3.aic_middleware.exceptions.ImageNotCreatedException;
 import group3.aic_middleware.exceptions.ImageNotFoundException;
-import group3.aic_middleware.restData.ImageEntity;
+import group3.aic_middleware.entities.ImageEntity;
 import group3.aic_middleware.restData.ImageObjectDTO;
-import group3.aic_middleware.restData.MetaDataEntity;
 import group3.aic_middleware.restData.SensingEventDTO;
-import group3.aic_middleware.service.FederationService;
+import group3.aic_middleware.services.FederationService;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -24,33 +26,20 @@ public class GatewayController {
 
     FederationService federationService = new FederationService();
 
-    public GatewayController() throws NoSuchAlgorithmException {
+    public GatewayController() throws NoSuchAlgorithmException, ImageNotFoundException, ImageNotCreatedException, DropboxLoginException, JSONException, IOException {
     }
 
     /**
-     * The call which posts an image
+     * The call which creates an image
      */
     @PostMapping("/{sensingEvent}")
     @ResponseStatus(HttpStatus.CREATED) // 8
     public void create(@PathVariable("sensingEvent") SensingEventDTO sensingEvent){
         ImageObjectDTO entity = new ImageObjectDTO();
-
-        MetaDataEntity metaData = new MetaDataEntity(
-                sensingEvent.getPlaceIdent(),
-                sensingEvent.getName(),
-                sensingEvent.getSeqId(),
-                sensingEvent.getLongitude(),
-                sensingEvent.getDatetime(),
-                sensingEvent.getFrameNum(),
-                sensingEvent.getSeqNumFrames(),
-                sensingEvent.getLatitude(),
-                sensingEvent.getFilename(),
-                sensingEvent.getDeviceId()
-        );
         ImageEntity image = new ImageEntity(sensingEvent.getBase64EncodedImage());
 
         entity.setImage(image);
-        entity.setMetaData(metaData);
+        entity.setMetaData(sensingEvent.getMetaData());
 
         try{
             this.federationService.saveImage(entity);
@@ -66,11 +55,11 @@ public class GatewayController {
     /**
      * The call which queries an image
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK) //5
-    public ImageObjectDTO getById(@PathVariable("id") String id) { // 3
+    public ImageObjectDTO getById(@PathVariable("seqId") String seqId) { // 3
         try {
-            return  this.federationService.readImage(id);
+            return  this.federationService.readImage(seqId);
         } catch (ImageNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Image not found. Reason: " + e.getMessage());
@@ -103,11 +92,11 @@ public class GatewayController {
     /**
      * The call which deletes an image
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK) // 8
-    public void delete(@PathVariable("id") String id) {
+    public void delete(@PathVariable("seqId") String seqId) {
         try {
-            this.federationService.deleteImage(id);
+            this.federationService.deleteImage(seqId);
         } catch (ImageNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Image deletion failed. Reason: " + e.getMessage());

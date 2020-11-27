@@ -1,4 +1,4 @@
-package group3.aic_middleware.service;
+package group3.aic_middleware.services;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
