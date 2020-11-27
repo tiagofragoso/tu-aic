@@ -5,11 +5,8 @@ import group3.aic_middleware.exceptions.DropboxLoginException;
 import group3.aic_middleware.exceptions.ImageNotCreatedException;
 import group3.aic_middleware.exceptions.ImageNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
-import group3.aic_middleware.restData.ImageObjectDTO;
-import group3.aic_middleware.restData.ImageObjectServiceCreateDTO;
-import group3.aic_middleware.restData.ImageObjectServiceLoadDTO;
+import group3.aic_middleware.restData.*;
 import group3.aic_middleware.entities.MetaDataEntity;
-import group3.aic_middleware.restData.MetaDataServiceDTO;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -46,7 +43,7 @@ public class FederationService {
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
 
         if(metaDataDTO == null) {
-            throw new ImageNotFoundException("Requested image doesn't exist.");
+            throw new ImageNotFoundException("Requested image does not exist.");
         } else {
             fileName = metaDataDTO.getSensingEventId() + ".jpg";
             copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
@@ -60,10 +57,14 @@ public class FederationService {
                 new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
 
-        // TODO Stage 2 compare images adding Recovery function
+        // 27.11.2020: compare images adding Recovery function
         // 27.11.2020: query an image using ImageObjectStorageService (secondary)
         ImageEntity imageIFS = this.imageFileService.readImage(fileName);
         int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+        int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
+        if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
+            throw new ImageNotFoundException("Saved images are not identical.");
+        }
 
         // 27.11.2020: encapsulate requested image and return it
         ImageObjectDTO imageObjectDTO = new ImageObjectDTO();
@@ -95,6 +96,9 @@ public class FederationService {
         // 27.11.2020: save metadata using the MetadataService
         URL_MDS = "localhost:8080/event";
         copyMetaDataFromEntityToDTO(metaDataDTO, imageObjectDTO.getMetaData());
+        ArrayList<TagDTO> tagList = new ArrayList<>();
+        tagList.add(new TagDTO("base", hashOfNewImage));
+        metaDataDTO.setTags(tagList);
         HttpEntity<MetaDataServiceDTO> request = new HttpEntity<>(metaDataDTO);
         ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
         MetaDataServiceDTO metaDataServiceDTO = response.getBody();

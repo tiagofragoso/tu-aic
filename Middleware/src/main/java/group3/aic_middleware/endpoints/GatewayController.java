@@ -62,7 +62,7 @@ public class GatewayController {
             return  this.federationService.readImage(seqId);
         } catch (ImageNotFoundException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Image not found. Reason: " + e.getMessage());
+                    HttpStatus.NOT_FOUND, "Image reading failed. Reason: " + e.getMessage());
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
