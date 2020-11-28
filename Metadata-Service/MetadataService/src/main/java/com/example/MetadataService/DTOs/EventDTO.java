@@ -3,9 +3,7 @@ package com.example.MetadataService.DTOs;
 import com.example.MetadataService.Entities.Tag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -35,7 +33,14 @@ public class EventDTO {
     @JsonProperty(required = false, value="tags")
     private List<TagDTO> tags;
 
+    @JsonProperty(required = false, value="frame_num")
+    private long frameNum;
 
+    @JsonProperty(required = false, value="place_ident")
+    private String placeIdent;
+
+    @JsonProperty(required = false, value="event_frames")
+    private long eventFrames;
 
     /**
      * Ctor to create a new event.
