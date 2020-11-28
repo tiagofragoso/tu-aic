@@ -27,12 +27,15 @@ public class FederationService {
     HashingService hashingService = new HashingService();
     ImageFileService imageFileService = new ImageFileService();
 
+    String MDSConnection = "metadata-service:8080";
+    String IOSConnection = "image-object-service:8000";
+
     public FederationService() throws NoSuchAlgorithmException, ImageNotFoundException, ImageNotCreatedException, DropboxLoginException, JSONException, IOException {
     }
 
     public ImageObjectDTO readImage(String seqId) throws ImageNotFoundException {
         String fileName = "";
-        String URL_MDS = "localhost:8080/event/" + seqId;
+        String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
         MetaDataEntity metaDataEntity = new MetaDataEntity();
 
@@ -49,7 +52,7 @@ public class FederationService {
             copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
         }
 
-        String URL_IOS = "localhost:8000/images/" + fileName;
+        String URL_IOS = IOSConnection + "/images/" + fileName;
 
         // 27.11.2020: query an image using ImageObjectStorageService (primary)
         ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = restTemplate.exchange(
@@ -77,7 +80,7 @@ public class FederationService {
     public void saveImage(ImageObjectDTO imageObjectDTO) throws ImageNotCreatedException {
         int seuid = -1;
         RestTemplate restTemplate = new RestTemplate();
-        String URL_MDS = "localhost:8080/event/" + imageObjectDTO.getMetaData().getSeqId();
+        String URL_MDS = MDSConnection + "/events/" + imageObjectDTO.getMetaData().getSeqId();
         int hashOfNewImage = this.hashingService.getHash(imageObjectDTO.getImage().getBase64EncodedImage());
         // 27.11.2020: check existence of an image using MetaDataService and request old hash
         ResponseEntity<MetaDataServiceDTO> responseMDS = restTemplate.exchange(
@@ -94,7 +97,7 @@ public class FederationService {
         }
 
         // 27.11.2020: save metadata using the MetadataService
-        URL_MDS = "localhost:8080/event";
+        URL_MDS = MDSConnection + "/events";
         copyMetaDataFromEntityToDTO(metaDataDTO, imageObjectDTO.getMetaData());
         ArrayList<TagDTO> tagList = new ArrayList<>();
         tagList.add(new TagDTO("base", hashOfNewImage));
@@ -105,7 +108,7 @@ public class FederationService {
 
         // 27.11.2020: save image using ImageObjectStorageService
         String fileName = imageObjectDTO.getMetaData().getSeqId() + ".jpg";
-        String URL_IOS = "localhost:8000/images";
+        String URL_IOS = IOSConnection + "/images";
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, imageObjectDTO.getImage().getBase64EncodedImage());
         HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
         restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
@@ -118,7 +121,7 @@ public class FederationService {
         int seuid = -1;
         RestTemplate restTemplate = new RestTemplate();
         String fileName = seqId + ".jpg";
-        String URL_IOS = "localhost:8000/images/" + fileName;
+        String URL_IOS = IOSConnection + "/images/" + fileName;
 
         // 27.11.2020: check existence of an image using ImageObjectStorageService
         ResponseEntity<ImageObjectServiceLoadDTO> response = restTemplate.exchange(

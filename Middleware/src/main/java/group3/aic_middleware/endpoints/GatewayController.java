@@ -21,7 +21,7 @@ import java.util.List;
  * The Endpoint which handles stuff
  */
 @RestController
-@RequestMapping("/images")
+@RequestMapping("/events")
 public class GatewayController {
 
     FederationService federationService = new FederationService();
@@ -32,9 +32,9 @@ public class GatewayController {
     /**
      * The call which creates an image
      */
-    @PostMapping("/{sensingEvent}")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED) // 8
-    public void create(@PathVariable("sensingEvent") SensingEventDTO sensingEvent){
+    public void create(@RequestBody SensingEventDTO sensingEvent){
         ImageObjectDTO entity = new ImageObjectDTO();
         ImageEntity image = new ImageEntity(sensingEvent.getBase64EncodedImage());
 

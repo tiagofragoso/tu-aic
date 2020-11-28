@@ -51,6 +51,6 @@ for i in range(47) : # 47 is the number of data that I put on little_data
     rdm_wait = int(random.random()*20) # a picture is sent every <20 s
     time.sleep(rdm_wait)
     data = getdata_encoded(pictures_dic)
-    post(str(API_ENDPOINT)+"/sensingEvent", data)
+    post(str(API_ENDPOINT)+"/events", data)
 
 # Help with mockoon post : https://mockoon.com/docs/latest/templating/
