@@ -1,10 +1,11 @@
-FROM python:3.7.4-slim
-# Alpine isn't used here intentionally because especially with python there are often major issues when compiling dependencies
-WORKDIR /app
-RUN apt-get update && apt-get install -y build-essential
-COPY ./requirements.txt ./
-RUN pip install -r /app/requirements.txt
-COPY . .
-EXPOSE 4000
-# The -u flag is important if you want to observe the logs, otherwise python buffers the output
-ENTRYPOINT [ "python", "-u", "main.py" ]
+FROM maven:3.6.3-openjdk-8-slim as builder
+WORKDIR /tmp/
+COPY pom.xml /tmp/
+RUN mvn dependency:resolve
+COPY src /tmp/src
+RUN mvn package
+
+FROM openjdk:8-jre-alpine as runner
+COPY --from=builder /tmp/target/*.jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar
+EXPOSE 8080
+CMD ["java", "-jar", "/app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar"]
