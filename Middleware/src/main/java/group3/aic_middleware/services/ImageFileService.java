@@ -28,12 +28,11 @@ public class ImageFileService {
 
     String password = "aicW$2020_Group3";
     String assetsPath = "./Middleware/src/main/resources/config/";
-    String secretFile = assetsPath + "auth.json";
     String tokenFile = assetsPath + "token-information.json";
     DbxRequestConfig config;
     DbxClientV2 client;
 
-    public ImageFileService() throws    DropboxLoginException, IOException, ImageNotCreatedException, JSONException, ImageNotFoundException {
+    public ImageFileService() throws    DropboxLoginException, IOException, JSONException {
         if (!Files.exists(Paths.get(tokenFile))) {
             this.login();
         }
@@ -52,12 +51,7 @@ public class ImageFileService {
 
     private void login() throws DropboxLoginException, IOException {
         // Read app info file (contains app key and app secret)
-        DbxAppInfo appInfo;
-        try {
-            appInfo = DbxAppInfo.Reader.readFromFile(secretFile);
-        } catch (JsonReader.FileLoadException ex) {
-            throw new DropboxLoginException("Could not read secret credentials file:\n"+ex.getMessage());
-        }
+        DbxAppInfo appInfo = new DbxAppInfo("5neyyqy1vy93ydk","xf3vcha9m6ckq3z");
 
         // Run through Dropbox API authorization process
         DbxAuthFinish authFinish = new ShortLiveTokenAuthorize().authorize(appInfo);
