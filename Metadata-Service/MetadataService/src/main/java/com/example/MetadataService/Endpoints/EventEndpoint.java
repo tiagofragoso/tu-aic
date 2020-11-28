@@ -22,8 +22,7 @@ public class EventEndpoint {
 
     @PostMapping("events")
     public ResponseEntity createEvent(@RequestBody EventDTO event) {
-        log.info(event.getSensingEventId());
-        log.info("Create event!!!!!!!!!!!!!!!!!");
+        log.info("Create event");
         crudService.createEvent(event);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();

@@ -1,16 +1,14 @@
 package com.example.MetadataService.Entities;
 
-import com.example.MetadataService.DTOs.EventDTO;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
 
-//@CompoundIndex(name="unique_tag_name", def = "{ 'tag.tagName' : 1 }", unique = true)
 @Document
 public class SensingEvent {
 

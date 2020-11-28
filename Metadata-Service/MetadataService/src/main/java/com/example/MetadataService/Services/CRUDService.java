@@ -2,7 +2,6 @@ package com.example.MetadataService.Services;
 
 import com.example.MetadataService.DTOs.EventDTO;
 import com.example.MetadataService.DTOs.TagDTO;
-
 import com.example.MetadataService.Entities.SensingEvent;
 import com.example.MetadataService.Entities.Tag;
 import com.example.MetadataService.Repositories.SensingEventRepository;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
