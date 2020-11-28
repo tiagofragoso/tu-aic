@@ -22,9 +22,8 @@ public class TagEndpoint {
 
     @PostMapping("events/{eventId}/tags")
     public ResponseEntity addTag(@PathVariable String eventId, @RequestBody TagDTO tag) {
-
-        log.info(String.format("Add Tag: "));
         crudService.addTag(eventId, tag);
+        log.info(String.format("Added Tag: %s", tag.getTagName()));
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -32,8 +31,17 @@ public class TagEndpoint {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("events/{eventId}/tags")
     public ResponseEntity updateTag(@PathVariable String eventId, @RequestBody TagDTO tag) {
-        log.info(String.format("Update Tag: "));
         crudService.updateTag(eventId, tag);
+        log.info(String.format("Updated Tag: %s", tag.getTagName()));
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("events/{eventId}/tags/{tagName}")
+    public ResponseEntity addTag(@PathVariable String eventId, @PathVariable String tagName) {
+        crudService.deleteTag(eventId, tagName);
+        log.info(String.format("Deleted Tag: %s", tagName));
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
