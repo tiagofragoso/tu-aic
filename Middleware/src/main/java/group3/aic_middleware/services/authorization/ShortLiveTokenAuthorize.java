@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class ShortLiveTokenAuthorize {
-    public DbxAuthFinish authorize(DbxAppInfo appInfo) throws IOException {
+    public DbxAuthFinish authorize(DbxAppInfo appInfo) {
         // Run through Dropbox API authorization process
         DbxRequestConfig requestConfig = new DbxRequestConfig("examples-authorize");
         DbxWebAuth webAuth = new DbxWebAuth(requestConfig, appInfo);
@@ -22,18 +22,7 @@ public class ShortLiveTokenAuthorize {
                                                        .withNoRedirect()
                                                        .withTokenAccessType(TokenAccessType.OFFLINE)
                                                        .build();
-
-        String authorizeUrl = webAuth.authorize(webAuthRequest);
-        System.out.println("1. Go to " + authorizeUrl);
-        System.out.println("2. Click \"Allow\" (you might have to log in first).");
-        System.out.println("3. Copy the authorization code.");
-        System.out.print("Enter the authorization code here: ");
-
-        String code = new BufferedReader(new InputStreamReader(System.in)).readLine();
-        if (code == null) {
-            System.exit(1);
-        }
-        code = code.trim();
+        String code = "7eAmhScCFQAAAAAAAAAAHnbLKfGrNMva0tPXF8-EgZQ";
 
         try {
             return webAuth.finishFromCode(code);
