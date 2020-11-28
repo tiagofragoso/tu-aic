@@ -171,8 +171,6 @@ public class FederationService {
         metaDataServiceDTO.setLatitude(metaDataEntity.getLatitude());
     }
 
-    // X - Replication Service (= requests are replicated to the IFS and the IOSS and vice versa)
-
     // Stage 2:
     // Recovery Service
     // Logging Service???
