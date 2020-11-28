@@ -32,6 +32,41 @@ services:
       MINIO_ENDPOINT: ${MINIO_ENDPOINT}
     depends_on:
       - minio
+      
 
+  mongodb:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_DATABASE=event_metadata
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+    volumes:
+      - mongodb_data_container:/data/db
+
+  metadata-service:
+    build: ./Metadata-Service/MetadataService
+    image: metadata-service
+    container_name: metadata-service
+    env_file:
+      - ./Metadata-Service/MetadataService/metadataService.env
+    depends_on:
+      - mongodb
+    ports:
+      - 1331:8080
+      
+  iot-simulator-service:
+    build: ./IOT-Simulator
+    depends_on:
+        - middleware
+  
+  middleware:
+    build: ./Middleware
+    depends_on:
+      - metadata-service
+      - image-object-service
+      
 volumes:
   minio_data:
+  mongodb_data_container:

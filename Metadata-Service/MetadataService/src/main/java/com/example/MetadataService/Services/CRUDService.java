@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -23,12 +22,42 @@ public class CRUDService {
     private SensingEventRepository eventRepository;
 
     /**
+     * Delete an event
+     * @param id the id of the event that should be deleted.
+     * @throws Exception Throws an exception if the item could not be found.
+     */
+    public void deleteEvent(String id) throws Exception {
+
+        Optional<SensingEvent> event = eventRepository.findById(id);
+
+        if(event.isPresent()) {
+            eventRepository.delete(event.get());
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find the given Sensing Event");
+        }
+    }
+
+    /**
      * Create an event and store it in the persistence.
      * @param event the event that should be stored.
      */
     public void createEvent(EventDTO event) {
         try {
             eventRepository.insert(sensingDtoToReal(event));
+        }
+        catch (DuplicateKeyException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The sensing event was already added");
+        }
+    }
+
+    /**
+     * Create an event and store it in the persistence.
+     * @param event the event that should be stored.
+     */
+    public void updateEvent(EventDTO event) {
+        try {
+            eventRepository.save(sensingDtoToReal(event));
         }
         catch (DuplicateKeyException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The sensing event was already added");
@@ -87,6 +116,25 @@ public class CRUDService {
         return ret;
     }
 
+    /**
+     * Delete a tag.
+     * @param event_id the id of the sensing event.
+     * @param tag_name the id of the tag that should be removed
+     */
+    public synchronized void deleteTag(String event_id, String tag_name) {
+        SensingEvent event = getEventIfExists(event_id);
+
+        // Check if the tag already exists in the event
+
+        Tag tag = event.getTags().stream().filter(x -> x.getTagName().equals(tag_name)).findAny().orElse(null);
+
+        if(tag == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The given tag name was not found.");
+        }
+
+        event.getTags().remove(tag);
+        eventRepository.save(event);
+    }
 
     /**
      * Add a tag to a sensing event.
@@ -155,13 +203,14 @@ public class CRUDService {
             tags.add(tagDtoToReal(tag));
         }
 
-        SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude());
+        SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames());
+        System.out.println(realEvent.getId());
         return realEvent;
     }
 
     /**
      * Converts a tag dto to a normal tag
-     * @param dto the dto that should be converted.
+     * @param dto the dto that should be converted.mongorepos
      * @return returns a tag
      */
     private Tag tagDtoToReal(TagDTO dto) {
@@ -181,7 +230,7 @@ public class CRUDService {
             tags.add(tagRealToDto(tag));
         }
 
-        return new EventDTO(event.getId(), event.getName(), event.getDeviceIdentifier(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags);
+        return new EventDTO(event.getId(), event.getName(), event.getDeviceIdentifier(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getFrameNum(), event.getPlaceIdent(), event.getEventFrames());
     }
 
     /**
