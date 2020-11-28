@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 
-@CompoundIndex(name="unique_tag_name", def = "{ 'tag.tagName' : 1 }", unique = true)
+//@CompoundIndex(name="unique_tag_name", def = "{ 'tag.tagName' : 1 }", unique = true)
 @Document
 public class SensingEvent {
 

@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 public class Tag {
 
-    @Indexed(unique = true)
+//    @Indexed(unique = true)
     private String tagName;
 
     private String imageHash;

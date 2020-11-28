@@ -28,12 +28,12 @@ public class CRUDService {
      * @param id the id of the event that should be deleted.
      * @throws Exception Throws an exception if the item could not be found.
      */
-    public EventDTO deleteEvent(String id) throws Exception {
+    public void deleteEvent(String id) throws Exception {
 
         Optional<SensingEvent> event = eventRepository.findById(id);
 
         if(event.isPresent()) {
-            return sensingRealToDto(event.get());
+            eventRepository.delete(event.get());
         }
         else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find the given Sensing Event");
@@ -206,6 +206,7 @@ public class CRUDService {
         }
 
         SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames());
+        System.out.println(realEvent.getId());
         return realEvent;
     }
 

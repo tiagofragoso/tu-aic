@@ -37,11 +37,11 @@ public class TagEndpoint {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("events/{eventId}/tags/{tagName}")
+    @DeleteMapping("events/{eventId}/tags/{tagName}")
     public ResponseEntity addTag(@PathVariable String eventId, @PathVariable String tagName) {
         crudService.deleteTag(eventId, tagName);
         log.info(String.format("Deleted Tag: %s", tagName));
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

@@ -22,7 +22,8 @@ public class EventEndpoint {
 
     @PostMapping("events")
     public ResponseEntity createEvent(@RequestBody EventDTO event) {
-        log.info("Create event");
+        log.info(event.getSensingEventId());
+        log.info("Create event!!!!!!!!!!!!!!!!!");
         crudService.createEvent(event);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -31,15 +32,16 @@ public class EventEndpoint {
     @PutMapping("events")
     public ResponseEntity updateEvent(@RequestBody EventDTO event) {
         log.info("Update event");
-        crudService.createEvent(event);
+        crudService.updateEvent(event);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("events/{eventId}")
-    public EventDTO deleteEvent(@PathVariable String eventId) throws Exception {
+    public ResponseEntity deleteEvent(@PathVariable String eventId) throws Exception {
         log.info(String.format("Delete Event %s", eventId));
-        return crudService.getEventDetails(eventId);
+        crudService.deleteEvent(eventId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("events/{eventId}")

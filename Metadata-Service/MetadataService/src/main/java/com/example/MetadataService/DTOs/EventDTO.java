@@ -42,18 +42,4 @@ public class EventDTO {
     @JsonProperty(required = false, value="event_frames")
     private long eventFrames;
 
-    /**
-     * Ctor to create a new event.
-     * @param deviceIdentifier the device id
-     * @param timestamp the timestamp of the capture
-     * @param longitude the longitude
-     * @param latitude the latitude
-     */
-    public EventDTO(String deviceIdentifier, String name, long timestamp, double longitude, double latitude) {
-        this.deviceIdentifier = deviceIdentifier;
-        this.timestamp = timestamp;
-        this.tags = tags;
-        this.longitude = longitude;
-        this.latitude = latitude;
-    }
 }
