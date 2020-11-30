@@ -7,6 +7,7 @@ import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
 import group3.aic_middleware.restData.*;
 import group3.aic_middleware.entities.MetaDataEntity;
+import lombok.extern.log4j.Log4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
+@Log4j
 public class FederationService {
 
     private HashingService hashingService = new HashingService();
@@ -43,12 +46,18 @@ public class FederationService {
         MetaDataEntity metaDataEntity = new MetaDataEntity();
 
         // 27.11.2020: check existence of an image using MetaDataService
-        ResponseEntity<MetaDataServiceDTO> responseMDS = restTemplate.exchange(
-                URL_MDS, HttpMethod.GET, null,
-                new ParameterizedTypeReference<MetaDataServiceDTO>(){});
-        if(responseMDS.getStatusCode() == HttpStatus.NOT_FOUND) {
-            throw new EventNotFoundException("Requested image does not exist.");
+        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
+        try {
+            responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new EventNotFoundException("Requested sensing event doesn't exist.");
+            }
         }
+
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
 
         fileName = metaDataDTO.getSensingEventId() + ".jpg";
@@ -83,20 +92,32 @@ public class FederationService {
         RestTemplate restTemplate = new RestTemplate();
         String URL_MDS = MDSConnection + "/events/" + readEventDTO.getMetaData().getSeqId();
         int hashOfNewImage = this.hashingService.getHash(readEventDTO.getImage().getBase64EncodedImage());
-        MetaDataServiceDTO metaDataDTO;
-        // 27.11.2020: check existence of an image using MetaDataService and request old hash
-        ResponseEntity<MetaDataServiceDTO> responseMDS = restTemplate.exchange(
-                URL_MDS, HttpMethod.GET, null,
-                new ParameterizedTypeReference<MetaDataServiceDTO>(){});
+        MetaDataServiceDTO metaDataDTO = null;
+        log.warn("1");
 
-        if(responseMDS.getStatusCode() == HttpStatus.NOT_FOUND) {
-            metaDataDTO = new MetaDataServiceDTO();
-        } else {
-            metaDataDTO = responseMDS.getBody();
-            if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
-                throw new EventNotCreatedException("Image already exists.");
+        // 27.11.2020: check existence of an image using MetaDataService and request old hash
+        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
+        try {
+            log.warn("2");
+            responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            log.warn("3");
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.warn("4");
+                metaDataDTO = new MetaDataServiceDTO();
+            } else {
+                log.warn("5");
+                metaDataDTO = responseMDS.getBody();
+                if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
+                    log.warn("6");
+                    throw new EventNotCreatedException("Sensing event already exists.");
+                }
             }
         }
+        log.warn("7");
 
         // 27.11.2020: save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
@@ -114,6 +135,7 @@ public class FederationService {
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, readEventDTO.getImage().getBase64EncodedImage());
         HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
         restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
+        log.warn("8");
 
         // 27.11.2020: replicate image using ImageFileService
         this.imageFileService.saveImage(readEventDTO);
@@ -127,12 +149,16 @@ public class FederationService {
         MetaDataServiceDTO metaDataDTO;
 
         // 27.11.2020: check existence of an image using MetaDataService
-        ResponseEntity<MetaDataServiceDTO> responseMDS = restTemplate.exchange(
-                URL_MDS, HttpMethod.GET, null,
-                new ParameterizedTypeReference<MetaDataServiceDTO>(){});
-
-        if(responseMDS.getStatusCode() == HttpStatus.NOT_FOUND) {
-            throw new EventNotFoundException("Requested image doesn't exist.");
+        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
+        try {
+            responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new EventNotFoundException("Requested sensing event doesn't exist.");
+            }
         }
 
         // TODO: delete metadata using the MetadataService

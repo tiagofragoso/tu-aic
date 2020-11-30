@@ -66,6 +66,8 @@ services:
     depends_on:
       - metadata-service
       - image-object-service
+    ports:
+      - "9999:8080"
       
 volumes:
   minio_data:

@@ -1,5 +1,6 @@
 package group3.aic_middleware.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -38,6 +39,7 @@ public class MetaDataEntity {
     @Setter
     // "datetime": "22-Apr-2019 (00:53:00.000000)"
     @JsonProperty(required = true, value = "datetime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MMM-yyyy '('HH:mm:ss.SSSSSS')'")
     private LocalDateTime datetime;
 
     @Getter
@@ -61,7 +63,7 @@ public class MetaDataEntity {
     @Getter
     @Setter
     // "filename": "0a914caf-2bfa-11e9-bcad-06f10d5896c4.jpg"
-    @JsonProperty(required = true, value = "filename")
+    @JsonProperty(value = "filename")
     private String filename;
 
     @Getter
