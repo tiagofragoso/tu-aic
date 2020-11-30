@@ -2,12 +2,13 @@ package group3.aic_middleware.endpoints;
 
 import group3.aic_middleware.exceptions.DeviceNotFoundException;
 import group3.aic_middleware.exceptions.DropboxLoginException;
-import group3.aic_middleware.exceptions.ImageNotCreatedException;
-import group3.aic_middleware.exceptions.ImageNotFoundException;
+import group3.aic_middleware.exceptions.EventNotCreatedException;
+import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
-import group3.aic_middleware.restData.ImageObjectDTO;
+import group3.aic_middleware.restData.ReadEventDTO;
 import group3.aic_middleware.restData.SensingEventDTO;
 import group3.aic_middleware.services.FederationService;
+import lombok.extern.log4j.Log4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +21,14 @@ import java.util.List;
 /**
  * The Endpoint which handles stuff
  */
+@Log4j
 @RestController
 @RequestMapping("/events")
 public class GatewayController {
 
     FederationService federationService = new FederationService();
 
-    public GatewayController() throws NoSuchAlgorithmException, ImageNotFoundException, ImageNotCreatedException, DropboxLoginException, JSONException, IOException {
+    public GatewayController() throws NoSuchAlgorithmException, EventNotFoundException, EventNotCreatedException, DropboxLoginException, JSONException, IOException {
     }
 
     /**
@@ -35,15 +37,16 @@ public class GatewayController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED) // 8
     public void create(@RequestBody SensingEventDTO sensingEvent){
-        ImageObjectDTO entity = new ImageObjectDTO();
+        log.info("creating an event");
+        ReadEventDTO entity = new ReadEventDTO();
         ImageEntity image = new ImageEntity(sensingEvent.getBase64EncodedImage());
 
         entity.setImage(image);
         entity.setMetaData(sensingEvent.getMetaData());
 
         try{
-            this.federationService.saveImage(entity);
-        } catch (ImageNotCreatedException e) {
+            this.federationService.saveEvent(entity);
+        } catch (EventNotCreatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Image creation failed. Reason: " + e.getMessage());
         } catch (Exception e) {
@@ -57,10 +60,11 @@ public class GatewayController {
      */
     @GetMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK) //5
-    public ImageObjectDTO getById(@PathVariable("seqId") String seqId) { // 3
+    public ReadEventDTO getById(@PathVariable("seqId") String seqId) { // 3
+        log.info("reading an event");
         try {
-            return  this.federationService.readImage(seqId);
-        } catch (ImageNotFoundException e) {
+            return  this.federationService.readEvent(seqId);
+        } catch (EventNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Image reading failed. Reason: " + e.getMessage());
         } catch (Exception exc) {
@@ -74,9 +78,10 @@ public class GatewayController {
      */
     @GetMapping("/device/{id}")
     @ResponseStatus(HttpStatus.OK) //5
-    public List<ImageObjectDTO> getByDeviceId(@PathVariable("id") String id) { // 3
+    public List<ReadEventDTO> getByDeviceId(@PathVariable("id") String id) { // 3
+        log.info("reading events for a device");
         try {
-            return  this.federationService.readImagesForDevice(id);
+            return  this.federationService.readEventsForDevice(id);
         } catch (DeviceNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Images for this device were not found. Reason: " + e.getMessage());
@@ -95,9 +100,10 @@ public class GatewayController {
     @DeleteMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK) // 8
     public void delete(@PathVariable("seqId") String seqId) {
+        log.info("deleting an event");
         try {
-            this.federationService.deleteImage(seqId);
-        } catch (ImageNotFoundException e) {
+            this.federationService.deleteEvent(seqId);
+        } catch (EventNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Image deletion failed. Reason: " + e.getMessage());
         } catch (Exception e) {

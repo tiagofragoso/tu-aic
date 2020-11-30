@@ -1,0 +1,7 @@
+spring:
+  connections:
+    MDSConnection: http://metadata-service:8080
+    IOSConnection: http://image-object-service:8000
+
+  folders:
+    dropBoxFolderName: aic_2020

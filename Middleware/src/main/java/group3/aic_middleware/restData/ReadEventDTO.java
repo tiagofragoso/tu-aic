@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ImageObjectDTO {
+public class ReadEventDTO {
 
     @Getter
     @Setter
