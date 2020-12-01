@@ -39,28 +39,21 @@ public class GatewayController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@RequestBody SensingEventDTO sensingEvent) throws JSONException {
-        log.info("Creating an event");
+        log.info("Creating an event:");
         log.info(sensingEvent.toString());
-        log.warn("c1");
 
         ReadEventDTO readEventDTO = new ReadEventDTO();
         ImageEntity image = new ImageEntity(sensingEvent.getBase64EncodedImage());
-        log.warn("c2");
 
         readEventDTO.setImage(image);
-        log.warn("c3");
         readEventDTO.setMetaData(sensingEvent.getMetaData());
-        log.warn("c4");
 
         try{
-            log.warn("c5");
             this.federationService.saveEvent(readEventDTO);
         } catch (EventNotCreatedException e) {
-            log.warn("c6");
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Sensing event creation failed. Reason: " + e.getMessage());
         } catch (Exception e) {
-            log.warn("c7");
             log.warn(e.getMessage());
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
@@ -124,11 +117,9 @@ public class GatewayController {
         try {
             this.federationService.deleteEvent(seqId);
         } catch (EventNotFoundException e) {
-            //log.error(e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Sensing event deletion failed. Reason: " + e.getMessage());
         } catch (Exception e) {
-            //log.error(e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
         }

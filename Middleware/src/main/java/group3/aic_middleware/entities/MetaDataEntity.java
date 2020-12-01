@@ -46,13 +46,13 @@ public class MetaDataEntity {
     @Setter
     // "frame_num": 1
     @JsonProperty(required = true, value = "frame_num")
-    private int frameNum;
+    private long frameNum;
 
     @Getter
     @Setter
     // "seq_num_frames": 1
     @JsonProperty(required = true, value = "seq_num_frames")
-    private int seqNumFrames;
+    private long seqNumFrames;
 
     @Getter
     @Setter

@@ -45,7 +45,7 @@ public class SensingEventDTO {
         "name": "MAMMOTH CAVE 4",
         "seq_id": "6f949a0c-2e32-11e9-8002-dca9047ef277",
         "longitude": -114.40363519793485,
-        "datetime": "17-apr-2019 (10:37:56.002000)",
+        "datetime": "17-Apr-2019 (10:37:56.002000)",
         "frame_num": 8,
         "seq_num_frames": 9,
         "latitude": 43.01208085674003,

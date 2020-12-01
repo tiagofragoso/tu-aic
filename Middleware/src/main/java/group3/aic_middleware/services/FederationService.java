@@ -93,23 +93,18 @@ public class FederationService {
         String URL_MDS = MDSConnection + "/events/" + readEventDTO.getMetaData().getSeqId();
         int hashOfNewImage = this.hashingService.getHash(readEventDTO.getImage().getBase64EncodedImage());
         MetaDataServiceDTO metaDataDTO = null;
-        log.warn("1");
 
         // 27.11.2020: check existence of an image using MetaDataService and request old hash
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
         try {
-            log.warn("2");
             responseMDS = restTemplate.exchange(
                     URL_MDS, HttpMethod.GET, null,
                     new ParameterizedTypeReference<MetaDataServiceDTO>() {
                     });
         } catch (HttpClientErrorException e) {
-            log.warn("3");
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                log.warn("4");
                 metaDataDTO = new MetaDataServiceDTO();
             } else {
-                log.warn("5");
                 metaDataDTO = responseMDS.getBody();
                 if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
                     log.warn("6");
@@ -117,7 +112,6 @@ public class FederationService {
                 }
             }
         }
-        log.warn("7");
 
         // 27.11.2020: save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
@@ -135,7 +129,6 @@ public class FederationService {
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, readEventDTO.getImage().getBase64EncodedImage());
         HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
         restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
-        log.warn("8");
 
         // 27.11.2020: replicate image using ImageFileService
         this.imageFileService.saveImage(readEventDTO);
@@ -191,6 +184,9 @@ public class FederationService {
         metaDataEntity.setDatetime(LocalDateTime.ofInstant(Instant.ofEpochMilli(metaDataServiceDTO.getTimestamp()), ZoneId.systemDefault()));
         metaDataEntity.setLongitude(metaDataServiceDTO.getLongitude());
         metaDataEntity.setLatitude(metaDataServiceDTO.getLatitude());
+        metaDataEntity.setFrameNum(metaDataServiceDTO.getFrameNum());
+        metaDataEntity.setPlaceIdent(metaDataServiceDTO.getPlaceIdent());
+        metaDataEntity.setSeqNumFrames(metaDataServiceDTO.getEventFrames());
     }
 
     private void copyMetaDataFromEntityToDTO(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
@@ -200,6 +196,9 @@ public class FederationService {
         metaDataServiceDTO.setTimestamp(ZonedDateTime.of(metaDataEntity.getDatetime(), ZoneId.systemDefault()).toInstant().toEpochMilli());
         metaDataServiceDTO.setLongitude(metaDataEntity.getLongitude());
         metaDataServiceDTO.setLatitude(metaDataEntity.getLatitude());
+        metaDataServiceDTO.setFrameNum(metaDataEntity.getFrameNum());
+        metaDataServiceDTO.setPlaceIdent(metaDataEntity.getPlaceIdent());
+        metaDataServiceDTO.setEventFrames(metaDataEntity.getSeqNumFrames());
     }
 
     // Stage 2:
