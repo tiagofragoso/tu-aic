@@ -2,9 +2,11 @@ package group3.aic_middleware.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import group3.aic_middleware.restData.TagDTO;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -71,4 +73,9 @@ public class MetaDataEntity {
     // "device_id": "b3f129b8-59f2-458f-bf2f-f0c1af0032d3"
     @JsonProperty(required = true, value = "device_id")
     private String deviceId;
+
+    @Getter
+    @Setter
+    @JsonProperty(required = false, value="tags")
+    private List<TagDTO> tags;
 }

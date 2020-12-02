@@ -54,6 +54,7 @@ public class FederationService {
                     });
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Requested sensing event doesn't exist.");
                 throw new EventNotFoundException("Requested sensing event doesn't exist.");
             }
         }
@@ -77,6 +78,7 @@ public class FederationService {
         int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
         int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
         if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
+            log.info("Saved images are not identical.");
             throw new EventNotFoundException("Saved images are not identical.");
         }
 
@@ -105,11 +107,19 @@ public class FederationService {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 metaDataDTO = new MetaDataServiceDTO();
             } else {
-                metaDataDTO = responseMDS.getBody();
-                if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
-                    log.warn("6");
-                    throw new EventNotCreatedException("Sensing event already exists.");
-                }
+                log.error("Status code: " + e.getStatusCode() + "; Message: " + e.getMessage());
+                throw new EventNotCreatedException("Status code: " + e.getStatusCode() + "; Message: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            throw new EventNotCreatedException("Reason: " + e.getMessage());
+        }
+
+        // TODO check why it return empty FrameNum, PlaceIdent, EventFrames
+        if(responseMDS != null) {
+            metaDataDTO = responseMDS.getBody();
+            if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
+                log.info("Sensing event already exists.");
+                throw new EventNotCreatedException("Sensing event already exists.");
             }
         }
 
@@ -120,8 +130,8 @@ public class FederationService {
         tagList.add(new TagDTO("base", hashOfNewImage));
         metaDataDTO.setTags(tagList);
         HttpEntity<MetaDataServiceDTO> request = new HttpEntity<>(metaDataDTO);
+        //log.warn("request: " + request.toString());
         ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
-        MetaDataServiceDTO metaDataServiceDTO = response.getBody();
 
         // 27.11.2020: save image using ImageObjectStorageService
         String fileName = readEventDTO.getMetaData().getSeqId() + ".jpg";
@@ -150,12 +160,13 @@ public class FederationService {
                     });
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Requested sensing event doesn't exist.");
                 throw new EventNotFoundException("Requested sensing event doesn't exist.");
             }
         }
 
-        // TODO: delete metadata using the MetadataService
-
+        // 2.12.2020: delete metadata using the MetadataService
+        restTemplate.delete(URL_MDS);
 
         // 27.11.2020: delete image using ImageObjectStorageService
         restTemplate.delete(URL_IOS);
@@ -187,6 +198,7 @@ public class FederationService {
         metaDataEntity.setFrameNum(metaDataServiceDTO.getFrameNum());
         metaDataEntity.setPlaceIdent(metaDataServiceDTO.getPlaceIdent());
         metaDataEntity.setSeqNumFrames(metaDataServiceDTO.getEventFrames());
+        metaDataEntity.setTags(metaDataServiceDTO.getTags());
     }
 
     private void copyMetaDataFromEntityToDTO(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
@@ -199,6 +211,7 @@ public class FederationService {
         metaDataServiceDTO.setFrameNum(metaDataEntity.getFrameNum());
         metaDataServiceDTO.setPlaceIdent(metaDataEntity.getPlaceIdent());
         metaDataServiceDTO.setEventFrames(metaDataEntity.getSeqNumFrames());
+        metaDataServiceDTO.setTags(metaDataEntity.getTags());
     }
 
     // Stage 2:
