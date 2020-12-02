@@ -1,6 +1,5 @@
 package group3.aic_middleware.services;
 
-import group3.aic_middleware.exceptions.DeviceNotFoundException;
 import group3.aic_middleware.exceptions.DropboxLoginException;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
@@ -33,6 +32,7 @@ public class FederationService {
     private HashingService hashingService = new HashingService();
     private ImageFileService imageFileService = new ImageFileService();
 
+    // TODO Transform into environment variables
     String MDSConnection = "http://metadata-service:8080";
     String IOSConnection = "http://image-object-service:8000";
 
@@ -45,7 +45,7 @@ public class FederationService {
         RestTemplate restTemplate = new RestTemplate();
         MetaDataEntity metaDataEntity = new MetaDataEntity();
 
-        // 27.11.2020: check existence of an image using MetaDataService
+        // check existence of an image using MetaDataService
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
         try {
             responseMDS = restTemplate.exchange(
@@ -66,14 +66,14 @@ public class FederationService {
 
         String URL_IOS = IOSConnection + "/images/" + fileName;
 
-        // 27.11.2020: query an image using ImageObjectStorageService (primary)
+        // query an image using ImageObjectStorageService (primary)
         ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = restTemplate.exchange(
                 URL_IOS, HttpMethod.GET, null,
                 new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
 
-        // 27.11.2020: compare images adding Recovery function
-        // 27.11.2020: query an image using ImageObjectStorageService (secondary)
+        // compare images
+        // query an image using ImageObjectStorageService (secondary)
         ImageEntity imageIFS = this.imageFileService.readImage(fileName);
         int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
         int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
@@ -82,7 +82,6 @@ public class FederationService {
             throw new EventNotFoundException("Saved images are not identical.");
         }
 
-        // 27.11.2020: encapsulate requested image and return it
         ReadEventDTO readEventDTO = new ReadEventDTO();
         readEventDTO.setImage(new ImageEntity(imageIOS.getBase64Image()));
         readEventDTO.setMetaData(metaDataEntity);
@@ -96,7 +95,7 @@ public class FederationService {
         int hashOfNewImage = this.hashingService.getHash(readEventDTO.getImage().getBase64EncodedImage());
         MetaDataServiceDTO metaDataDTO = null;
 
-        // 27.11.2020: check existence of an image using MetaDataService and request old hash
+        // check existence of an image using MetaDataService and request old hash
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
         try {
             responseMDS = restTemplate.exchange(
@@ -114,7 +113,6 @@ public class FederationService {
             throw new EventNotCreatedException("Reason: " + e.getMessage());
         }
 
-        // TODO check why it return empty FrameNum, PlaceIdent, EventFrames
         if(responseMDS != null) {
             metaDataDTO = responseMDS.getBody();
             if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
@@ -123,24 +121,29 @@ public class FederationService {
             }
         }
 
-        // 27.11.2020: save metadata using the MetadataService
+        // save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
         copyMetaDataFromEntityToDTO(metaDataDTO, readEventDTO.getMetaData());
         ArrayList<TagDTO> tagList = new ArrayList<>();
         tagList.add(new TagDTO("base", hashOfNewImage));
         metaDataDTO.setTags(tagList);
-        HttpEntity<MetaDataServiceDTO> request = new HttpEntity<>(metaDataDTO);
-        //log.warn("request: " + request.toString());
-        ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
+        HttpEntity<MetaDataServiceDTO> request = null;
+        request = new HttpEntity<>(metaDataDTO);
+        try {
+            ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
+        } catch(HttpClientErrorException e) {
+            log.info(e.getMessage());
+            throw new EventNotCreatedException(e.getMessage());
+        }
 
-        // 27.11.2020: save image using ImageObjectStorageService
+        // save image using ImageObjectStorageService
         String fileName = readEventDTO.getMetaData().getSeqId() + ".jpg";
         String URL_IOS = IOSConnection + "/images";
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, readEventDTO.getImage().getBase64EncodedImage());
         HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
         restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
 
-        // 27.11.2020: replicate image using ImageFileService
+        // replicate image using ImageFileService
         this.imageFileService.saveImage(readEventDTO);
     }
 
@@ -151,7 +154,7 @@ public class FederationService {
         String URL_MDS = MDSConnection + "/events/" + seqId;
         MetaDataServiceDTO metaDataDTO;
 
-        // 27.11.2020: check existence of an image using MetaDataService
+        // check existence of an image using MetaDataService
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
         try {
             responseMDS = restTemplate.exchange(
@@ -165,27 +168,57 @@ public class FederationService {
             }
         }
 
-        // 2.12.2020: delete metadata using the MetadataService
+        // delete metadata using the MetadataService
         restTemplate.delete(URL_MDS);
 
-        // 27.11.2020: delete image using ImageObjectStorageService
+        // delete primary image using ImageObjectStorageService
         restTemplate.delete(URL_IOS);
 
-        // 27.11.2020: delete image using ImageFileService
+        // delete backup image using ImageFileService
         this.imageFileService.deleteImage(fileName);
     }
 
-    // TODO ? Stage 2 ?
-    public List<ReadEventDTO> readEventsForDevice(String id) throws EventNotFoundException, DeviceNotFoundException {
-        String deviceName = "";
-        // check existence of a device using MetaDataService / ImageObjectStorageService
-        if(deviceName == "") {
-            throw new DeviceNotFoundException("Requested device doesn't exist.");
+
+    public List<ReadEventDTO> readEvents() throws EventNotFoundException {
+        ArrayList<ReadEventDTO> eventList = new ArrayList<>();
+        String fileName = "";
+        String URL_MDS = MDSConnection + "/events";
+        RestTemplate restTemplate = new RestTemplate();
+        MetaDataEntity metaDataEntity = new MetaDataEntity();
+
+        // querry images
+        ResponseEntity<List<MetaDataServiceDTO>> responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<List<MetaDataServiceDTO>>() {
+                    });
+
+        while(responseMDS.getBody().iterator().hasNext()) {
+            MetaDataServiceDTO metaDataDTO = responseMDS.getBody().iterator().next();
+            fileName = metaDataDTO.getSensingEventId() + ".jpg";
+            copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
+
+            String URL_IOS = IOSConnection + "/images/" + fileName;
+
+            ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = restTemplate.exchange(
+                    URL_IOS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
+            ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
+
+            ImageEntity imageIFS = this.imageFileService.readImage(fileName);
+            int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+            int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
+            if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
+                log.info("Saved images are not identical.");
+                throw new EventNotFoundException("Saved images are not identical.");
+            }
+
+            ReadEventDTO readEventDTO = new ReadEventDTO();
+            readEventDTO.setImage(new ImageEntity(imageIOS.getBase64Image()));
+            readEventDTO.setMetaData(metaDataEntity);
+            eventList.add(readEventDTO);
         }
-        // query images using ImageObjectStorageService (primary)
-        // query images using ImageObjectStorageService (secondary)
-        // encapsulate obtained images, create ArrayList out of them and return the List of image DTOs
-        return new ArrayList<ReadEventDTO>();
+
+        return eventList;
     }
 
     private void copyMetaDataFromDTOToEntity(MetaDataEntity metaDataEntity, MetaDataServiceDTO metaDataServiceDTO) {
@@ -215,6 +248,6 @@ public class FederationService {
     }
 
     // Stage 2:
-    // Recovery Service
-    // Logging Service???
+    // Full Recovery Service
+    // Update
 }

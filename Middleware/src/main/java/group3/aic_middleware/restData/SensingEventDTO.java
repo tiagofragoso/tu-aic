@@ -23,8 +23,7 @@ public class SensingEventDTO {
 
     @Override
     public String toString() {
-        return "base64EncodedImage: " + this.base64EncodedImage + "\n"
-                + "seqId: " + this.metaData.getSeqId() + "\n"
+        return "seqId: " + this.metaData.getSeqId() + "\n"
                 + "deviceId: " + this.metaData.getDeviceId() + "\n"
                 + "name: " + this.metaData.getName() + "\n"
                 + "filename: " + this.metaData.getFilename() + "\n"

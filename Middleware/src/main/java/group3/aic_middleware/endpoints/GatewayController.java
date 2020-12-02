@@ -1,6 +1,5 @@
 package group3.aic_middleware.endpoints;
 
-import group3.aic_middleware.exceptions.DeviceNotFoundException;
 import group3.aic_middleware.exceptions.DropboxLoginException;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
@@ -54,7 +53,6 @@ public class GatewayController {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Sensing event creation failed. Reason: " + e.getMessage());
         } catch (Exception e) {
-            log.warn(e.getMessage());
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             String exceptionAsString = sw.toString();
@@ -87,17 +85,14 @@ public class GatewayController {
     }
 
     /**
-     * The call which queries events for a device
+     * The call which queries all events stored in the system
      */
-    @GetMapping("/device/{id}")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ReadEventDTO> getByDeviceId(@PathVariable("id") String id) { // 3
-        log.info("Reading events for a device with the id = " + id);
+    public List<ReadEventDTO> getEvents() {
+        log.info("Reading all events.");
         try {
-            return  this.federationService.readEventsForDevice(id);
-        } catch (DeviceNotFoundException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Sensing events for this device were not found. Reason: " + e.getMessage());
+            return  this.federationService.readEvents();
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
@@ -105,7 +100,7 @@ public class GatewayController {
         }
     }
 
-    // TODO: update
+    // TODO Stage 2: update
 
     /**
      * The call which deletes an event
