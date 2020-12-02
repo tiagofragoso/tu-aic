@@ -22,7 +22,7 @@ def getdata_encoded(my_dic) :
     file_name = PATH + "/images/" + pic_name
     with open(file_name, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()) # encode the picture
-    data_encoded = {"image" : str(encoded_string), "metadata" : my_dic[rdm_nbr]} # add the metadata to send a json
+    data_encoded = {"image" : encoded_string.decode('utf-8'), "metadata" : my_dic[rdm_nbr]} # add the metadata to send a json
     # print(data_encoded)
     return data_encoded
 
