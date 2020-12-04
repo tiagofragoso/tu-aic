@@ -68,6 +68,9 @@ services:
       - image-object-service
     ports:
       - "9999:8080"
+    environment:
+          DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME}
+          DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN}
       
 volumes:
   minio_data:

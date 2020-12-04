@@ -3,5 +3,5 @@ spring:
     MDSConnection: http://metadata-service:8080
     IOSConnection: http://image-object-service:8000
 
-  folders:
-    dropBoxFolderName: aic_2020
+DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME:}
+DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN:}
