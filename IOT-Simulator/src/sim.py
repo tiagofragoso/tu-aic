@@ -40,15 +40,15 @@ def getdata_encoded(my_dic) :
     with open(linkedFile, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()) # encode the picture
     data_encoded = {"image" : encoded_string.decode('utf-8'), "metadata" : my_dic} # add the metadata to send a json
-    print(my_dic["datetime"])
     return data_encoded
 
 # POST the data to the middleware
 def post(url, data):
     try :
         post_test = requests.post(url, json=data)
+        print(str(data["metadata"]["datetime"])+" : image sent with id : "+str(data["metadata"]["seq_id"]))
     except requests.exceptions.RequestException as e:
-        print("Error sending image", e)
+        print("Error sending image :", e)
         return
 
     status_code = post_test.status_code
