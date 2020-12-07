@@ -17,7 +17,6 @@ PATH = "../little_data/iwildcam_synthesized_idaho"
 API_ENDPOINT = os.getenv("API_ENDPOINT")
 
 def sortDataChronologically(dicToSort) :
-    print(dicToSort)
     linkDateToIndex = []
     for i in range(len(dicToSort)) :
         # print(dicToSort[i]["datetime"])
@@ -28,14 +27,11 @@ def sortDataChronologically(dicToSort) :
     for i in range(len(sortedList)) :
         getIndexes.append(sortedList[i][0])
     # print(getIndexes)
-    tryList = []
+    dataSortedList = []
     for k in getIndexes :
-        print("k : ",k)
-        print(dicToSort[k]["datetime"])
-        tryList.append(dicToSort[k])
+        dataSortedList.append(dicToSort[k])
     
-    print(tryList)
-    return tryList
+    return dataSortedList
 
 # Encode the data to send it to the port
 def getdata_encoded(my_dic) :
@@ -51,7 +47,6 @@ def getdata_encoded(my_dic) :
 def post(url, data):
     try :
         post_test = requests.post(url, json=data)
-        print(post_test.text)
     except requests.exceptions.RequestException as e:
         print("Error sending image", e)
         return
@@ -72,8 +67,8 @@ if __name__ == '__main__':
 picturesDic = sortDataChronologically(picturesDic)
 # Script to send the pictures to the PORT
 for i in range(47) : # 47 is the number of data that I put on little_data
-    rdm_wait = int(random.random() * 5) # a picture is sent every <20 s
-    time.sleep(rdm_wait)
+    waitingTime = 5 # a picture is sent every <20 s
+    time.sleep(waitingTime)
     data = getdata_encoded(picturesDic[i])
     post(str(API_ENDPOINT) + "/events", data)
 
