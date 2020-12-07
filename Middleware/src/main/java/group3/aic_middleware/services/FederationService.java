@@ -1,6 +1,7 @@
 package group3.aic_middleware.services;
 
 import group3.aic_middleware.exceptions.DropboxLoginException;
+import group3.aic_middleware.exceptions.DuplicateEventException;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
@@ -39,7 +40,7 @@ public class FederationService {
     public FederationService() throws NoSuchAlgorithmException, EventNotFoundException, EventNotCreatedException, DropboxLoginException, JSONException, IOException {
     }
 
-    public ReadEventDTO readEvent(String seqId) throws EventNotFoundException {
+    public ReadEventDTO readEvent(String seqId) throws EventNotFoundException, DuplicateEventException {
         String fileName = "";
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
@@ -79,7 +80,7 @@ public class FederationService {
         int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
         if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
             log.info("Saved images are not identical.");
-            throw new EventNotFoundException("Saved images are not identical.");
+            throw new DuplicateEventException("Saved images are not identical.");
         }
 
         ReadEventDTO readEventDTO = new ReadEventDTO();

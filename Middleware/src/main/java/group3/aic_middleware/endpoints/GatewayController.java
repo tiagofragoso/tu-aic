@@ -1,6 +1,7 @@
 package group3.aic_middleware.endpoints;
 
 import group3.aic_middleware.exceptions.DropboxLoginException;
+import group3.aic_middleware.exceptions.DuplicateEventException;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
@@ -74,6 +75,9 @@ public class GatewayController {
         } catch (EventNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Sensing event reading failed. Reason: " + e.getMessage());
+        } catch (DuplicateEventException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Sensing event reading failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
