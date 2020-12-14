@@ -204,7 +204,6 @@ public class CRUDService {
         }
 
         SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames());
-        System.out.println(realEvent.getId());
         return realEvent;
     }
 

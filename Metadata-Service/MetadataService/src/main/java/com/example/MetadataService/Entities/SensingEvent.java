@@ -82,6 +82,9 @@ public class SensingEvent {
         this.deviceIdentifier = deviceIdentifier;
         this.timestamp = timestamp;
         this.tags = tags;
+        this.frameNum = frameNum;
+        this.placeIdent = placeIdent;
+        this.eventFrames = eventFrames;
         this.setLongitude(longitude);
         this.setLatitude(latitude);
     }
