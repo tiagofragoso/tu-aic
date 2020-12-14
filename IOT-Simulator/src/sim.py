@@ -66,8 +66,8 @@ if __name__ == '__main__':
 
 picturesDic = sortDataChronologically(picturesDic)
 # Script to send the pictures to the PORT
-for i in range(47) : # 47 is the number of data that I put on little_data
-    waitingTime = 5 # a picture is sent every <20 s
+for i in range(len(picturesDic)) :
+    waitingTime = 20 # a picture is sent every waitingTime second
     time.sleep(waitingTime)
     data = getdata_encoded(picturesDic[i])
     post(str(API_ENDPOINT) + "/events", data)
