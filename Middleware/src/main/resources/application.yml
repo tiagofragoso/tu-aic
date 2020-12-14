@@ -1,0 +1,11 @@
+spring:
+  connections:
+    MDSConnection: http://metadata-service:8080
+    IOSConnection: http://image-object-service:8000
+
+DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME:}
+DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN:}
+
+server:
+  error:
+    include-message: always
