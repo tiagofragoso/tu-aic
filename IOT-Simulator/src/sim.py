@@ -45,8 +45,8 @@ def getdata_encoded(my_dic) :
 # POST the data to the middleware
 def post(url, data):
     try :
-        post_test = requests.post(url, json=data)
         print(str(data["metadata"]["datetime"])+" : image sent with id : "+str(data["metadata"]["seq_id"]))
+        post_test = requests.post(url, json=data)
     except requests.exceptions.RequestException as e:
         print("Error sending image :", e)
         return
