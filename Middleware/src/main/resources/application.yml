@@ -5,3 +5,7 @@ spring:
 
 DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME:}
 DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN:}
+
+server:
+  error:
+    include-message: always
