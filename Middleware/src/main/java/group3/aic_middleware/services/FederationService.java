@@ -233,6 +233,7 @@ public class FederationService {
         metaDataEntity.setPlaceIdent(metaDataServiceDTO.getPlaceIdent());
         metaDataEntity.setSeqNumFrames(metaDataServiceDTO.getEventFrames());
         metaDataEntity.setTags(metaDataServiceDTO.getTags());
+        metaDataEntity.setFilename(metaDataServiceDTO.getSensingEventId() + ".jpg");
     }
 
     private void copyMetaDataFromEntityToDTO(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {

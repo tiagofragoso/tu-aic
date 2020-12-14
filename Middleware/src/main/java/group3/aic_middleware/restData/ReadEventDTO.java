@@ -11,11 +11,6 @@ public class ReadEventDTO {
 
     @Getter
     @Setter
-    // Pronounced as sweet
-    private long seuid;
-
-    @Getter
-    @Setter
     private ImageEntity image;
 
     @Getter
