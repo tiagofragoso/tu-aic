@@ -11,7 +11,7 @@ public class ReadEventDTO {
 
     @Getter
     @Setter
-    private ImageEntity image;
+    private String imageBase64Enc;
 
     @Getter
     @Setter
