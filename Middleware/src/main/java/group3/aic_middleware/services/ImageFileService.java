@@ -39,13 +39,11 @@ public class ImageFileService {
         }
     }
 
-    public void saveImage(ReadEventDTO readEventDTO) throws EventNotCreatedException {
+    public void saveImage(String filename, String imageBase64Enc) throws EventNotCreatedException {
         //  Get current account info
         //  FullAccount account = client.users().getCurrentAccount();
         try {
-            String filename = readEventDTO.getMetaData().getSeqId() + ".jpg";
-            byte[] bytes = Base64.decodeBase64(readEventDTO.getImage().getBase64EncodedImage().getBytes(StandardCharsets.UTF_8));
-
+            byte[] bytes = Base64.decodeBase64(imageBase64Enc.getBytes(StandardCharsets.UTF_8));
 
             InputStream in = new ByteArrayInputStream(bytes);
             this.client.files().uploadBuilder("/" + filename).withMode(WriteMode.OVERWRITE).uploadAndFinish(in);

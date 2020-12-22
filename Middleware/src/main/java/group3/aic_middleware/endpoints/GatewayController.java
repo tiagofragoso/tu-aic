@@ -30,7 +30,7 @@ public class GatewayController {
 
     FederationService federationService = new FederationService();
 
-    public GatewayController() throws NoSuchAlgorithmException, EventNotFoundException, EventNotCreatedException, DropboxLoginException, JSONException, IOException {
+    public GatewayController() throws NoSuchAlgorithmException {
     }
 
     /**
@@ -43,9 +43,8 @@ public class GatewayController {
         log.info(sensingEvent.toString());
 
         ReadEventDTO readEventDTO = new ReadEventDTO();
-        ImageEntity image = new ImageEntity(sensingEvent.getBase64EncodedImage());
 
-        readEventDTO.setImage(image);
+        readEventDTO.setImageBase64Enc(sensingEvent.getBase64EncodedImage());
         readEventDTO.setMetaData(sensingEvent.getMetaData());
 
         try{
@@ -75,9 +74,6 @@ public class GatewayController {
         } catch (EventNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Sensing event reading failed. Reason: " + e.getMessage());
-        } catch (DuplicateEventException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Sensing event reading failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
