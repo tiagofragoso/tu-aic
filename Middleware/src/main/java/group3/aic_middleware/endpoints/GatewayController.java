@@ -103,7 +103,7 @@ public class GatewayController {
     // TODO Stage 2: update
 
     /**
-     * The call which deletes an event
+     * The call which cascade deletes an event
      */
     @DeleteMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK)

@@ -133,10 +133,8 @@ public class FederationService {
 
     public void deleteEvent(String seqId) throws EventNotFoundException {
         RestTemplate restTemplate = new RestTemplate();
-        String fileName = seqId + ".jpg";
-        String URL_IOS = IOSConnection + "/images/" + fileName;
+        String fileName = "";
         String URL_MDS = MDSConnection + "/events/" + seqId;
-        MetaDataServiceDTO metaDataDTO;
 
         // check existence of an image using MetaDataService
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
@@ -155,22 +153,28 @@ public class FederationService {
         // delete metadata using the MetadataService
         restTemplate.delete(URL_MDS);
 
-        // delete primary image using ImageObjectStorageService
-        restTemplate.delete(URL_IOS);
-
-        // delete backup image using ImageFileService
-        this.imageFileService.deleteImage(fileName);
+        // cascade delete images for all tags from both storage
+        while(responseMDS.getBody().getTags().iterator().hasNext()) {
+            TagDTO tagDTO = responseMDS.getBody().getTags().iterator().next();
+            fileName = seqId + "_" + tagDTO.getTagName() + ".jpg";
+            this.deleteImages(fileName);
+        }
     }
 
 
     public void deleteTag(String seqId, String tagName) throws EventNotFoundException {
         RestTemplate restTemplate = new RestTemplate();
         String fileName = seqId + "_" + tagName + ".jpg";
-        String URL_IOS = IOSConnection + "/images/" + fileName;
         String URL_MDS = MDSConnection + "/events/" + seqId + "/tags/" + tagName;
 
         // delete metadata using the MetadataService
         restTemplate.delete(URL_MDS);
+        this.deleteImages(fileName);
+    }
+
+    private void deleteImages(String fileName) throws EventNotFoundException {
+        RestTemplate restTemplate = new RestTemplate();
+        String URL_IOS = IOSConnection + "/images/" + fileName;
 
         // delete primary image using ImageObjectStorageService
         restTemplate.delete(URL_IOS);
