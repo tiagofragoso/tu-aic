@@ -163,6 +163,23 @@ public class FederationService {
     }
 
 
+    public void deleteTag(String seqId, String tagName) throws EventNotFoundException {
+        RestTemplate restTemplate = new RestTemplate();
+        String fileName = seqId + "_" + tagName + ".jpg";
+        String URL_IOS = IOSConnection + "/images/" + fileName;
+        String URL_MDS = MDSConnection + "/events/" + seqId + "/tags/" + tagName;
+
+        // delete metadata using the MetadataService
+        restTemplate.delete(URL_MDS);
+
+        // delete primary image using ImageObjectStorageService
+        restTemplate.delete(URL_IOS);
+
+        // delete backup image using ImageFileService
+        this.imageFileService.deleteImage(fileName);
+    }
+
+
     public List<ReadEventDTO> readEvents() throws EventNotFoundException {
         ArrayList<ReadEventDTO> eventList = new ArrayList<>();
         String fileName = "";
