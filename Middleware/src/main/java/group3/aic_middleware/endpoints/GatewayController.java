@@ -118,7 +118,24 @@ public class GatewayController {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
         }
+    }
 
+    /**
+     * The call which deletes a tag of an event and corresponding images from primary and backup storage
+     */
+    @DeleteMapping("/{seqId}/tags/{tagName}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteTag(@PathVariable("seqId") String seqId, @PathVariable("seqId") String tagName) {
+        log.info("Deleting a tag: " + tagName+ " for an event with the seqId = " + seqId);
+        try {
+            this.federationService.deleteTag(seqId, tagName);
+        } catch (EventNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Sensing event deletion failed. Reason: " + e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
+        }
     }
 
 }
