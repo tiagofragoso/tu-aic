@@ -60,4 +60,13 @@ public class MetaDataServiceDTO {
     @JsonProperty(required = false, value="event_frames")
     private long eventFrames;
 
+    public long getCreated(String tagName) {
+        while(this.tags.iterator().hasNext()) {
+            TagDTO tagDTO = this.tags.iterator().next();
+            if(tagDTO.getTagName() == tagName) {
+                return tagDTO.getCreated();
+            }
+        }
+        return -1;
+    }
 }

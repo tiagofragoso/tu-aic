@@ -1,14 +1,12 @@
 package group3.aic_middleware.services;
 
-import group3.aic_middleware.exceptions.DropboxLoginException;
-import group3.aic_middleware.exceptions.DuplicateEventException;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
+import group3.aic_middleware.exceptions.EventNotUpdatedException;
 import group3.aic_middleware.restData.*;
 import group3.aic_middleware.entities.MetaDataEntity;
 import lombok.extern.log4j.Log4j;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -41,6 +38,9 @@ public class FederationService {
     public FederationService() throws NoSuchAlgorithmException {
     }
 
+    /*
+    * Read operations
+    * */
     public ReadEventDTO readEvent(String seqId) throws EventNotFoundException {
         String fileName = "";
         String URL_MDS = MDSConnection + "/events/" + seqId;
@@ -73,6 +73,84 @@ public class FederationService {
         return readEventDTO;
     }
 
+    public TagDataDTO readTagData(String seqId, String tagName) throws EventNotFoundException {
+        TagDataDTO tagDataDTO = new TagDataDTO();
+        String fileName = seqId + "_" + tagName + ".jpg";
+        String URL_MDS = MDSConnection + "/events/" + seqId;
+        RestTemplate restTemplate = new RestTemplate();
+        MetaDataEntity metaDataEntity = new MetaDataEntity();
+
+        // check existence of an image using MetaDataService
+        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
+        try {
+            responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Requested sensing event doesn't exist.");
+                throw new EventNotFoundException("Requested sensing event doesn't exist.");
+            }
+        }
+
+        MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
+        copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
+
+        tagDataDTO.setTagName(tagName);
+        tagDataDTO.setCreated(metaDataDTO.getCreated(tagName));
+        tagDataDTO.setImage(this.recoveryService.recoverImage(fileName, metaDataEntity));
+
+        return tagDataDTO;
+    }
+
+
+    public List<ReadEventDTO> readEvents() throws EventNotFoundException {
+        ArrayList<ReadEventDTO> eventList = new ArrayList<>();
+        String fileName = "";
+        String URL_MDS = MDSConnection + "/events";
+        RestTemplate restTemplate = new RestTemplate();
+        MetaDataEntity metaDataEntity = new MetaDataEntity();
+
+        // querry images
+        ResponseEntity<List<MetaDataServiceDTO>> responseMDS = restTemplate.exchange(
+                URL_MDS, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<MetaDataServiceDTO>>() {
+                });
+
+        while(responseMDS.getBody().iterator().hasNext()) {
+            MetaDataServiceDTO metaDataDTO = responseMDS.getBody().iterator().next();
+            fileName = metaDataDTO.getSensingEventId() + ".jpg";
+            copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
+
+            String URL_IOS = IOSConnection + "/images/" + fileName;
+
+            ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = restTemplate.exchange(
+                    URL_IOS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
+            ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
+
+            ImageEntity imageIFS = this.imageFileService.readImage(fileName);
+            int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+            int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
+            if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
+                log.info("Saved images are not identical.");
+                throw new EventNotFoundException("Saved images are not identical.");
+            }
+
+            ReadEventDTO readEventDTO = new ReadEventDTO();
+            readEventDTO.setImageBase64Enc(imageIOS.getBase64Image());
+            readEventDTO.setMetaData(metaDataEntity);
+            eventList.add(readEventDTO);
+        }
+
+        return eventList;
+    }
+
+
+    /*
+     * Create operations
+     * */
     public void saveEvent(ReadEventDTO readEventDTO) throws EventNotCreatedException {
         RestTemplate restTemplate = new RestTemplate();
         String URL_MDS = MDSConnection + "/events/" + readEventDTO.getMetaData().getSeqId();
@@ -131,6 +209,40 @@ public class FederationService {
         this.imageFileService.saveImage(fileName, readEventDTO.getImageBase64Enc());
     }
 
+    public void createTag(TagDTO tagDTO, String seqId) throws EventNotUpdatedException {
+        String fileName = "";
+        String URL_MDS = MDSConnection + "/events/" + seqId;
+        RestTemplate restTemplate = new RestTemplate();
+        MetaDataEntity metaDataEntity = new MetaDataEntity();
+
+        // check existence of an image using MetaDataService
+        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
+        try {
+            responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Requested sensing event doesn't exist.");
+                throw new EventNotUpdatedException("Requested sensing event doesn't exist.");
+            }
+        }
+
+        // save new tag using the MetaDataService
+        URL_MDS = MDSConnection + "/events/" + seqId + "/tags";
+        HttpEntity<TagDTO> request = new HttpEntity<>(tagDTO);
+        try {
+            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDTO.class);
+        } catch(HttpClientErrorException e) {
+            log.info(e.getMessage());
+            throw new EventNotUpdatedException(e.getMessage());
+        }
+    }
+
+    /*
+     * Delete operations
+     * */
     public void deleteEvent(String seqId) throws EventNotFoundException {
         RestTemplate restTemplate = new RestTemplate();
         String fileName = "";
@@ -183,50 +295,9 @@ public class FederationService {
         this.imageFileService.deleteImage(fileName);
     }
 
-
-    public List<ReadEventDTO> readEvents() throws EventNotFoundException {
-        ArrayList<ReadEventDTO> eventList = new ArrayList<>();
-        String fileName = "";
-        String URL_MDS = MDSConnection + "/events";
-        RestTemplate restTemplate = new RestTemplate();
-        MetaDataEntity metaDataEntity = new MetaDataEntity();
-
-        // querry images
-        ResponseEntity<List<MetaDataServiceDTO>> responseMDS = restTemplate.exchange(
-                    URL_MDS, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<List<MetaDataServiceDTO>>() {
-                    });
-
-        Iterator<MetaDataServiceDTO> it = responseMDS.getBody().iterator();
-        while(it.hasNext()) {
-            MetaDataServiceDTO metaDataDTO = it.next();
-            fileName = metaDataDTO.getSensingEventId() + ".jpg";
-            copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
-
-            String URL_IOS = IOSConnection + "/images/" + fileName;
-
-            ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = restTemplate.exchange(
-                    URL_IOS, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
-            ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
-
-            ImageEntity imageIFS = this.imageFileService.readImage(fileName);
-            int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
-            int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
-            if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
-                log.info("Saved images are not identical.");
-                throw new EventNotFoundException("Saved images are not identical.");
-            }
-
-            ReadEventDTO readEventDTO = new ReadEventDTO();
-            readEventDTO.setImageBase64Enc(imageIOS.getBase64Image());
-            readEventDTO.setMetaData(metaDataEntity);
-            eventList.add(readEventDTO);
-        }
-
-        return eventList;
-    }
-
+    /*
+     * Support functions
+     * */
     private void copyMetaDataFromDTOToEntity(MetaDataEntity metaDataEntity, MetaDataServiceDTO metaDataServiceDTO) {
         metaDataEntity.setSeqId(metaDataServiceDTO.getSensingEventId());
         metaDataEntity.setName(metaDataServiceDTO.getName());
