@@ -1,0 +1,105 @@
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body * {
+  font-family: math, sans-serif;
+}
+
+.page-content-wrapper {
+  padding-top: 84px;
+}
+
+/* *** HEADER *** */
+.header {
+  height: 90px;
+  background-color: yellowgreen;
+  margin-bottom: 0;
+  margin-top: 0;
+  vertical-align: center;
+  position: fixed;
+  width: 100%;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.header .logo {
+  height: 85px;
+  max-width: 150px;
+  margin: 3px 0 0 25px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: left center;
+  cursor: pointer;
+  background-image: url("assets/aic_logo.png");
+}
+
+.main-container {
+  height: 100%;
+  padding: 8px 16px 0;
+}
+
+.main-content {
+  position: relative;
+}
+
+.sidebar-bg {
+  position: fixed;
+  background-color: #eceff1;
+  height: 100%;
+}
+
+.sidebar-bg.width {
+  width: 170px;
+}
+
+.full-height {
+  height: 100%;
+}
+
+/* *** SIDEBAR *** */
+.sidebar {
+  padding-top: 25px;
+}
+
+.sidebar ul.nav > li + li {
+  margin-left: 0;
+}
+
+.sidebar ul.nav > li > a, .sidebar ul.nav > li > a:focus {
+  color: #37474f;
+  font-size: 20px;
+  margin-left: 8px;
+  border-radius: 0;
+}
+
+.sidebar ul.nav ul.nav > li > a, .sidebar ul.nav > ul.nav > li > a:focus {
+  font-size: 14px;
+  margin-left: 16px;
+  border-radius: 0;
+}
+
+.sidebar ul.nav > li > a:hover {
+  color: #546e7a;
+  cursor: pointer;
+}
+
+.sidebar ul.nav > li.active > a, .sidebar ul.nav > li.active > a:focus {
+  background-color: white;
+  font-weight: 700;
+}
+
+.sidebar ul.nav > li > a.return::before {
+  content: "◀";
+  margin-right: 8px;
+}
+
+a {
+  cursor: pointer;
+}

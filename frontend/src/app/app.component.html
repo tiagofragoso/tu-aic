@@ -1,0 +1,43 @@
+<div class="wrapper">
+  <div class="header">
+    <div class="row mx-0">
+      <div class="col-9 px-0">
+        <div (click)="logoClicked()" class="logo"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content-wrapper full-height">
+    <div class="container-fluid full-height" role="main">
+      <div class="content full-height">
+        <div class="row full-height">
+          <div class="px-0 sidebar-bg width">
+            <div class="sidebar">
+              <ul class="nav nav-pills flex-column">
+                <!-- TODO: Insert burger menu instead of sidebar starting with a certain screen-width -->
+                <li *ngIf="router.url.includes('event-details')" [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'"
+                    role="presentation">
+                  <a (click)="goBack()" [routerLink]="'event-details'" class="return nav-link">Back</a>
+                </li>
+                <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
+                  <a [routerLink]="'event-table'" class="nav-link">Event Table</a>
+                </li>
+                <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
+                  <a [routerLink]="'event-map'" class="nav-link">Event Map</a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+          <div class="px-0 main-content full-height col-margin-left margin-top container-width">
+            <div class="full-height">
+              <div class="main-container">
+                <router-outlet></router-outlet>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
