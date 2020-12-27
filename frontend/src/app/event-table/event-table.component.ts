@@ -4,6 +4,7 @@ import {environment} from '../../environments/environment';
 import {events} from './events'; // mock data
 import {formatDate} from '../../utils/date';
 
+const PAGE_SIZE = 10; // Discuss this
 @Component({
   selector: 'app-event-table',
   templateUrl: './event-table.component.html',
@@ -12,12 +13,16 @@ import {formatDate} from '../../utils/date';
 export class EventTableComponent implements OnInit {
 
   environment: any;
-  events: any[];
+  state = {
+    page: 1,
+    pageSize: PAGE_SIZE,
+    totalResults: 3
+  }
 
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute) {
                 this.environment = environment;
-                this.events = events.map((e) => ({
+                this.state.events = events.map((e) => ({
                   ...e, 
                   tags: e.tags.join(", "),
                   created: formatDate(e.created),
@@ -26,6 +31,11 @@ export class EventTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getEvents();
+  }
+
+  public getEvents() {
+    // make api request if state changed
   }
 
   public eventClicked(id: string) {

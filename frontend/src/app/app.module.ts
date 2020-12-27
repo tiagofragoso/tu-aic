@@ -6,6 +6,7 @@ import {AppComponent} from './app.component';
 import {EventTableComponent} from './event-table/event-table.component';
 import {EventMapComponent} from './event-map/event-map.component';
 import {EventDetailsComponent} from './event-details/event-details.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import {EventDetailsComponent} from './event-details/event-details.component';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgbModule
   ],
   providers: [],
   bootstrap: [AppComponent]
