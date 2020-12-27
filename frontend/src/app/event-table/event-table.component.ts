@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-event-table',
@@ -8,8 +9,11 @@ import {ActivatedRoute, Router} from "@angular/router";
 })
 export class EventTableComponent implements OnInit {
 
+  environment: any;
+
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute) {
+                this.environment = environment;
   }
 
   ngOnInit(): void {
