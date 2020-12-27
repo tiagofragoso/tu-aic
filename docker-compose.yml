@@ -76,8 +76,6 @@ services:
     build: ./frontend
     volumes: 
       - "./frontend/src:/usr/app/src"
-    environment:
-      API_URL: ${MIDDLEWARE_URL}
     ports: 
       - "8080:4200"
       
