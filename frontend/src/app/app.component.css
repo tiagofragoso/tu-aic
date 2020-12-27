@@ -1,13 +1,8 @@
 .col-margin-left {
-  margin-left: 200px;
-}
-
-.col-margin-left.margin-top {
-  margin-top: 40px;
+  margin-left: 170px;
 }
 
 .container-width {
   width: -webkit-fill-available;
   width: -moz-available;
-  width: auto;
 }
