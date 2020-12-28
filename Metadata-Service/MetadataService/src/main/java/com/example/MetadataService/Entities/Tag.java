@@ -13,4 +13,6 @@ public class Tag {
     private String tagName;
 
     private String imageHash;
+
+    private long created;
 }

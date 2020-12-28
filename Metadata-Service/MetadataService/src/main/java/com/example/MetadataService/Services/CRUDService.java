@@ -1,6 +1,8 @@
 package com.example.MetadataService.Services;
 
 import com.example.MetadataService.DTOs.EventDTO;
+import com.example.MetadataService.DTOs.SimpleEventDTO;
+import com.example.MetadataService.DTOs.SimpleTagDTO;
 import com.example.MetadataService.DTOs.TagDTO;
 import com.example.MetadataService.Entities.SensingEvent;
 import com.example.MetadataService.Entities.Tag;
@@ -90,12 +92,12 @@ public class CRUDService {
      * @return returns all events.
      * @throws Exception Throws an exception if location data was wrongly stored.
      */
-    public List<EventDTO> getAllEvents() throws Exception {
+    public List<SimpleEventDTO> getAllEvents() throws Exception {
 
-        List<EventDTO> ret = new ArrayList<>();
+        List<SimpleEventDTO> ret = new ArrayList<>();
 
         for(SensingEvent event : eventRepository.findAll()) {
-            ret.add(sensingRealToDto(event));
+            ret.add(sensingRealToSimpleDto(event));
         }
 
         return ret;
@@ -109,11 +111,11 @@ public class CRUDService {
      * @return returns all event dtos found in the radius
      * @throws Exception
      */
-    public List<EventDTO> getAllEventsInRadius(double size, double lon, double lat) throws Exception {
-        List<EventDTO> ret = new ArrayList<>();
+    public List<SimpleEventDTO> getAllEventsInRadius(double size, double lon, double lat) throws Exception {
+        List<SimpleEventDTO> ret = new ArrayList<>();
 
         for(SensingEvent event : eventRepository.findSensingEventInCircle(size, lon, lat)) {
-            ret.add(sensingRealToDto(event));
+            ret.add(sensingRealToSimpleDto(event));
         }
 
         return ret;
@@ -152,7 +154,7 @@ public class CRUDService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The given tag was already added to this event.");
         }
 
-        event.getTags().add(tagDtoToReal(tag));
+        event.getTags().add(tagDtoToReal(tag, Instant.now().getEpochSecond()));
         eventRepository.save(event);
     }
 
@@ -203,7 +205,7 @@ public class CRUDService {
 
         List<Tag> tags = new ArrayList<>();
         for(TagDTO tag : dto.getTags()) {
-            tags.add(tagDtoToReal(tag));
+            tags.add(tagDtoToReal(tag, dto.getTimestamp()));
         }
 
         SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames(), dto.getUpdated());
@@ -215,8 +217,8 @@ public class CRUDService {
      * @param dto the dto that should be converted.mongorepos
      * @return returns a tag
      */
-    private Tag tagDtoToReal(TagDTO dto) {
-        return new Tag(dto.getTagName(), dto.getImageHash());
+    private Tag tagDtoToReal(TagDTO dto, long created) {
+        return new Tag(dto.getTagName(), dto.getImageHash(), created);
     }
 
     /**
@@ -241,6 +243,31 @@ public class CRUDService {
      * @return returns a tag dto.
      */
     private TagDTO tagRealToDto(Tag tag) {
-        return new TagDTO(tag.getTagName(), tag.getImageHash());
+        return new TagDTO(tag.getTagName(), tag.getImageHash(), tag.getCreated());
+    }
+
+    /**
+     * Converts a tag to a simple tag dto
+     * @param tag the tag that should be converted.
+     * @return returns a tag dto.
+     */
+    private SimpleTagDTO tagRealToSimpleDto(Tag tag) {
+        return new SimpleTagDTO(tag.getTagName());
+    }
+
+    /**
+     * Convert a sensing event to a simple dto
+     * @param event the event that should be converted.
+     * @return returns the dto
+     * @throws Exception throws an exception if the location was wrongly stored.
+     */
+    private SimpleEventDTO sensingRealToSimpleDto(SensingEvent event) throws Exception {
+        List<SimpleTagDTO> tags = new ArrayList<>();
+
+        for(Tag tag : event.getTags()) {
+            tags.add(tagRealToSimpleDto(tag));
+        }
+
+        return new SimpleEventDTO(event.getId(), event.getName(), event.getPlaceIdent(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getUpdated());
     }
 }
