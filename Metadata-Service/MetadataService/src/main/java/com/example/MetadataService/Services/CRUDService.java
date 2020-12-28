@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class CRUDService {
      */
     public void createEvent(EventDTO event) {
         try {
+            event.setUpdated(event.getTimestamp());
             eventRepository.insert(sensingDtoToReal(event));
         }
         catch (DuplicateKeyException e) {
@@ -57,6 +59,7 @@ public class CRUDService {
      */
     public void updateEvent(EventDTO event) {
         try {
+            event.setUpdated(Instant.now().getEpochSecond());
             eventRepository.save(sensingDtoToReal(event));
         }
         catch (DuplicateKeyException e) {
@@ -203,7 +206,7 @@ public class CRUDService {
             tags.add(tagDtoToReal(tag));
         }
 
-        SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames());
+        SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames(), dto.getUpdated());
         return realEvent;
     }
 
@@ -229,7 +232,7 @@ public class CRUDService {
             tags.add(tagRealToDto(tag));
         }
 
-        return new EventDTO(event.getId(), event.getName(), event.getDeviceIdentifier(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getFrameNum(), event.getPlaceIdent(), event.getEventFrames());
+        return new EventDTO(event.getId(), event.getName(), event.getDeviceIdentifier(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getFrameNum(), event.getPlaceIdent(), event.getEventFrames(), event.getUpdated());
     }
 
     /**
