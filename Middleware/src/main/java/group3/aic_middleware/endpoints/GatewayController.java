@@ -127,6 +127,33 @@ public class GatewayController {
     }
 
     // TODO Stage 2: update
+
+    /**
+     * The call which updates an event
+     */
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public void update(@RequestBody ReadEventDetailsDTO readEventDetailsDTO) throws JSONException {
+        log.info("Updating an event:");
+        log.info(readEventDetailsDTO.toString());
+
+        try{
+            this.federationService.updateEvent(readEventDetailsDTO);
+        } catch (EventNotUpdatedException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_MODIFIED, "Sensing event update failed. Reason: " + e.getMessage());
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            log.warn(exceptionAsString);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
+        }
+    }
+
+
+
     /**
      * The call which creates adds a new tag to the event
      */
@@ -140,7 +167,7 @@ public class GatewayController {
             this.federationService.createTag(tagDTO, seqId);
         } catch (EventNotUpdatedException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_MODIFIED, "Sensing event creation failed. Reason: " + e.getMessage());
+                    HttpStatus.NOT_MODIFIED, "Tag creation failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));

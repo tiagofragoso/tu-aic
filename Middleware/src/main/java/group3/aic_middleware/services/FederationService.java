@@ -206,10 +206,8 @@ public class FederationService {
     }
 
     public void createTag(TagDTO tagDTO, String seqId) throws EventNotUpdatedException {
-        String fileName = "";
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
-        MetaDataEntity metaDataEntity = new MetaDataEntity();
 
         // check existence of an image using MetaDataService
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
@@ -240,8 +238,43 @@ public class FederationService {
     /*
      * Update operations
      * */
-    public void updateEvent(ReadEventDetailsDTO readEventDetailsDTO) {
+    public void updateEvent(ReadEventDetailsDTO readEventDetailsDTO) throws EventNotUpdatedException {
+        String URL_MDS = MDSConnection + "/events/" + readEventDetailsDTO.getMetaData().getSeqId();
+        RestTemplate restTemplate = new RestTemplate();
+        MetaDataServiceDTO metaDataServiceDTO = null;
 
+        // check existence of an image using MetaDataService
+        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
+        try {
+            responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
+                    });
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Requested sensing event doesn't exist.");
+                throw new EventNotUpdatedException("Requested sensing event doesn't exist.");
+            }
+        }
+        metaDataServiceDTO = responseMDS.getBody();
+
+        if(metaDataServiceDTO.getSensingEventId() != readEventDetailsDTO.getMetaData().getSeqId()) {
+            throw new EventNotUpdatedException("The sequence ID of the event is not identical, wrong update request");
+        }
+        if(!this.compareMetadata(metaDataServiceDTO, readEventDetailsDTO.getMetaData())) {
+            throw new EventNotUpdatedException("The metadata did not change.");
+        } else {
+            // update the MetaData for an event
+            URL_MDS = MDSConnection + "/events";
+            copyMetaDataFromEntityToDTO(metaDataServiceDTO, readEventDetailsDTO.getMetaData());
+            HttpEntity<MetaDataServiceDTO> request = new HttpEntity<>(metaDataServiceDTO);
+            try {
+                ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.PUT, request, MetaDataServiceDTO.class);
+            } catch (HttpClientErrorException e) {
+                log.info(e.getMessage());
+                throw new EventNotUpdatedException(e.getMessage());
+            }
+        }
     }
 
 
@@ -332,6 +365,31 @@ public class FederationService {
         metaDataServiceDTO.setTags(metaDataEntity.getTags());
     }
 
-    // Stage 2:
-    // Update
+    private boolean compareMetadata(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
+        if(metaDataServiceDTO.getName() == metaDataEntity.getName()) {
+            return true;
+        }
+        if(metaDataServiceDTO.getDeviceIdentifier() == metaDataEntity.getDeviceId()) {
+            return true;
+        }
+        if(metaDataServiceDTO.getTimestamp() == (ZonedDateTime.of(metaDataEntity.getDatetime(), ZoneId.systemDefault()).toInstant().toEpochMilli())) {
+            return true;
+        }
+        if(metaDataServiceDTO.getLongitude() == metaDataEntity.getLongitude()) {
+            return true;
+        }
+        if(metaDataServiceDTO.getLatitude() == metaDataEntity.getLatitude()) {
+            return true;
+        }
+        if(metaDataServiceDTO.getFrameNum() == metaDataEntity.getFrameNum()) {
+            return true;
+        }
+        if(metaDataServiceDTO.getPlaceIdent() == metaDataEntity.getPlaceIdent()) {
+            return true;
+        }
+        if(metaDataServiceDTO.getEventFrames() == metaDataEntity.getSeqNumFrames()) {
+            return true;
+        }
+        return false;
+    }
 }
