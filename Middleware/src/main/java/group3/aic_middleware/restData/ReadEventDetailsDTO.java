@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReadEventDTO {
+public class ReadEventDetailsDTO {
 
     @Getter
     @Setter

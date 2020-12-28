@@ -1,11 +1,7 @@
 package group3.aic_middleware.endpoints;
 
 import group3.aic_middleware.exceptions.*;
-import group3.aic_middleware.entities.ImageEntity;
-import group3.aic_middleware.restData.ReadEventDTO;
-import group3.aic_middleware.restData.SensingEventDTO;
-import group3.aic_middleware.restData.TagDTO;
-import group3.aic_middleware.restData.TagDataDTO;
+import group3.aic_middleware.restData.*;
 import group3.aic_middleware.services.FederationService;
 import lombok.extern.log4j.Log4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
@@ -13,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
@@ -41,13 +36,13 @@ public class GatewayController {
         log.info("Creating an event:");
         log.info(sensingEvent.toString());
 
-        ReadEventDTO readEventDTO = new ReadEventDTO();
+        ReadEventDetailsDTO readEventDetailsDTO = new ReadEventDetailsDTO();
 
-        readEventDTO.setImageBase64Enc(sensingEvent.getBase64EncodedImage());
-        readEventDTO.setMetaData(sensingEvent.getMetaData());
+        readEventDetailsDTO.setImageBase64Enc(sensingEvent.getBase64EncodedImage());
+        readEventDetailsDTO.setMetaData(sensingEvent.getMetaData());
 
         try{
-            this.federationService.saveEvent(readEventDTO);
+            this.federationService.saveEvent(readEventDetailsDTO);
         } catch (EventNotCreatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Sensing event creation failed. Reason: " + e.getMessage());
@@ -66,7 +61,7 @@ public class GatewayController {
      */
     @GetMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK)
-    public ReadEventDTO getById(@PathVariable("seqId") String seqId) { // 3
+    public ReadEventDetailsDTO getById(@PathVariable("seqId") String seqId) { // 3
         log.info("Reading an event with the seqId = " + seqId);
         try {
             return  this.federationService.readEvent(seqId);
@@ -88,7 +83,7 @@ public class GatewayController {
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ReadEventDTO> getEvents() {
+    public List<ReadEventsDTO> getEvents() {
         log.info("Reading all events.");
         try {
             return  this.federationService.readEvents();

@@ -7,7 +7,6 @@ import com.dropbox.core.v2.files.WriteMode;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
-import group3.aic_middleware.restData.ReadEventDTO;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.DatatypeConverter;
