@@ -17,4 +17,18 @@ public class ReadEventDetailsDTO {
     @Setter
     private MetaDataEntity metaData;
 
+    @Override
+    public String toString() {
+        return "seqId: " + this.metaData.getSeqId() + "\n"
+                + "deviceId: " + this.metaData.getDeviceId() + "\n"
+                + "name: " + this.metaData.getName() + "\n"
+                + "filename: " + this.metaData.getFilename() + "\n"
+                + "placeIdent: " + this.metaData.getPlaceIdent() + "\n"
+                + "latitude: " + this.metaData.getLatitude() + "\n"
+                + "longitude: " + this.metaData.getLongitude() + "\n"
+                + "frameNum: " + this.metaData.getFrameNum() + "\n"
+                + "seqFrameNum: " + this.metaData.getSeqNumFrames() + "\n"
+                + "datetime: " + this.metaData.getDatetime();
+    }
+
 }
