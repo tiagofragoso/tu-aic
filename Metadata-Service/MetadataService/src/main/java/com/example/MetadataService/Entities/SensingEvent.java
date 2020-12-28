@@ -52,6 +52,10 @@ public class SensingEvent {
     @GeoSpatialIndexed
     private double[] gpsLocation = new double[2];
 
+    @Getter
+    @Setter
+    private long updated;
+
     public double getLongitude() throws Exception{
         if(gpsLocation.length > 0) {
             return gpsLocation[0];
@@ -76,7 +80,7 @@ public class SensingEvent {
         this.latitude = latitude;
     }
 
-    public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude, long frameNum, String placeIdent, long eventFrames) {
+    public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude, long frameNum, String placeIdent, long eventFrames, long updated) {
         this.id = id;
         this.name = name;
         this.deviceIdentifier = deviceIdentifier;
@@ -87,5 +91,6 @@ public class SensingEvent {
         this.eventFrames = eventFrames;
         this.setLongitude(longitude);
         this.setLatitude(latitude);
+        this.updated = updated;
     }
 }
