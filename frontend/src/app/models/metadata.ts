@@ -1,6 +1,8 @@
+import {States} from "./states";
+
 export class MetaData {
   event_id!: string;
-  state?: string;
+  state?: States;
   dev_id?: string;
   dev_name?: string;
   timestamp?: Date;

@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {environment} from '../../../environments/environment';
-import {events} from './events'; // mock data
-import {formatDate} from '../../utils/date';
+import {mockEvents} from "../../models/mockEvents";
+import {convertUnixDateToString} from "../../utils/date";
+import {Tag} from "../../models/tag";
 
 const PAGE_SIZE = 10; // TODO: discuss this
 
@@ -17,18 +18,13 @@ export class EventTableComponent implements OnInit {
   state = {
     page: 1,
     pageSize: PAGE_SIZE,
-    totalResults: 3
-  }
+    totalResults: 3,
+    events: mockEvents
+  };
 
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute) {
                 this.environment = environment;
-                this.state.events = events.map((e) => ({
-                  ...e,
-                  tags: e.tags.join(", "),
-                  created: formatDate(e.created),
-                  updated: formatDate(e.updated)
-                }));
   }
 
   ngOnInit(): void {
@@ -41,5 +37,14 @@ export class EventTableComponent implements OnInit {
 
   public eventClicked(id: string) {
     this.router.navigate(['/events/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
+  }
+
+  public convertDate(date: Date) {
+    return convertUnixDateToString(date);
+  }
+
+  public convertTagNames(tags: Tag[]) {
+    // TODO: If too many tags occur, append ...
+    return tags.map(tag => tag.name).toString().replace(/,/g, ", ");
   }
 }

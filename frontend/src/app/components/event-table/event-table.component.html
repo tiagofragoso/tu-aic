@@ -15,12 +15,13 @@
     </thead>
     <tbody>
     <tr *ngFor="let event of state.events">
-      <td>{{ event.name }}</td>
-      <td>{{ event.place_ident }}</td>
-      <td>{{ event.created }}</td>
-      <td>{{ event.updated }}</td>
-      <td>{{ event.tags }}</td>
-      <td>{{ event.state }}</td>
+      <!-- TODO: In case of empty value, add placeholder text  -->
+      <td>{{ event.metadata?.dev_name }}</td>
+      <td>{{ event.metadata?.place_ident }}</td>
+      <td>{{ convertDate(event.metadata?.created) }}</td>
+      <td>{{ convertDate(event.metadata?.updated) }}</td>
+      <td>{{ convertTagNames(event.tags) }}</td>
+      <td>{{ event.metadata?.state }}</td>
     </tr>
     </tbody>
   </table>
