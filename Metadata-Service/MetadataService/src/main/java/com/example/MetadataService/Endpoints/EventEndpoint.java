@@ -1,6 +1,7 @@
 package com.example.MetadataService.Endpoints;
 
 import com.example.MetadataService.DTOs.EventDTO;
+import com.example.MetadataService.DTOs.SimpleEventDTO;
 import com.example.MetadataService.Services.CRUDService;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,13 +51,13 @@ public class EventEndpoint {
     }
 
     @GetMapping("events")
-    public List<EventDTO> getAllEvents() throws Exception {
+    public List<SimpleEventDTO> getAllEvents() throws Exception {
         log.info("Get all events.");
         return crudService.getAllEvents();
     }
 
     @GetMapping("events/radius")
-    public List<EventDTO> getAllEventsInRadius(@RequestParam(required = true) double size, @RequestParam(required = true) double lon, @RequestParam(required = true) double lat) throws Exception {
+    public List<SimpleEventDTO> getAllEventsInRadius(@RequestParam(required = true) double size, @RequestParam(required = true) double lon, @RequestParam(required = true) double lat) throws Exception {
         log.info(String.format("Get all events in radius size: %.2f  lon: %.2f lat: %.2f", size, lon, lat));
         return crudService.getAllEventsInRadius(size, lon, lat);
     }
