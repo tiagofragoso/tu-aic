@@ -3,6 +3,7 @@ package group3.aic_middleware.restData;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Data
@@ -61,8 +62,9 @@ public class MetaDataServiceDTO {
     private long eventFrames;
 
     public long getCreated(String tagName) {
-        while(this.tags.iterator().hasNext()) {
-            TagDTO tagDTO = this.tags.iterator().next();
+        Iterator<TagDTO> it = this.tags.iterator();
+        while(it.hasNext()) {
+            TagDTO tagDTO = it.next();
             if(tagDTO.getTagName() == tagName) {
                 return tagDTO.getCreated();
             }
