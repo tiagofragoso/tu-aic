@@ -1,4 +1,35 @@
 <h2>Event Table</h2>
 <a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
-<p>The API URL is not {{environment.apiUrl}}</p>
+<p>The API URL is {{environment.apiUrl}}</p>
+<div *ngIf="state.totalResults > 0; else noResults">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Place ID</th>
+      <th scope="col">Created</th>
+      <th scope="col">Last updated</th>
+      <th scope="col">Tags</th>
+      <th scope="col">State</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let event of state.events">
+      <td>{{ event.name }}</td>
+      <td>{{ event.place_ident }}</td>
+      <td>{{ event.created }}</td>
+      <td>{{ event.updated }}</td>
+      <td>{{ event.tags }}</td>
+      <td>{{ event.state }}</td>
+    </tr>
+    </tbody>
+  </table>
 
+  <div class="d-flex justify-content-center">
+    <ngb-pagination [collectionSize]="state.totalResults" [(page)]="state.page" [pageSize]="state.pageSize" (pageChange)="getEvents()">
+    </ngb-pagination>
+  </div>
+</div>
+<ng-template #noResults>
+  <p>No events found</p>
+</ng-template>

@@ -42,7 +42,7 @@ body * {
 
 .main-container {
   height: 100%;
-  padding: 8px 16px 0;
+  padding: 40px 40px 0px 40px;
 }
 
 .main-content {
@@ -102,4 +102,8 @@ body * {
 
 a {
   cursor: pointer;
+}
+
+.sr-only {
+  display: none!important; /* Sorry screen-reader-dependent people but bootstrap broke my code */
 }

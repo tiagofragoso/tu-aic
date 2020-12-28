@@ -193,8 +193,9 @@ public class FederationService {
                     new ParameterizedTypeReference<List<MetaDataServiceDTO>>() {
                     });
 
-        while(responseMDS.getBody().iterator().hasNext()) {
-            MetaDataServiceDTO metaDataDTO = responseMDS.getBody().iterator().next();
+        Iterator<MetaDataServiceDTO> it = responseMDS.getBody().iterator();
+        while(it.hasNext()) {
+            MetaDataServiceDTO metaDataDTO = it.next();
             fileName = metaDataDTO.getSensingEventId() + ".jpg";
             copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
 
