@@ -104,18 +104,23 @@ public class FederationService {
     }
 
 
-    public List<ReadEventsDTO> readEvents() throws EventNotFoundException {
+    public List<ReadEventsDTO> readEvents(double size, double longitude, double latitude) {
         ArrayList<ReadEventsDTO> eventList = new ArrayList<>();
-        String fileName = "";
-        String URL_MDS = MDSConnection + "/events";
+        String URL_MDS = "";
         RestTemplate restTemplate = new RestTemplate();
         MetaDataEntity metaDataEntity = new MetaDataEntity();
+        ResponseEntity<List<MetaDataServiceDTO>> responseMDS = null;
+        if(size >= 0) {
+            URL_MDS = MDSConnection + "/events/radius?size="+size+"&lon="+longitude+"&lat="+latitude;
+        } else {
+            URL_MDS = MDSConnection + "/events";
+        }
 
-        // query images
-        ResponseEntity<List<MetaDataServiceDTO>> responseMDS = restTemplate.exchange(
+        // query events
+        responseMDS = restTemplate.exchange(
                 URL_MDS, HttpMethod.GET, null,
-                new ParameterizedTypeReference<List<MetaDataServiceDTO>>() {
-                });
+                new ParameterizedTypeReference<List<MetaDataServiceDTO>>() {}
+                );
 
         Iterator<MetaDataServiceDTO> it = responseMDS.getBody().iterator();
         while(it.hasNext()) {
@@ -230,6 +235,16 @@ public class FederationService {
             throw new EventNotUpdatedException(e.getMessage());
         }
     }
+
+
+    /*
+     * Update operations
+     * */
+    public void updateEvent(ReadEventDetailsDTO readEventDetailsDTO) {
+
+    }
+
+
 
     /*
      * Delete operations

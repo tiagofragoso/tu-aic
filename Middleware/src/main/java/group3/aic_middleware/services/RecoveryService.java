@@ -78,7 +78,7 @@ public class RecoveryService {
         return retImage;
     }
 
-    public String getEventStatus(MetaDataServiceDTO metaDataDTO) throws EventNotFoundException {
+    public String getEventStatus(MetaDataServiceDTO metaDataDTO) {
         String fileName = metaDataDTO.getSensingEventId() + "_base.jpg";
         String URL_IOS = IOSConnection + "/images/" + fileName;
         RestTemplate restTemplate = new RestTemplate();
@@ -129,7 +129,7 @@ public class RecoveryService {
             return "faulty";
         }
 
-        return "valid";
+        return "correct";
     }
 
     private int getHashValue(MetaDataServiceDTO metaDataServiceDTO) {

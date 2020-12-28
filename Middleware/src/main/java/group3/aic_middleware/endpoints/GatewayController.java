@@ -86,7 +86,23 @@ public class GatewayController {
     public List<ReadEventsDTO> getEvents() {
         log.info("Reading all events.");
         try {
-            return  this.federationService.readEvents();
+            return  this.federationService.readEvents(-1, -1, -1);
+        } catch (Exception exc) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
+
+        }
+    }
+
+    /**
+     * The call which queries all events stored in the system within a radius of specific longitude/latitude
+     */
+    @GetMapping("/radius")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ReadEventsDTO> getEventsInRadius(@RequestParam double size, @RequestParam double lon, @RequestParam double lat) {
+        log.info("Reading all events.");
+        try {
+            return  this.federationService.readEvents(size, lon, lat);
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
