@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {environment} from '../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-event-table',
@@ -20,6 +20,6 @@ export class EventTableComponent implements OnInit {
   }
 
   public eventClicked(id: string) {
-    this.router.navigate(['/event-details/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
+    this.router.navigate(['/events/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
   }
 }

@@ -16,6 +16,6 @@ export class EventMapComponent implements OnInit {
   }
 
   public eventClicked(id: string) {
-    this.router.navigate(['/event-details/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
+    this.router.navigate(['/events/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
   }
 }

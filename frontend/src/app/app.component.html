@@ -15,15 +15,17 @@
             <div class="sidebar">
               <ul class="nav nav-pills flex-column">
                 <!-- TODO: Insert burger menu instead of sidebar starting with a certain screen-width -->
-                <li *ngIf="router.url.includes('event-details')" [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'"
-                    role="presentation">
-                  <a (click)="goBack()" [routerLink]="'event-details'" class="return nav-link">Back</a>
+                <li
+                  *ngIf="router.url.includes('events/') && !router.url.endsWith('events/') && !router.url.endsWith('events') && !router.url.endsWith('events/map')"
+                  [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'"
+                  role="presentation">
+                  <a (click)="goBack()" class="return nav-link" routerLink="/events/{{id}}">Back</a>
                 </li>
                 <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
-                  <a [routerLink]="'event-table'" class="nav-link">Event Table</a>
+                  <a class="nav-link" routerLink="events">Event Table</a>
                 </li>
                 <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
-                  <a [routerLink]="'event-map'" class="nav-link">Event Map</a>
+                  <a class="nav-link" routerLink="events/map">Event Map</a>
                 </li>
               </ul>
             </div>
@@ -32,7 +34,7 @@
           <div class="px-0 main-content full-height col-margin-left margin-top container-width">
             <div class="full-height">
               <div class="main-container">
-                <router-outlet></router-outlet>
+                <router-outlet (activate)="onActivate($event)"></router-outlet>
               </div>
             </div>
           </div>
