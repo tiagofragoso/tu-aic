@@ -116,6 +116,6 @@ export class EventTableComponent implements OnInit {
   public convertTagNames(tags?: Tag[]): string {
     if (!tags) return '';
     // TODO: If too many tags occur, append ...
-    return tags.map(tag => tag.name).join(", ");
+    return tags.slice(0, 2).map(tag => tag.name).join(", ");
   }
 }

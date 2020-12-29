@@ -26,7 +26,9 @@
       <td>{{ event?.metadata?.place_ident }}</td>
       <td>{{ convertDate(event?.metadata?.created) }}</td>
       <td>{{ convertDate(event?.metadata?.updated) }}</td>
-      <td>{{ convertTagNames(event?.tags) }}</td>
+      <td>{{ convertTagNames(event?.tags) }}
+        <span *ngIf="event?.tags.length > 2" class="text-muted"> & {{event?.tags.length - 2}} more</span>
+      </td>
       <td>{{ event?.metadata?.state }}</td>
     </tr>
     </tbody>
