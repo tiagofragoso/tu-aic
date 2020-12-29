@@ -27,9 +27,13 @@
       <td>{{ convertDate(event?.metadata?.created) }}</td>
       <td>{{ convertDate(event?.metadata?.updated) }}</td>
       <td>{{ convertTagNames(event?.tags) }}
-        <span *ngIf="event?.tags.length > 2" class="text-muted"> & {{event?.tags.length - 2}} more</span>
+        <span *ngIf="event?.tags.length > 2" class="text-muted"> & {{event?.tags?.length - 2}} more</span>
       </td>
-      <td>{{ event?.metadata?.state }}</td>
+      <td>
+        <span [className]="'text-' + statesColorMapping[event?.metadata?.state]">
+          {{event?.metadata?.state}}
+        </span>
+    </td>
     </tr>
     </tbody>
   </table>

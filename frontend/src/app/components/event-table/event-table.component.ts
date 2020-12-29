@@ -5,6 +5,7 @@ import {mockEvents} from "../../models/mockEvents";
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from "../../models/event";
 import {Tag} from "../../models/tag";
+import {States} from "../../models/states";
 
 const PAGE_SIZE = 10; // TODO: discuss this
 
@@ -55,6 +56,11 @@ interface TableState {
 export class EventTableComponent implements OnInit {
   @ViewChildren(SortableHeader) headers: QueryList<SortableHeader>;
   state: TableState;
+  statesColorMapping: {[key in States]: string} = { 
+    CORRECT: 'success', 
+    FAULTY: 'warning', 
+    MISSING: 'danger' 
+  };
 
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute) {
@@ -92,7 +98,7 @@ export class EventTableComponent implements OnInit {
   }
 
   onSubmitSearch() {
-    console.log(this.state.searchTerm.value);
+    console.log(this.state.searchTerm?.value);
     this.getEvents();
   }
 
