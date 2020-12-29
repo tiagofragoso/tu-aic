@@ -1,10 +1,15 @@
 package com.example.MetadataService.Endpoints;
 
 import com.example.MetadataService.DTOs.EventDTO;
+import com.example.MetadataService.DTOs.PageMetaPlusItemDTO;
 import com.example.MetadataService.DTOs.SimpleEventDTO;
 import com.example.MetadataService.Services.CRUDService;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,9 +56,9 @@ public class EventEndpoint {
     }
 
     @GetMapping("events")
-    public List<SimpleEventDTO> getAllEvents() throws Exception {
-        log.info("Get all events.");
-        return crudService.getAllEvents();
+    public PageMetaPlusItemDTO getAllEvents(@PageableDefault(size=20) Pageable pageable, @RequestParam(required = false) String search) throws Exception {
+        log.info(String.format("Get all events from page %s", pageable.getPageNumber()));
+        return crudService.getAllEvents(pageable, search);
     }
 
     @GetMapping("events/radius")

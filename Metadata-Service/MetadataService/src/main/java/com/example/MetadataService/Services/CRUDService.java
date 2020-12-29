@@ -1,20 +1,20 @@
 package com.example.MetadataService.Services;
 
-import com.example.MetadataService.DTOs.EventDTO;
-import com.example.MetadataService.DTOs.SimpleEventDTO;
-import com.example.MetadataService.DTOs.SimpleTagDTO;
-import com.example.MetadataService.DTOs.TagDTO;
+import com.example.MetadataService.DTOs.*;
 import com.example.MetadataService.Entities.SensingEvent;
 import com.example.MetadataService.Entities.Tag;
 import com.example.MetadataService.Repositories.SensingEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,15 +92,37 @@ public class CRUDService {
      * @return returns all events.
      * @throws Exception Throws an exception if location data was wrongly stored.
      */
-    public List<SimpleEventDTO> getAllEvents() throws Exception {
+    public PageMetaPlusItemDTO getAllEvents(Pageable pageRequest, String search) throws Exception {
 
         List<SimpleEventDTO> ret = new ArrayList<>();
 
-        for(SensingEvent event : eventRepository.findAll()) {
+        List<Sort.Order> orders = new ArrayList<>();
+        for (Iterator<Sort.Order> it = pageRequest.getSort().stream().iterator(); it.hasNext(); ) {
+            Sort.Order order = it.next();
+
+            try {
+                orders.add(Sort.Order.by(AttributeMapper.mapJsonAttributeToInternalAttributes(order.getProperty())).with(order.getDirection()));
+            }
+            catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given attribute for sorting is not valid.");
+            }
+        }
+
+        Pageable modifiedPageRequest = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(), Sort.by(orders));
+
+        Page<SensingEvent> page;
+        if(search != null) {
+            page = findEventFullSearch(search, modifiedPageRequest);
+        }
+        else {
+            page = eventRepository.findAll(modifiedPageRequest);
+        }
+
+        for(SensingEvent event : page.getContent()) {
             ret.add(sensingRealToSimpleDto(event));
         }
 
-        return ret;
+        return new PageMetaPlusItemDTO(ret, page.getNumber(), page.getTotalElements(), page.getTotalPages());
     }
 
     /**
@@ -269,5 +291,10 @@ public class CRUDService {
         }
 
         return new SimpleEventDTO(event.getId(), event.getName(), event.getPlaceIdent(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getUpdated());
+    }
+
+    private Page<SensingEvent> findEventFullSearch(String searchText, Pageable pageable) {
+        return eventRepository.findByNameContainingIgnoreCaseOrPlaceIdentContainingIgnoreCaseOrCreatedHumanReadableContainingIgnoreCaseOrUpdatedHumanReadableContainingIgnoreCaseOrTagConcatContainingIgnoreCase(searchText, searchText, searchText, searchText, searchText, pageable);
+
     }
 }
