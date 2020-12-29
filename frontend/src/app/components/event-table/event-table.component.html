@@ -1,7 +1,13 @@
 <h2>Event Table</h2>
 <a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
-<p>The API URL is {{environment?.apiUrl}}</p>
 <div *ngIf="state && state.totalResults > 0; else noResults">
+  <form (ngSubmit)="onSubmitSearch()" novalidate>
+    <div class="form-group form-inline">
+      <input class="form-control m-2" placeholder="Search..." type="text" [formControl]="state.searchTerm"/>
+      <button class="btn btn-primary" type="submit">GO</button>
+    </div>
+  </form>
+
   <table class="table table-striped">
     <thead>
     <tr>
@@ -38,6 +44,7 @@
     </select>
   </div>
 </div>
+
 <ng-template #noResults>
   <p>No events found</p>
 </ng-template>

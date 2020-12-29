@@ -1,5 +1,6 @@
 import {Component, OnInit, Directive, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
+import {FormControl} from '@angular/forms';
 import {mockEvents} from "../../models/mockEvents";
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from "../../models/event";
@@ -42,7 +43,8 @@ interface TableState {
   totalResults: number,
   events: Event[],
   sortColumn?: SortColumn,
-  sortDirection?: SortDirection
+  sortDirection?: SortDirection,
+  searchTerm?: FormControl
 }
 
 @Component({
@@ -60,7 +62,8 @@ export class EventTableComponent implements OnInit {
                   page: 1,
                   pageSize: PAGE_SIZE,
                   totalResults: 0,
-                  events: []
+                  events: [],
+                  searchTerm: new FormControl('')
                 };
                 this.headers = new QueryList<SortableHeader>();
               }
@@ -86,6 +89,11 @@ export class EventTableComponent implements OnInit {
     this.state.sortColumn = column;
     this.state.sortDirection = direction;
     console.log(this.state);
+  }
+
+  onSubmitSearch() {
+    console.log(this.state.searchTerm.value);
+    this.getEvents();
   }
 
   public getEvents() {
