@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReadEventDetailsDTO {
+public class StoreEventDTO {
 
     @Getter
     @Setter
@@ -15,20 +15,19 @@ public class ReadEventDetailsDTO {
 
     @Getter
     @Setter
-    private MetaDataEntity metaData;
+    private MetaDataServiceDTO metaData;
 
     @Override
     public String toString() {
-        return "seqId: " + this.metaData.getSeqId() + "\n"
-                + "deviceId: " + this.metaData.getDeviceId() + "\n"
+        return "seqId: " + this.metaData.getSensingEventId() + "\n"
+                + "deviceId: " + this.metaData.getDeviceIdentifier() + "\n"
                 + "name: " + this.metaData.getName() + "\n"
-                + "filename: " + this.metaData.getFilename() + "\n"
                 + "placeIdent: " + this.metaData.getPlaceIdent() + "\n"
                 + "latitude: " + this.metaData.getLatitude() + "\n"
                 + "longitude: " + this.metaData.getLongitude() + "\n"
                 + "frameNum: " + this.metaData.getFrameNum() + "\n"
-                + "seqFrameNum: " + this.metaData.getSeqNumFrames() + "\n"
-                + "datetime: " + this.metaData.getDatetime();
+                + "seqFrameNum: " + this.metaData.getFrameNum() + "\n"
+                + "created: " + this.metaData.getTimestamp();
     }
 
 }

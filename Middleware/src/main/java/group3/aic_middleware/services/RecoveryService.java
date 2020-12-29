@@ -3,10 +3,7 @@ package group3.aic_middleware.services;
 import group3.aic_middleware.entities.ImageEntity;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
-import group3.aic_middleware.restData.ImageObjectServiceCreateDTO;
-import group3.aic_middleware.restData.ImageObjectServiceLoadDTO;
-import group3.aic_middleware.restData.MetaDataServiceDTO;
-import group3.aic_middleware.restData.TagDTO;
+import group3.aic_middleware.restData.*;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -27,8 +24,8 @@ public class RecoveryService {
     private HashingService hashingService = new HashingService();
     private ImageFileService imageFileService = new ImageFileService();
 
-    private String MDSConnection = "http://metadata-service:8080";
-    private String IOSConnection = "http://image-object-service:8000";
+    private String MDSConnection = "http://192.168.9.132:1331";
+    private String IOSConnection = "http://192.168.9.132:8000";
 
     public RecoveryService() throws NoSuchAlgorithmException {
     }
@@ -87,6 +84,60 @@ public class RecoveryService {
 
         try {
             responseIOS = restTemplate.exchange(
+                    URL_IOS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Requested sensing event doesn't exist in Image Object Storage.");
+                try {
+                    imageIFS = this.imageFileService.readImage(fileName);
+                    int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+                    if(hashedImageIFS == this.getHashValue(metaDataDTO)) {
+                        return "FAULTY";
+                    } else {
+                        log.info("Requested sensing event is corrupted in Image File Storage.");
+                        return "MISSING";
+                    }
+                } catch (EventNotFoundException ex) {
+                    log.info("Requested sensing event doesn't exist in any Storage.");
+                    return "MISSING";
+                }
+            }
+        }
+
+        ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
+        try {
+            imageIFS = this.imageFileService.readImage(fileName);
+        } catch (EventNotFoundException ex) {
+            log.info("Requested sensing event doesn't exist in Image File Storage.");
+            int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
+            if(hashedImageIOS == this.getHashValue(metaDataDTO)) {
+                return "FAULTY";
+            } else {
+                log.info("Requested sensing event is corrupted in Image Object Storage.");
+                return "MISSING";
+            }
+        }
+
+        int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+        int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
+        if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
+            log.info("Saved images are not identical.");
+            return "FAULTY";
+        }
+
+        return "CORRECT";
+    }
+
+    public String getEventStatus(ReadEventsDTO metaDataDTO) {
+        String fileName = metaDataDTO.getSeqId() + "_base.jpg";
+        String URL_IOS = IOSConnection + "/images/" + fileName;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = null;
+        ImageEntity imageIFS = null;
+
+        try {
+            responseIOS = restTemplate.exchange(
                 URL_IOS, HttpMethod.GET, null,
                 new ParameterizedTypeReference<ImageObjectServiceLoadDTO>(){});
         } catch (HttpClientErrorException e) {
@@ -136,6 +187,17 @@ public class RecoveryService {
         Iterator<TagDTO> it = metaDataServiceDTO.getTags().iterator();
         while(it.hasNext()) {
             TagDTO tagDTO = it.next();
+            if(tagDTO.getTagName() == "base") {
+                return tagDTO.getImageHash();
+            }
+        }
+        return -1;
+    }
+
+    private int getHashValue(ReadEventsDTO metaDataServiceDTO) {
+        Iterator<SimpleTagDTO> it = metaDataServiceDTO.getTags().iterator();
+        while(it.hasNext()) {
+            SimpleTagDTO tagDTO = it.next();
             if(tagDTO.getTagName() == "base") {
                 return tagDTO.getImageHash();
             }

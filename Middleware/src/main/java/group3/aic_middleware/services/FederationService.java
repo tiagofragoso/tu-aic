@@ -7,6 +7,8 @@ import group3.aic_middleware.restData.*;
 import group3.aic_middleware.entities.MetaDataEntity;
 import lombok.extern.log4j.Log4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -31,8 +33,8 @@ public class FederationService {
     private RecoveryService recoveryService = new RecoveryService();
 
     // TODO Transform into environment variables
-    String MDSConnection = "http://metadata-service:8080";
-    String IOSConnection = "http://image-object-service:8000";
+    String MDSConnection = "http://192.168.9.132:1331";
+    String IOSConnection = "http://192.168.9.132:8000";
 
     public FederationService() throws NoSuchAlgorithmException {
     }
@@ -40,11 +42,11 @@ public class FederationService {
     /*
     * Read operations
     * */
-    public ReadEventDetailsDTO readEvent(String seqId) throws EventNotFoundException {
+    public ReadDetailsEventDTO readEvent(String seqId) throws EventNotFoundException {
         String fileName = "";
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
-        ReadEventDetailsDTO readEventDetailsDTO = new ReadEventDetailsDTO();
+        ReadDetailsEventDTO storeEventDTO = new ReadDetailsEventDTO();
         MetaDataEntity metaDataEntity = new MetaDataEntity();
 
         // check existence of an image using MetaDataService
@@ -63,13 +65,13 @@ public class FederationService {
 
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
 
-        fileName = metaDataDTO.getSensingEventId() + "_" + metaDataEntity.getTags().iterator().next().getTagName() + ".jpg";
-        copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
+        fileName = metaDataDTO.getSensingEventId() + "_" + metaDataDTO.getTags().iterator().next().getTagName() + ".jpg";
 
-        readEventDetailsDTO.setMetaData(metaDataEntity);
-        readEventDetailsDTO.setImageBase64Enc(this.recoveryService.recoverImage(fileName));
+        storeEventDTO.setMetadata(convertMetaDataServiceToMetaDataDetail(metaDataDTO));
+//        storeEventDTO.setImageBase64Enc(this.recoveryService.recoverImage(fileName));
+        storeEventDTO.setTags(convertTagDtoToEventDetailTagDto(metaDataDTO.getTags()));
 
-        return readEventDetailsDTO;
+        return storeEventDTO;
     }
 
     public TagDataDTO readTagData(String seqId, String tagName) throws EventNotFoundException {
@@ -104,6 +106,28 @@ public class FederationService {
     }
 
 
+    public MetadataPageDTO readEvents(Pageable pageable, String search) {
+        String URL_MDS = "";
+        RestTemplate restTemplate = new RestTemplate();
+        MetaDataEntity metaDataEntity = new MetaDataEntity();
+        ResponseEntity<MetadataPageDTO> responseMDS = null;
+
+        URL_MDS = MDSConnection + "/events" + createPageString(pageable) + createSearchString(search);
+
+        // query events
+        responseMDS = restTemplate.exchange(
+                    URL_MDS, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<MetadataPageDTO>() {});
+
+        MetadataPageDTO ret = responseMDS.getBody();
+
+        for(ReadEventsDTO readEventsDTO : ret.getEvents()){
+            readEventsDTO.setState(this.recoveryService.getEventStatus(readEventsDTO));
+        }
+
+        return ret;
+    }
+
     public List<ReadEventsDTO> readEvents(double size, double longitude, double latitude) {
         ArrayList<ReadEventsDTO> eventList = new ArrayList<>();
         String URL_MDS = "";
@@ -136,7 +160,7 @@ public class FederationService {
             readEventsDTO.setLongitude(metaDataDTO.getLongitude());
             readEventsDTO.setLatitude(metaDataDTO.getLatitude());
             readEventsDTO.setState(this.recoveryService.getEventStatus(metaDataDTO));
-            readEventsDTO.setTags(metaDataDTO.getTags());
+            readEventsDTO.setTags(convertTagDtoToSimpleTagDto(metaDataDTO.getTags()));
             eventList.add(readEventsDTO);
         }
 
@@ -147,10 +171,10 @@ public class FederationService {
     /*
      * Create operations
      * */
-    public void saveEvent(ReadEventDetailsDTO readEventDetailsDTO) throws EventNotCreatedException {
+    public void saveEvent(StoreEventDTO storeEventDTO) throws EventNotCreatedException {
         RestTemplate restTemplate = new RestTemplate();
-        String URL_MDS = MDSConnection + "/events/" + readEventDetailsDTO.getMetaData().getSeqId();
-        int hashOfNewImage = this.hashingService.getHash(readEventDetailsDTO.getImageBase64Enc());
+        String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetaData().getSensingEventId();
+        int hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImageBase64Enc());
         MetaDataServiceDTO metaDataDTO = null;
 
         // check existence of an image using MetaDataService and request old hash
@@ -181,28 +205,28 @@ public class FederationService {
 
         // save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
-        copyMetaDataFromEntityToDTO(metaDataDTO, readEventDetailsDTO.getMetaData());
+        metaDataDTO =  storeEventDTO.getMetaData();
         ArrayList<TagDTO> tagList = new ArrayList<>();
         tagList.add(new TagDTO("base", hashOfNewImage));
         metaDataDTO.setTags(tagList);
         HttpEntity<MetaDataServiceDTO> request = null;
         request = new HttpEntity<>(metaDataDTO);
         try {
-            ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
+            restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
         } catch(HttpClientErrorException e) {
             log.info(e.getMessage());
             throw new EventNotCreatedException(e.getMessage());
         }
 
         // save image using ImageObjectStorageService
-        String fileName = readEventDetailsDTO.getMetaData().getSeqId() + "_base.jpg";
+        String fileName = storeEventDTO.getMetaData().getSensingEventId() + "_base.jpg";
         String URL_IOS = IOSConnection + "/images";
-        ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, readEventDetailsDTO.getImageBase64Enc());
+        ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, storeEventDTO.getImageBase64Enc());
         HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
         restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
 
         // replicate image using ImageFileService
-        this.imageFileService.saveImage(fileName, readEventDetailsDTO.getImageBase64Enc());
+        this.imageFileService.saveImage(fileName, storeEventDTO.getImageBase64Enc());
     }
 
     public void createTag(TagDataDTO tagDataDTO, String seqId) throws EventNotUpdatedException {
@@ -253,8 +277,8 @@ public class FederationService {
     /*
      * Update operations
      * */
-    public void updateEvent(ReadEventDetailsDTO readEventDetailsDTO) throws EventNotUpdatedException {
-        String URL_MDS = MDSConnection + "/events/" + readEventDetailsDTO.getMetaData().getSeqId();
+    public void updateEvent(StoreEventDTO storeEventDTO) throws EventNotUpdatedException {
+        String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetaData().getSensingEventId();
         RestTemplate restTemplate = new RestTemplate();
         MetaDataServiceDTO metaDataServiceDTO = null;
 
@@ -273,15 +297,15 @@ public class FederationService {
         }
         metaDataServiceDTO = responseMDS.getBody();
 
-        if(metaDataServiceDTO.getSensingEventId() != readEventDetailsDTO.getMetaData().getSeqId()) {
+        if(metaDataServiceDTO.getSensingEventId() != storeEventDTO.getMetaData().getSensingEventId()) {
             throw new EventNotUpdatedException("The sequence ID of the event is not identical, wrong update request");
         }
-        if(!this.compareMetadata(metaDataServiceDTO, readEventDetailsDTO.getMetaData())) {
+        if(!this.compareMetadata(metaDataServiceDTO, storeEventDTO.getMetaData())) {
             throw new EventNotUpdatedException("The metadata did not change.");
         } else {
             // update the MetaData for an event
             URL_MDS = MDSConnection + "/events";
-            copyMetaDataFromEntityToDTO(metaDataServiceDTO, readEventDetailsDTO.getMetaData());
+            metaDataServiceDTO = storeEventDTO.getMetaData();
             HttpEntity<MetaDataServiceDTO> request = new HttpEntity<>(metaDataServiceDTO);
             try {
                 ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.PUT, request, MetaDataServiceDTO.class);
@@ -367,7 +391,51 @@ public class FederationService {
         metaDataEntity.setFilename(metaDataServiceDTO.getSensingEventId() + ".jpg");
     }
 
-    private void copyMetaDataFromEntityToDTO(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
+    private List<EventDetailsTagDTO> convertTagDtoToEventDetailTagDto(List<TagDTO> tags) {
+
+        ArrayList<EventDetailsTagDTO> ret = new ArrayList<>();
+        for (TagDTO tag: tags) {
+            ret.add(new EventDetailsTagDTO(tag.getTagName(), tag.getCreated(), tag.getImageHash()));
+        }
+        return ret;
+    }
+
+    private List<SimpleTagDTO> convertTagDtoToSimpleTagDto(List<TagDTO> tags) {
+
+        ArrayList<SimpleTagDTO> ret = new ArrayList<>();
+        for (TagDTO tag: tags) {
+            ret.add(new SimpleTagDTO(tag.getTagName(), tag.getImageHash()));
+        }
+        return ret;
+    }
+
+    private List<TagDTO> convertEventDetailsTagsDtoToTagDto(List<EventDetailsTagDTO> tags) {
+        ArrayList<TagDTO> ret = new ArrayList<>();
+        for (EventDetailsTagDTO tag : tags) {
+            ret.add(new TagDTO(tag.getTagName(), tag.getImageHash()));
+        }
+        return ret;
+    }
+
+    /*
+     * Support functions
+     * */
+    private MetaDataDetailsDTO convertMetaDataServiceToMetaDataDetail(MetaDataServiceDTO metaDataEntity) {
+
+        MetaDataDetailsDTO ret = new MetaDataDetailsDTO();
+        ret.setSensingEventId(metaDataEntity.getSensingEventId());
+        ret.setName(metaDataEntity.getName());
+        ret.setDeviceIdentifier(metaDataEntity.getDeviceIdentifier());
+        ret.setTimestamp(metaDataEntity.getTimestamp());
+        ret.setLongitude(metaDataEntity.getLongitude());
+        ret.setLatitude(metaDataEntity.getLatitude());
+        ret.setFrameNum(metaDataEntity.getFrameNum());
+        ret.setPlaceIdent(metaDataEntity.getPlaceIdent());
+        ret.setEventFrames(metaDataEntity.getEventFrames());
+        return ret;
+    }
+
+    public void copyMetaDataFromEntityToDTO(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
         metaDataServiceDTO.setSensingEventId(metaDataEntity.getSeqId());
         metaDataServiceDTO.setName(metaDataEntity.getName());
         metaDataServiceDTO.setDeviceIdentifier(metaDataEntity.getDeviceId());
@@ -380,14 +448,14 @@ public class FederationService {
         metaDataServiceDTO.setTags(metaDataEntity.getTags());
     }
 
-    private boolean compareMetadata(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
+    private boolean compareMetadata(MetaDataServiceDTO metaDataServiceDTO, MetaDataServiceDTO metaDataEntity) {
         if(metaDataServiceDTO.getName() == metaDataEntity.getName()) {
             return true;
         }
-        if(metaDataServiceDTO.getDeviceIdentifier() == metaDataEntity.getDeviceId()) {
+        if(metaDataServiceDTO.getDeviceIdentifier() == metaDataEntity.getDeviceIdentifier()) {
             return true;
         }
-        if(metaDataServiceDTO.getTimestamp() == (ZonedDateTime.of(metaDataEntity.getDatetime(), ZoneId.systemDefault()).toInstant().toEpochMilli())) {
+        if(metaDataServiceDTO.getTimestamp() == metaDataEntity.getTimestamp()) {
             return true;
         }
         if(metaDataServiceDTO.getLongitude() == metaDataEntity.getLongitude()) {
@@ -402,9 +470,32 @@ public class FederationService {
         if(metaDataServiceDTO.getPlaceIdent() == metaDataEntity.getPlaceIdent()) {
             return true;
         }
-        if(metaDataServiceDTO.getEventFrames() == metaDataEntity.getSeqNumFrames()) {
+        if(metaDataServiceDTO.getEventFrames() == metaDataEntity.getEventFrames()) {
             return true;
         }
         return false;
+    }
+
+    private String createPageString(Pageable pageable) {
+        String ret = "";
+
+        ret += String.format("?page=%d", pageable.getPageNumber());
+        ret += String.format("&size=%d", pageable.getPageNumber());
+
+        for(Sort.Order ord : pageable.getSort().toList()) {
+            ret += String.format("&sort=%s,%s", ord.getProperty(), ord.getDirection().toString());
+        }
+
+        return ret;
+    }
+
+    private String createSearchString(String search) {
+
+        if(search == null || search.isEmpty())
+        {
+            return "";
+        }
+
+        return "&search=" + search;
     }
 }

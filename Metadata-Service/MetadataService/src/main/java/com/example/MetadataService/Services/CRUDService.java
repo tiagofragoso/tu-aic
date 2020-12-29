@@ -274,7 +274,7 @@ public class CRUDService {
      * @return returns a tag dto.
      */
     private SimpleTagDTO tagRealToSimpleDto(Tag tag) {
-        return new SimpleTagDTO(tag.getTagName());
+        return new SimpleTagDTO(tag.getTagName(), tag.getImageHash());
     }
 
     /**
