@@ -1,11 +1,49 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Directive, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {environment} from '../../../environments/environment';
 import {mockEvents} from "../../models/mockEvents";
 import {convertUnixDateToString} from "../../utils/date";
+import {Event} from "../../models/event";
 import {Tag} from "../../models/tag";
 
 const PAGE_SIZE = 10; // TODO: discuss this
+
+export type SortColumn = 'dev_name' | 'place_ident' | 'created' | 'udpated' | '';
+export type SortDirection = 'asc' | 'desc' | '';
+const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
+
+export interface SortEvent {
+  column: SortColumn;
+  direction: SortDirection;
+}
+
+@Directive({
+  selector: 'th[sortable]',
+  host: {
+    '[class.asc]': 'direction === "asc"',
+    '[class.desc]': 'direction === "desc"',
+    '(click)': 'rotate()'
+  }
+})
+export class SortableHeader {
+
+  @Input() sortable: SortColumn = '';
+  @Input() direction: SortDirection = '';
+  @Output() sort = new EventEmitter<SortEvent>();
+
+  rotate() {
+    this.direction = rotate[this.direction];
+    this.sort.emit({column: this.direction !== '' ? this.sortable: '', direction: this.direction});
+  }
+}
+
+interface TableState {
+  page: number,
+  pageSize: number,
+  totalResults: number,
+  events: Event[],
+  sortColumn?: SortColumn,
+  sortDirection?: SortDirection
+}
 
 @Component({
   selector: 'app-event-table',
@@ -13,26 +51,47 @@ const PAGE_SIZE = 10; // TODO: discuss this
   styleUrls: ['./event-table.component.css']
 })
 export class EventTableComponent implements OnInit {
-
-  environment: any;
-  state = {
-    page: 1,
-    pageSize: PAGE_SIZE,
-    totalResults: 3,
-    events: mockEvents
-  };
+  @ViewChildren(SortableHeader) headers: QueryList<SortableHeader>;
+  state: TableState;
 
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute) {
-                this.environment = environment;
-  }
+                this.state = {
+                  page: 1,
+                  pageSize: PAGE_SIZE,
+                  totalResults: 0,
+                  events: []
+                };
+                this.headers = new QueryList<SortableHeader>();
+              }
 
   ngOnInit(): void {
     this.getEvents();
   }
 
+  onPageChange() {
+    console.log(this.state);
+    this.getEvents();
+  }
+
+  onSort({column, direction}: SortEvent) {
+
+    // resetting other headers
+    this.headers.forEach(header => {
+      if (header.sortable !== column) {
+        header.direction = '';
+      }
+    });
+
+    this.state.sortColumn = column;
+    this.state.sortDirection = direction;
+    console.log(this.state);
+  }
+
   public getEvents() {
     // make api request if state changed
+    this.state.events = mockEvents;
+    this.state.totalResults = mockEvents.length;
   }
 
   public eventClicked(id: string) {
@@ -48,7 +107,7 @@ export class EventTableComponent implements OnInit {
 
   public convertTagNames(tags?: Tag[]): string {
     if (!tags) return '';
-    // TODO: If too many tags occur, append '...'
-    return tags.map(tag => tag.name).toString().replace(/,/g, ", ");
+    // TODO: If too many tags occur, append ...
+    return tags.map(tag => tag.name).join(", ");
   }
 }
