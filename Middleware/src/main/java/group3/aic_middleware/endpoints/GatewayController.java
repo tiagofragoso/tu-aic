@@ -4,7 +4,10 @@ import group3.aic_middleware.exceptions.*;
 import group3.aic_middleware.restData.*;
 import group3.aic_middleware.services.FederationService;
 import lombok.extern.log4j.Log4j;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,17 +35,20 @@ public class GatewayController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody SensingEventDTO sensingEvent) throws JSONException {
+    public void create(@RequestBody SensingEventDTO sensingEvent) {
         log.info("Creating an event:");
         log.info(sensingEvent.toString());
 
-        ReadEventDetailsDTO readEventDetailsDTO = new ReadEventDetailsDTO();
+        MetaDataServiceDTO metaData = new MetaDataServiceDTO();
+        federationService.copyMetaDataFromEntityToDTO(metaData, sensingEvent.getMetaData());
 
-        readEventDetailsDTO.setImageBase64Enc(sensingEvent.getBase64EncodedImage());
-        readEventDetailsDTO.setMetaData(sensingEvent.getMetaData());
+        StoreEventDTO storeEventDTO = new StoreEventDTO();
+
+        storeEventDTO.setImageBase64Enc(sensingEvent.getBase64EncodedImage());
+        storeEventDTO.setMetaData(metaData);
 
         try{
-            this.federationService.saveEvent(readEventDetailsDTO);
+            this.federationService.saveEvent(storeEventDTO);
         } catch (EventNotCreatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Sensing event creation failed. Reason: " + e.getMessage());
@@ -61,10 +67,10 @@ public class GatewayController {
      */
     @GetMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK)
-    public ReadEventDetailsDTO getById(@PathVariable("seqId") String seqId) { // 3
+    public ReadDetailsEventDTO getById(@PathVariable("seqId") String seqId) { // 3
         log.info("Reading an event with the seqId = " + seqId);
         try {
-            return  this.federationService.readEvent(seqId);
+            return this.federationService.readEvent(seqId);
         } catch (EventNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Sensing event reading failed. Reason: " + e.getMessage());
@@ -83,14 +89,13 @@ public class GatewayController {
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ReadEventsDTO> getEvents() {
+    public MetadataPageDTO getEvents(@PageableDefault(size=20) Pageable pageable, @RequestParam(required = false) String search) {
         log.info("Reading all events.");
         try {
-            return  this.federationService.readEvents(-1, -1, -1);
+            return  this.federationService.readEvents(pageable, search);
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
-
         }
     }
 
@@ -131,12 +136,12 @@ public class GatewayController {
      */
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public void update(@RequestBody ReadEventDetailsDTO readEventDetailsDTO) throws JSONException {
+    public void update(@RequestBody StoreEventDTO storeEventDTO) throws JSONException {
         log.info("Updating an event:");
-        log.info(readEventDetailsDTO.toString());
+        log.info(storeEventDTO.toString());
 
         try{
-            this.federationService.updateEvent(readEventDetailsDTO);
+            this.federationService.updateEvent(storeEventDTO);
         } catch (EventNotUpdatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Sensing event update failed. Reason: " + e.getMessage());
@@ -199,7 +204,7 @@ public class GatewayController {
      */
     @DeleteMapping("/{seqId}/tags/{tagName}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteTag(@PathVariable("seqId") String seqId, @PathVariable("seqId") String tagName) {
+    public void deleteTag(@PathVariable("seqId") String seqId, @PathVariable("tagName") String tagName) {
         log.info("Deleting a tag: " + tagName+ " for an event with the seqId = " + seqId);
         try {
             this.federationService.deleteTag(seqId, tagName);

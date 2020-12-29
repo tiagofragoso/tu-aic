@@ -1,17 +1,19 @@
-package com.example.MetadataService.DTOs;
+package group3.aic_middleware.restData;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class SimpleTagDTO {
+    @Getter
+    @Setter
     @JsonProperty(required = true, value = "tag_name")
     private String tagName;
 
+    @Getter
+    @Setter
     @JsonProperty(required = true, value = "image_hash")
     private int imageHash;
 }

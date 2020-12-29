@@ -12,7 +12,7 @@ public class Tag {
 
     private String tagName;
 
-    private String imageHash;
+    private int imageHash;
 
     private long created;
 }
