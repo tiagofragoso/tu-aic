@@ -126,8 +126,6 @@ public class GatewayController {
         }
     }
 
-    // TODO Stage 2: update
-
     /**
      * The call which updates an event
      */
@@ -159,12 +157,12 @@ public class GatewayController {
      */
     @PutMapping("/{seqId}/tags")
     @ResponseStatus(HttpStatus.OK)
-    public void createTag(@RequestBody TagDTO tagDTO, @PathVariable String seqId) throws JSONException {
+    public void createTag(@RequestBody TagDataDTO tagDataDTO, @PathVariable String seqId) throws JSONException {
         log.info("Adding a tag to an event with seqId = " + seqId + ":");
-        log.info(tagDTO.toString());
+        log.info(tagDataDTO.toString());
 
         try{
-            this.federationService.createTag(tagDTO, seqId);
+            this.federationService.createTag(tagDataDTO, seqId);
         } catch (EventNotUpdatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Tag creation failed. Reason: " + e.getMessage());

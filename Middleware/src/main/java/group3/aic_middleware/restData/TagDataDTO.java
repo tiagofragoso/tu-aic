@@ -15,12 +15,12 @@ public class TagDataDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = false, value = "image")
+    @JsonProperty(required = true, value = "image")
     private String image;
 
     @Getter
     @Setter
-    @JsonProperty(required = true, value = "created")
+    @JsonProperty(required = false, value = "created")
     private long created;
 
 }

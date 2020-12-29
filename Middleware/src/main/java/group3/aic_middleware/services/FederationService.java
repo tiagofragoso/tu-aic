@@ -205,7 +205,7 @@ public class FederationService {
         this.imageFileService.saveImage(fileName, readEventDetailsDTO.getImageBase64Enc());
     }
 
-    public void createTag(TagDTO tagDTO, String seqId) throws EventNotUpdatedException {
+    public void createTag(TagDataDTO tagDataDTO, String seqId) throws EventNotUpdatedException {
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
 
@@ -225,12 +225,27 @@ public class FederationService {
 
         // save new tag using the MetaDataService
         URL_MDS = MDSConnection + "/events/" + seqId + "/tags";
-        HttpEntity<TagDTO> request = new HttpEntity<>(tagDTO);
+        HttpEntity<TagDataDTO> request = new HttpEntity<>(tagDataDTO);
         try {
-            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDTO.class);
+            ResponseEntity<TagDataDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDataDTO.class);
         } catch(HttpClientErrorException e) {
             log.info(e.getMessage());
             throw new EventNotUpdatedException(e.getMessage());
+        }
+
+        // save image using ImageObjectStorageService
+        String fileName = seqId + "_" + tagDataDTO.getTagName() + ".jpg";
+        String URL_IOS = IOSConnection + "/images";
+        ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, tagDataDTO.getImage());
+        HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
+        restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
+
+        // replicate image using ImageFileService
+        try {
+            this.imageFileService.saveImage(fileName, tagDataDTO.getImage());
+        } catch (EventNotCreatedException e) {
+            log.info("Tag could not be saved into Image File Storage.");
+            throw new EventNotUpdatedException("Tag could not be saved into Image File Storage: " + e.getMessage());
         }
     }
 

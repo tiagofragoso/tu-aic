@@ -96,14 +96,14 @@ public class RecoveryService {
                     imageIFS = this.imageFileService.readImage(fileName);
                     int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
                     if(hashedImageIFS == this.getHashValue(metaDataDTO)) {
-                        return "faulty";
+                        return "FAULTY";
                     } else {
                         log.info("Requested sensing event is corrupted in Image File Storage.");
-                        return "missing";
+                        return "MISSING";
                     }
                 } catch (EventNotFoundException ex) {
                     log.info("Requested sensing event doesn't exist in any Storage.");
-                    return "missing";
+                    return "MISSING";
                 }
             }
         }
@@ -115,10 +115,10 @@ public class RecoveryService {
             log.info("Requested sensing event doesn't exist in Image File Storage.");
             int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
             if(hashedImageIOS == this.getHashValue(metaDataDTO)) {
-                return "faulty";
+                return "FAULTY";
             } else {
                 log.info("Requested sensing event is corrupted in Image Object Storage.");
-                return "missing";
+                return "MISSING";
             }
         }
 
@@ -126,10 +126,10 @@ public class RecoveryService {
         int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
         if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
             log.info("Saved images are not identical.");
-            return "faulty";
+            return "FAULTY";
         }
 
-        return "correct";
+        return "CORRECT";
     }
 
     private int getHashValue(MetaDataServiceDTO metaDataServiceDTO) {
