@@ -30,10 +30,11 @@ public class RecoveryService {
     public RecoveryService() throws NoSuchAlgorithmException {
     }
 
-    public String recoverImage(String fileName) {
+    public String recoverImage(String fileName, int hashStored) {
         RestTemplate restTemplate = new RestTemplate();
         String retImage = "";
         String URL_IOS = IOSConnection + "/images/" + fileName;
+        ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = null;
 
         // query an image using ImageObjectStorageService (primary)
         // if not exists then recover it into primary storage
@@ -47,16 +48,15 @@ public class RecoveryService {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist in Image Object Storage.");
                 URL_IOS = IOSConnection + "/images";
-                ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = null;
                 try {
                     retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
-                    } catch (EventNotFoundException ex) {
+                    imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
+                    HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
+                    restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
+                } catch (EventNotFoundException ex) {
                     log.info("Requested sensing event doesn't exist in Image File Storage.");
                     ex.printStackTrace();
                 }
-                imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
-                HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
-                restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
             }
         }
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
@@ -64,11 +64,23 @@ public class RecoveryService {
         // query an image using ImageFileStorageService (secondary/backup)
         if(imageIOS != null) {
             retImage = imageIOS.getBase64Image();
-            try {
-                this.imageFileService.saveImage(fileName, retImage);
-            } catch (EventNotCreatedException e) {
-                e.printStackTrace();
-                log.info("Requested sensing event couldn't be recovered in Image File Storage: " + e.getMessage());
+            if(hashStored == this.hashingService.getHash(retImage)) {
+                try {
+                    this.imageFileService.saveImage(fileName, retImage);
+                } catch (EventNotCreatedException e) {
+                    e.printStackTrace();
+                    log.info("Requested sensing event couldn't be recovered in Image File Storage: " + e.getMessage());
+                }
+            } else {
+                try {
+                    retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
+                    imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
+                    HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
+                    restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
+                } catch (EventNotFoundException e) {
+                    e.printStackTrace();
+                    log.info("Requested sensing event couldn't be recovered from Image File Storage: " + e.getMessage());
+                }
             }
         }
 
@@ -183,11 +195,11 @@ public class RecoveryService {
         return "CORRECT";
     }
 
-    private int getHashValue(MetaDataServiceDTO metaDataServiceDTO) {
+    public int getHashValue(MetaDataServiceDTO metaDataServiceDTO) {
         Iterator<TagDTO> it = metaDataServiceDTO.getTags().iterator();
         while(it.hasNext()) {
             TagDTO tagDTO = it.next();
-            if(tagDTO.getTagName() == "base") {
+            if(tagDTO.getTagName().equals("base")) {
                 return tagDTO.getImageHash();
             }
         }

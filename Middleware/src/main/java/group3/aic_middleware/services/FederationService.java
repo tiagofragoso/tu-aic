@@ -47,7 +47,6 @@ public class FederationService {
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
         ReadDetailsEventDTO storeEventDTO = new ReadDetailsEventDTO();
-        MetaDataEntity metaDataEntity = new MetaDataEntity();
 
         // check existence of an image using MetaDataService
         ResponseEntity<MetaDataServiceDTO> responseMDS = null;
@@ -65,10 +64,10 @@ public class FederationService {
 
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
 
-        fileName = metaDataDTO.getSensingEventId() + "_" + metaDataDTO.getTags().iterator().next().getTagName() + ".jpg";
+        fileName = metaDataDTO.getSensingEventId() + "_base.jpg";
 
         storeEventDTO.setMetadata(convertMetaDataServiceToMetaDataDetail(metaDataDTO));
-//        storeEventDTO.setImageBase64Enc(this.recoveryService.recoverImage(fileName));
+        storeEventDTO.setImage(this.recoveryService.recoverImage(fileName, this.recoveryService.getHashValue(metaDataDTO)));
         storeEventDTO.setTags(convertTagDtoToEventDetailTagDto(metaDataDTO.getTags()));
 
         return storeEventDTO;
@@ -100,7 +99,7 @@ public class FederationService {
 
         tagDataDTO.setTagName(tagName);
         tagDataDTO.setCreated(metaDataDTO.getCreated(tagName));
-        tagDataDTO.setImage(this.recoveryService.recoverImage(fileName));
+        tagDataDTO.setImage(this.recoveryService.recoverImage(fileName, this.recoveryService.getHashValue(metaDataDTO)));
 
         return tagDataDTO;
     }
