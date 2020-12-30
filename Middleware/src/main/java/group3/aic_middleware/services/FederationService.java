@@ -33,8 +33,8 @@ public class FederationService {
     private RecoveryService recoveryService = new RecoveryService();
 
     // TODO Transform into environment variables
-    String MDSConnection = "http://192.168.9.132:1331";
-    String IOSConnection = "http://192.168.9.132:8000";
+    String MDSConnection = "http://metadata-service:8080";
+    String IOSConnection = "http://image-object-service:8000";
 
     public FederationService() throws NoSuchAlgorithmException {
     }

@@ -24,8 +24,8 @@ public class RecoveryService {
     private HashingService hashingService = new HashingService();
     private ImageFileService imageFileService = new ImageFileService();
 
-    private String MDSConnection = "http://192.168.9.132:1331";
-    private String IOSConnection = "http://192.168.9.132:8000";
+    String MDSConnection = "http://metadata-service:8080";
+    String IOSConnection = "http://image-object-service:8000";
 
     public RecoveryService() throws NoSuchAlgorithmException {
     }
