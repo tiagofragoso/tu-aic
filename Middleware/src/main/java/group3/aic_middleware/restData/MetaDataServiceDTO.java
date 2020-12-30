@@ -70,7 +70,7 @@ public class MetaDataServiceDTO {
         Iterator<TagDTO> it = this.tags.iterator();
         while(it.hasNext()) {
             TagDTO tagDTO = it.next();
-            if(tagDTO.getTagName() == tagName) {
+            if(tagDTO.getTagName().equals(tagName)) {
                 return tagDTO.getCreated();
             }
         }

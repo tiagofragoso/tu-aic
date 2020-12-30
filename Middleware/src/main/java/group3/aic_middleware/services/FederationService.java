@@ -356,7 +356,7 @@ public class FederationService {
     }
 
 
-    public void deleteTag(String seqId, String tagName) throws EventNotFoundException {
+    public void deleteTag(String seqId, String tagName) {
         RestTemplate restTemplate = new RestTemplate();
         String fileName = seqId + "_" + tagName + ".jpg";
         String URL_MDS = MDSConnection + "/events/" + seqId + "/tags/" + tagName;
@@ -366,7 +366,7 @@ public class FederationService {
         this.deleteImages(fileName);
     }
 
-    private void deleteImages(String fileName) throws EventNotFoundException {
+    private void deleteImages(String fileName) {
         RestTemplate restTemplate = new RestTemplate();
         String URL_IOS = IOSConnection + "/images/" + fileName;
 
@@ -374,7 +374,11 @@ public class FederationService {
         restTemplate.delete(URL_IOS);
 
         // delete backup image using ImageFileService
-        this.imageFileService.deleteImage(fileName);
+        try {
+            this.imageFileService.deleteImage(fileName);
+        } catch (EventNotFoundException e) {
+            log.info("File with the name " + fileName + " could not be found in Image File Storage.");
+        }
     }
 
     /*
