@@ -198,7 +198,7 @@ public class RecoveryService {
         Iterator<SimpleTagDTO> it = metaDataServiceDTO.getTags().iterator();
         while(it.hasNext()) {
             SimpleTagDTO tagDTO = it.next();
-            if(tagDTO.getTagName() == "base") {
+            if(tagDTO.getTagName().equals("base")) {
                 return tagDTO.getImageHash();
             }
         }
