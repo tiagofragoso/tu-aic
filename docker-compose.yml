@@ -81,6 +81,8 @@ services:
       - mongodb
     ports:
       - 1331:8080
+    environment:
+          API_ENDPOINT: ${API_ENDPOINT}
       
   iot-simulator-service:
     build: ./IOT-Simulator

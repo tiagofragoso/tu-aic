@@ -9,8 +9,8 @@ import datetime
 from dotenv import load_dotenv
 from pathlib import Path  # Python 3.6+ only
 import os
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
+# env_path = Path('.') / '.env'
+# load_dotenv(dotenv_path=env_path)
 # PATH = "../data/iwildcam_synthesized_idaho"
 # for the moment, we take data from the little_data_repo
 PATH = "../little_data/iwildcam_synthesized_idaho"

@@ -6,7 +6,6 @@ RUN pip install requests
 RUN pip install -U python-dotenv
 COPY ./little_data ./little_data
 COPY ./src ./src
-COPY .env ./src/
 WORKDIR /app/src
 # The -u flag is important if you want to observe the logs, otherwise python buffers the output
 ENTRYPOINT [ "python", "-u", "./sim.py" ]
