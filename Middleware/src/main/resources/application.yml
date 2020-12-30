@@ -2,9 +2,16 @@ spring:
   connections:
     MDSConnection: http://metadata-service:8080
     IOSConnection: http://image-object-service:8000
+  datasource:
+    url: jdbc:mysql://logdb:3306/logDb
+    username: root
+    password: pw
+    show-sql: true
 
 DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME:}
 DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN:}
+
+
 
 server:
   error:
