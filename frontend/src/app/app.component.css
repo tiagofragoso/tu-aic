@@ -6,3 +6,7 @@
   width: -webkit-fill-available;
   width: -moz-available;
 }
+
+.sidebar ul.nav > li > a, .sidebar ul.nav > li > a:focus {
+  margin-left: 0 !important;
+}

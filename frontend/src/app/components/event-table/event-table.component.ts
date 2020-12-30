@@ -39,12 +39,16 @@ export class EventTableComponent implements OnInit {
     this.router.navigate(['/events/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
   }
 
-  public convertDate(date: Date) {
+  public convertDate(date?: Date): string {
+    if (!date) {
+      return '';
+    }
     return convertUnixDateToString(date);
   }
 
-  public convertTagNames(tags: Tag[]) {
-    // TODO: If too many tags occur, append ...
+  public convertTagNames(tags?: Tag[]): string {
+    if (!tags) return '';
+    // TODO: If too many tags occur, append '...'
     return tags.map(tag => tag.name).toString().replace(/,/g, ", ");
   }
 }

@@ -1,7 +1,7 @@
 <h2>Event Table</h2>
 <a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
-<p>The API URL is {{environment.apiUrl}}</p>
-<div *ngIf="state.totalResults > 0; else noResults">
+<p>The API URL is {{environment?.apiUrl}}</p>
+<div *ngIf="state && state.totalResults > 0; else noResults">
   <table class="table table-striped">
     <thead>
     <tr>
@@ -14,20 +14,20 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let event of state.events">
+    <tr *ngFor="let event of state?.events">
       <!-- TODO: In case of empty value, add placeholder text  -->
-      <td>{{ event.metadata?.dev_name }}</td>
-      <td>{{ event.metadata?.place_ident }}</td>
-      <td>{{ convertDate(event.metadata?.created) }}</td>
-      <td>{{ convertDate(event.metadata?.updated) }}</td>
-      <td>{{ convertTagNames(event.tags) }}</td>
-      <td>{{ event.metadata?.state }}</td>
+      <td>{{ event?.metadata?.dev_name }}</td>
+      <td>{{ event?.metadata?.place_ident }}</td>
+      <td>{{ convertDate(event?.metadata?.created) }}</td>
+      <td>{{ convertDate(event?.metadata?.updated) }}</td>
+      <td>{{ convertTagNames(event?.tags) }}</td>
+      <td>{{ event?.metadata?.state }}</td>
     </tr>
     </tbody>
   </table>
 
-  <div class="d-flex justify-content-center">
-    <ngb-pagination [collectionSize]="state.totalResults" [(page)]="state.page" [pageSize]="state.pageSize" (pageChange)="getEvents()">
+  <div class="d-flex justify-content-end">
+    <ngb-pagination (pageChange)="getEvents()" [(page)]="state.page" [collectionSize]="state.totalResults" [pageSize]="state.pageSize" [size]="'sm'">
     </ngb-pagination>
   </div>
 </div>
