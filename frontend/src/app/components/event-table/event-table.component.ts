@@ -45,7 +45,7 @@ interface TableState {
   events: Event[],
   sortColumn?: SortColumn,
   sortDirection?: SortDirection,
-  searchTerm?: FormControl
+  searchTerm: FormControl
 }
 
 @Component({
