@@ -161,6 +161,8 @@ public class FederationService {
             readEventsDTO.setLatitude(metaDataDTO.getLatitude());
             readEventsDTO.setState(this.recoveryService.getEventStatus(metaDataDTO));
             readEventsDTO.setTags(convertTagDtoToSimpleTagDto(metaDataDTO.getTags()));
+            readEventsDTO.setCreated(metaDataDTO.getTimestamp());
+            readEventsDTO.setUpdated(metaDataDTO.getUpdated());
             eventList.add(readEventsDTO);
         }
 
@@ -173,8 +175,8 @@ public class FederationService {
      * */
     public void saveEvent(StoreEventDTO storeEventDTO) throws EventNotCreatedException {
         RestTemplate restTemplate = new RestTemplate();
-        String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetaData().getSensingEventId();
-        int hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImageBase64Enc());
+        String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetadata().getSensingEventId();
+        int hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImage());
         MetaDataServiceDTO metaDataDTO = null;
 
         // check existence of an image using MetaDataService and request old hash
@@ -205,7 +207,7 @@ public class FederationService {
 
         // save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
-        metaDataDTO =  storeEventDTO.getMetaData();
+        metaDataDTO =  storeEventDTO.getMetadata();
         ArrayList<TagDTO> tagList = new ArrayList<>();
         tagList.add(new TagDTO("base", hashOfNewImage));
         metaDataDTO.setTags(tagList);
@@ -219,14 +221,14 @@ public class FederationService {
         }
 
         // save image using ImageObjectStorageService
-        String fileName = storeEventDTO.getMetaData().getSensingEventId() + "_base.jpg";
+        String fileName = storeEventDTO.getMetadata().getSensingEventId() + "_base.jpg";
         String URL_IOS = IOSConnection + "/images";
-        ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, storeEventDTO.getImageBase64Enc());
+        ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, storeEventDTO.getImage());
         HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
         restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
 
         // replicate image using ImageFileService
-        this.imageFileService.saveImage(fileName, storeEventDTO.getImageBase64Enc());
+        this.imageFileService.saveImage(fileName, storeEventDTO.getImage());
     }
 
     public void createTag(TagDataDTO tagDataDTO, String seqId) throws EventNotUpdatedException {
@@ -278,7 +280,7 @@ public class FederationService {
      * Update operations
      * */
     public void updateEvent(StoreEventDTO storeEventDTO) throws EventNotUpdatedException {
-        String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetaData().getSensingEventId();
+        String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetadata().getSensingEventId();
         RestTemplate restTemplate = new RestTemplate();
         MetaDataServiceDTO metaDataServiceDTO = null;
 
@@ -297,15 +299,16 @@ public class FederationService {
         }
         metaDataServiceDTO = responseMDS.getBody();
 
-        if(metaDataServiceDTO.getSensingEventId() != storeEventDTO.getMetaData().getSensingEventId()) {
+        if(!metaDataServiceDTO.getSensingEventId().equals(storeEventDTO.getMetadata().getSensingEventId())) {
             throw new EventNotUpdatedException("The sequence ID of the event is not identical, wrong update request");
         }
-        if(!this.compareMetadata(metaDataServiceDTO, storeEventDTO.getMetaData())) {
+
+        if(!this.compareMetadataChanged(metaDataServiceDTO, storeEventDTO.getMetadata())) {
             throw new EventNotUpdatedException("The metadata did not change.");
         } else {
             // update the MetaData for an event
             URL_MDS = MDSConnection + "/events";
-            metaDataServiceDTO = storeEventDTO.getMetaData();
+            metaDataServiceDTO = storeEventDTO.getMetadata();
             HttpEntity<MetaDataServiceDTO> request = new HttpEntity<>(metaDataServiceDTO);
             try {
                 ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.PUT, request, MetaDataServiceDTO.class);
@@ -448,29 +451,29 @@ public class FederationService {
         metaDataServiceDTO.setTags(metaDataEntity.getTags());
     }
 
-    private boolean compareMetadata(MetaDataServiceDTO metaDataServiceDTO, MetaDataServiceDTO metaDataEntity) {
-        if(metaDataServiceDTO.getName() == metaDataEntity.getName()) {
+    private boolean compareMetadataChanged(MetaDataServiceDTO metaDataServiceDTO, MetaDataServiceDTO metaDataEntity) {
+        if(!metaDataServiceDTO.getName().equals(metaDataEntity.getName())) {
             return true;
         }
-        if(metaDataServiceDTO.getDeviceIdentifier() == metaDataEntity.getDeviceIdentifier()) {
+        if(!metaDataServiceDTO.getDeviceIdentifier().equals(metaDataEntity.getDeviceIdentifier())) {
             return true;
         }
-        if(metaDataServiceDTO.getTimestamp() == metaDataEntity.getTimestamp()) {
+        if(metaDataServiceDTO.getTimestamp() != (metaDataEntity.getTimestamp())) {
             return true;
         }
-        if(metaDataServiceDTO.getLongitude() == metaDataEntity.getLongitude()) {
+        if(metaDataServiceDTO.getLongitude() != (metaDataEntity.getLongitude())) {
             return true;
         }
-        if(metaDataServiceDTO.getLatitude() == metaDataEntity.getLatitude()) {
+        if(metaDataServiceDTO.getLatitude() != (metaDataEntity.getLatitude())) {
             return true;
         }
-        if(metaDataServiceDTO.getFrameNum() == metaDataEntity.getFrameNum()) {
+        if(metaDataServiceDTO.getFrameNum() != (metaDataEntity.getFrameNum())) {
             return true;
         }
-        if(metaDataServiceDTO.getPlaceIdent() == metaDataEntity.getPlaceIdent()) {
+        if(!metaDataServiceDTO.getPlaceIdent().equals(metaDataEntity.getPlaceIdent())) {
             return true;
         }
-        if(metaDataServiceDTO.getEventFrames() == metaDataEntity.getEventFrames()) {
+        if(metaDataServiceDTO.getEventFrames() != (metaDataEntity.getEventFrames())) {
             return true;
         }
         return false;
