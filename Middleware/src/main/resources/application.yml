@@ -6,7 +6,6 @@ spring:
     url: jdbc:mysql://logdb:3306/logDb
     username: root
     password: pw
-    show-sql: true
 
 DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME:}
 DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN:}
