@@ -4,7 +4,6 @@ import group3.aic_middleware.exceptions.*;
 import group3.aic_middleware.restData.*;
 import group3.aic_middleware.services.FederationService;
 import lombok.extern.log4j.Log4j;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -44,8 +43,8 @@ public class GatewayController {
 
         StoreEventDTO storeEventDTO = new StoreEventDTO();
 
-        storeEventDTO.setImageBase64Enc(sensingEvent.getBase64EncodedImage());
-        storeEventDTO.setMetaData(metaData);
+        storeEventDTO.setImage(sensingEvent.getBase64EncodedImage());
+        storeEventDTO.setMetadata(metaData);
 
         try{
             this.federationService.saveEvent(storeEventDTO);
@@ -137,6 +136,7 @@ public class GatewayController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public void update(@RequestBody StoreEventDTO storeEventDTO) throws JSONException {
+
         log.info("Updating an event:");
         log.info(storeEventDTO.toString());
 

@@ -1,7 +1,5 @@
 package group3.aic_middleware.restData;
 
-import group3.aic_middleware.entities.ImageEntity;
-import group3.aic_middleware.entities.MetaDataEntity;
 import lombok.*;
 
 @Data
@@ -11,23 +9,23 @@ public class StoreEventDTO {
 
     @Getter
     @Setter
-    private String imageBase64Enc;
+    private String image;
 
     @Getter
     @Setter
-    private MetaDataServiceDTO metaData;
+    private MetaDataServiceDTO metadata;
 
     @Override
     public String toString() {
-        return "seqId: " + this.metaData.getSensingEventId() + "\n"
-                + "deviceId: " + this.metaData.getDeviceIdentifier() + "\n"
-                + "name: " + this.metaData.getName() + "\n"
-                + "placeIdent: " + this.metaData.getPlaceIdent() + "\n"
-                + "latitude: " + this.metaData.getLatitude() + "\n"
-                + "longitude: " + this.metaData.getLongitude() + "\n"
-                + "frameNum: " + this.metaData.getFrameNum() + "\n"
-                + "seqFrameNum: " + this.metaData.getFrameNum() + "\n"
-                + "created: " + this.metaData.getTimestamp();
+        return "seqId: " + this.metadata.getSensingEventId() + "\n"
+                + "deviceId: " + this.metadata.getDeviceIdentifier() + "\n"
+                + "name: " + this.metadata.getName() + "\n"
+                + "placeIdent: " + this.metadata.getPlaceIdent() + "\n"
+                + "latitude: " + this.metadata.getLatitude() + "\n"
+                + "longitude: " + this.metadata.getLongitude() + "\n"
+                + "frameNum: " + this.metadata.getFrameNum() + "\n"
+                + "seqFrameNum: " + this.metadata.getFrameNum() + "\n"
+                + "created: " + this.metadata.getTimestamp();
     }
 
 }
