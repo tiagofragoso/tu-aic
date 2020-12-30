@@ -19,9 +19,9 @@ public class LogEndpoint {
 
 
     /**
-     * The call which queries the last 'logCount' logs
+     * The call which queries the last 'count' logs
      *
-     * @param logCount: The last logs according to this number.
+     * @param count: The last logs according to this number.
      */
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
