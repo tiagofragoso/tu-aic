@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 
+import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,7 +62,22 @@ public class CRUDService {
      */
     public void updateEvent(EventDTO event) {
         try {
+
+            Optional<SensingEvent> storedOpt = eventRepository.findById(event.getSensingEventId());
+
+            if(!storedOpt.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The specified event could not be found!");
+            }
+
+            SensingEvent stored = storedOpt.get();
+
+            ArrayList<TagDTO> tagDtos = new ArrayList<>();
+            for(Tag tagdt : stored.getTags()) {
+                tagDtos.add(tagRealToDto(tagdt));
+            }
+            event.setTags(tagDtos);
             event.setUpdated(Instant.now().getEpochSecond());
+
             eventRepository.save(sensingDtoToReal(event));
         }
         catch (DuplicateKeyException e) {
@@ -187,8 +203,8 @@ public class CRUDService {
      * @param tag the tag dto.
      */
     public synchronized void updateTag(String event_id, TagDTO tag) {
-
         SensingEvent event = getEventIfExists(event_id);
+
 
         Optional<Tag> foundTag = event.getTags().stream().filter(x -> x.getTagName().equals(tag.getTagName())).findFirst();
 
@@ -224,7 +240,6 @@ public class CRUDService {
      * @return returns a real sensing event object
      */
     private SensingEvent sensingDtoToReal(EventDTO dto) {
-
         List<Tag> tags = new ArrayList<>();
         for(TagDTO tag : dto.getTags()) {
             tags.add(tagDtoToReal(tag, dto.getTimestamp()));
