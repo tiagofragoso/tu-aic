@@ -2,9 +2,13 @@
 <a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
 <div *ngIf="state && state.totalResults > 0; else noResults">
   <form (ngSubmit)="onSubmitSearch()" novalidate>
-    <div class="form-group form-inline">
-      <input class="form-control m-2" placeholder="Search..." type="text" [formControl]="state.searchTerm"/>
-      <button class="btn btn-primary" type="submit">GO</button>
+    <div class="row row-cols-lg-auto g-3">
+      <div class="col-auto">
+        <input class="form-control" placeholder="Search..." type="text" [formControl]="state.searchTerm"/>
+      </div>
+      <div class="col-auto">
+        <button class="col-auto btn btn-primary" type="submit">GO</button>
+      </div>
     </div>
   </form>
 
@@ -38,16 +42,20 @@
     </tbody>
   </table>
 
-  <div class="d-flex justify-content-between p-2">
-    <ngb-pagination [collectionSize]="state.totalResults" [(page)]="state.page" [pageSize]="state.pageSize" (pageChange)="onPageChange()" [size]="'sm'">
-    </ngb-pagination>
+  <div class="row row-cols-lg-auto justify-content-between">
+    <div class="col-auto">
+      <ngb-pagination [collectionSize]="state.totalResults" [(page)]="state.page" [pageSize]="state.pageSize" (pageChange)="onPageChange()" [size]="'sm'">
+      </ngb-pagination>
+    </div>
 
-    <!-- TODO: Might be helpful to bind the ngModel to a different property that doesn't interfere with the pagination widget  -->
-    <select class="custom-select" [(ngModel)]="state.pageSize" (ngModelChange)="onPageChange()">
-      <option [ngValue]="10">10 items per page</option>
-      <option [ngValue]="15">15 items per page</option>
-      <option [ngValue]="20">20 items per page</option>
-    </select>
+    <div class="col-auto">
+      <!-- TODO: Might be helpful to bind the ngModel to a different property that doesn't interfere with the pagination widget  -->
+      <select class="form-select" [(ngModel)]="state.pageSize" (ngModelChange)="onPageChange()">
+        <option [ngValue]="10">10 items per page</option>
+        <option [ngValue]="15">15 items per page</option>
+        <option [ngValue]="20">20 items per page</option>
+      </select>
+    </div>
   </div>
 </div>
 
