@@ -20,8 +20,8 @@ public class ImageFileService {
     DbxClientV2 client;
 
     public ImageFileService(){
-        this.config = DbxRequestConfig.newBuilder("dropBoxAppFolderName").build();
-        this.client = new DbxClientV2(config, new DbxCredential("accessTokenForDropBoxApp"));
+        this.config = DbxRequestConfig.newBuilder(System.getenv("DROPBOX_FOLDERNAME")).build();
+        this.client = new DbxClientV2(config, new DbxCredential(System.getenv("DROPBOX_ACCESSTOKEN")));
     }
 
     public ImageEntity readImage(String imageName) throws EventNotFoundException {
