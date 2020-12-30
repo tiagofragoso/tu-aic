@@ -7,7 +7,6 @@ import com.dropbox.core.v2.files.WriteMode;
 import group3.aic_middleware.exceptions.EventNotCreatedException;
 import group3.aic_middleware.exceptions.EventNotFoundException;
 import group3.aic_middleware.entities.ImageEntity;
-import group3.aic_middleware.restData.ReadEventDTO;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.DatatypeConverter;
@@ -39,13 +38,11 @@ public class ImageFileService {
         }
     }
 
-    public void saveImage(ReadEventDTO readEventDTO) throws EventNotCreatedException {
+    public void saveImage(String filename, String imageBase64Enc) throws EventNotCreatedException {
         //  Get current account info
         //  FullAccount account = client.users().getCurrentAccount();
         try {
-            String filename = readEventDTO.getMetaData().getSeqId() + ".jpg";
-            byte[] bytes = Base64.decodeBase64(readEventDTO.getImage().getBase64EncodedImage().getBytes(StandardCharsets.UTF_8));
-
+            byte[] bytes = Base64.decodeBase64(imageBase64Enc.getBytes(StandardCharsets.UTF_8));
 
             InputStream in = new ByteArrayInputStream(bytes);
             this.client.files().uploadBuilder("/" + filename).withMode(WriteMode.OVERWRITE).uploadAndFinish(in);
@@ -53,14 +50,15 @@ public class ImageFileService {
             throw new EventNotCreatedException("Could not save image:\n" + ex.getMessage());
         }
     }
-        public void deleteImage (String imageName) throws EventNotFoundException {
-            if (!imageName.endsWith(".jpg")) {
-                imageName = imageName + ".jpg";
-            }
-            try {
-                this.client.files().deleteV2("/" + imageName);
-            } catch (DbxException ex) {
-                throw new EventNotFoundException("Could not delete image:\n" + ex.getMessage());
-            }
+
+    public void deleteImage (String imageName) throws EventNotFoundException {
+        if (!imageName.endsWith(".jpg")) {
+            imageName = imageName + ".jpg";
+        }
+        try {
+            this.client.files().deleteV2("/" + imageName);
+        } catch (DbxException ex) {
+            throw new EventNotFoundException("Could not delete image:\n" + ex.getMessage());
         }
     }
+}

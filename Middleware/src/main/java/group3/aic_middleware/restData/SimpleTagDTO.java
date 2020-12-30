@@ -7,13 +7,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TagDTO {
-
-    public TagDTO(String tagName, int imageHash) {
-        this.tagName = tagName;
-        this.imageHash = imageHash;
-    }
-
+public class SimpleTagDTO {
     @Getter
     @Setter
     @JsonProperty(required = true, value = "tag_name")
@@ -23,10 +17,4 @@ public class TagDTO {
     @Setter
     @JsonProperty(required = true, value = "image_hash", access = JsonProperty.Access.WRITE_ONLY)
     private int imageHash;
-
-    @Getter
-    @Setter
-    @JsonProperty(required = false, value = "created")
-    private long created;
-
 }
