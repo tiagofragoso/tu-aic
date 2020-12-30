@@ -45,6 +45,32 @@ services:
     volumes:
       - mongodb_data_container:/data/db
 
+  logdb:
+    build: ./Middleware/LoggingDB
+    image: logger-mysql
+    volumes:
+      - logger_container:/data/logdb
+    command: --init-file /data/logdb/init.sql 
+    environment:
+       MYSQL_ROOT_PASSWORD: pw
+       MYSQL_DATABASE: logDb
+       MYSQL_USER: user
+       MYSQL_PASSWORD: pw
+    ports:
+      - "1234:3306"
+      
+      
+  #phpAdmin:
+  #  image: phpmyadmin/phpmyadmin:5.0.1
+  #  environment:
+  #    PMA_HOST: logdb
+  #    PMA_USER: root
+  #    PMA_PASSWORD: pw
+  #  ports:
+  #    - "1334:80"
+  #  depends_on:
+  #    - logdb
+      
   metadata-service:
     build: ./Metadata-Service/MetadataService
     image: metadata-service
@@ -66,6 +92,7 @@ services:
     depends_on:
       - metadata-service
       - image-object-service
+      - logdb
     ports:
       - "9999:8080"
     environment:
@@ -82,3 +109,4 @@ services:
 volumes:
   minio_data:
   mongodb_data_container:
+  logger_container:
