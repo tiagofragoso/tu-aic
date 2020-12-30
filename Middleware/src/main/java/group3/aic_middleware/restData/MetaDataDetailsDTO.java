@@ -9,8 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetaDataServiceDTO {
-
+public class MetaDataDetailsDTO {
     @Getter
     @Setter
     @JsonProperty(required = true, value = "event_id")
@@ -23,7 +22,7 @@ public class MetaDataServiceDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = false, value = "dev_id")
+    @JsonProperty(required = true, value = "dev_id")
     private String deviceIdentifier;
 
     @Getter
@@ -43,11 +42,6 @@ public class MetaDataServiceDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = false, value="tags")
-    private List<TagDTO> tags;
-
-    @Getter
-    @Setter
     @JsonProperty(required = false, value="frame_num")
     private long frameNum;
 
@@ -63,17 +57,5 @@ public class MetaDataServiceDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = false, value="updated")
     private long updated;
-
-    public long getCreated(String tagName) {
-        Iterator<TagDTO> it = this.tags.iterator();
-        while(it.hasNext()) {
-            TagDTO tagDTO = it.next();
-            if(tagDTO.getTagName().equals(tagName)) {
-                return tagDTO.getCreated();
-            }
-        }
-        return -1;
-    }
 }

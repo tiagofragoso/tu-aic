@@ -8,13 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TagDTO {
+public class SimpleTagDTO {
     @JsonProperty(required = true, value = "tag_name")
     private String tagName;
 
     @JsonProperty(required = true, value = "image_hash")
     private int imageHash;
-
-    @JsonProperty(value="created")
-    private long created;
 }
