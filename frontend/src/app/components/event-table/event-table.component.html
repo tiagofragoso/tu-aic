@@ -1,64 +1,71 @@
 <h2>Event Table</h2>
 <a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
-<div *ngIf="events && totalResults > 0; else noResults">
-  <form (ngSubmit)="onSubmitSearch()" novalidate>
-    <div class="row row-cols-lg-auto g-3">
-      <div class="col-auto">
-        <input class="form-control" placeholder="Search..." type="text" [formControl]="queryOptions.searchTerm"/>
+<div *ngIf="loading; else ready">
+  <p>Loading...</p>
+</div>
+<ng-template #ready>
+  <div *ngIf="events && totalResults > 0; else noResults">
+    <form (ngSubmit)="onSubmitSearch()" novalidate>
+      <div class="row row-cols-lg-auto g-3">
+        <div class="col-auto">
+          <input class="form-control" placeholder="Search..." type="text" [formControl]="queryOptions.searchTerm"/>
+        </div>
+        <div class="col-auto">
+          <button class="col-auto btn btn-primary" type="submit">GO</button>
+        </div>
       </div>
-      <div class="col-auto">
-        <button class="col-auto btn btn-primary" type="submit">GO</button>
-      </div>
-    </div>
-  </form>
+    </form>
 
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
-      <th scope="col" sortable="place_ident" (sort)="onSort($event)">Place ID</th>
-      <th scope="col" sortable="created" (sort)="onSort($event)">Created</th>
-      <th scope="col" sortable="udpated" (sort)="onSort($event)">Last updated</th>
-      <th scope="col">Tags</th>
-      <th scope="col">State</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let event of events">
-      <!-- TODO: In case of empty value, add placeholder text  -->
-      <td>{{ event?.metadata?.dev_name }}</td>
-      <td>{{ event?.metadata?.place_ident }}</td>
-      <td>{{ convertDate(event?.metadata?.created) }}</td>
-      <td>{{ convertDate(event?.metadata?.updated) }}</td>
-      <td>{{ convertTagNames(event?.tags) }}
-        <span *ngIf="event?.tags.length > 2" class="text-muted"> & {{event?.tags?.length - 2}} more</span>
+    <table class="table table-striped my-4">
+      <thead>
+      <tr>
+        <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+        <th scope="col" sortable="place_ident" (sort)="onSort($event)">Place ID</th>
+        <th scope="col" sortable="created" (sort)="onSort($event)">Created</th>
+        <th scope="col" sortable="udpated" (sort)="onSort($event)">Last updated</th>
+        <th scope="col">Tags</th>
+        <th scope="col">State</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let event of events">
+        <!-- TODO: In case of empty value, add placeholder text  -->
+        <td>{{ event.name }}</td>
+        <td>{{ event.place_ident }}</td>
+        <td>{{ convertDate(event.created) }}</td>
+        <td>{{ convertDate(event.updated) }}</td>
+        <!-- TODO: Kevin span -->
+        <td>{{ convertTagNames(event.tags) }}
+          <span *ngIf="event.tags.length > 2" class="text-muted"> & {{event.tags.length - 2}} more</span>
+        </td>
+        <td>
+          <span [className]="'text-' + statesColorMapping[event.state]">
+            {{event.state}}
+          </span>
       </td>
-      <td>
-        <span [className]="'text-' + statesColorMapping[event?.metadata?.state]">
-          {{event?.metadata?.state}}
-        </span>
-    </td>
-    </tr>
-    </tbody>
-  </table>
+      </tr>
+      </tbody>
+    </table>
 
-  <div class="row row-cols-lg-auto justify-content-between">
-    <div class="col-auto">
-      <ngb-pagination [collectionSize]="totalResults" [(page)]="queryOptions.page" [pageSize]="queryOptions.pageSize" (pageChange)="onPageChange()" [size]="'sm'">
-      </ngb-pagination>
-    </div>
+    <div class="row row-cols-lg-auto justify-content-between">
+      <div class="col-auto">
+        <ngb-pagination [collectionSize]="totalResults" [(page)]="queryOptions.page" [pageSize]="queryOptions.pageSize" (pageChange)="onPageChange()">
+        </ngb-pagination>
+      </div>
 
-    <div class="col-auto">
-      <!-- TODO: Might be helpful to bind the ngModel to a different property that doesn't interfere with the pagination widget  -->
-      <select class="form-select" [(ngModel)]="queryOptions.pageSize" (ngModelChange)="onPageChange()">
-        <option [ngValue]="10">10 items per page</option>
-        <option [ngValue]="15">15 items per page</option>
-        <option [ngValue]="20">20 items per page</option>
-      </select>
+      <div class="col-auto">
+        <!-- TODO: Might be helpful to bind the ngModel to a different property that doesn't interfere with the pagination widget  -->
+        <select class="form-select" [(ngModel)]="queryOptions.pageSize" (ngModelChange)="onPageChange()">
+          <option [ngValue]="5">5 items per page</option>
+          <option [ngValue]="10">10 items per page</option>
+          <option [ngValue]="15">15 items per page</option>
+          <option [ngValue]="20">20 items per page</option>
+        </select>
+      </div>
     </div>
   </div>
-</div>
 
-<ng-template #noResults>
-  <p>No events found</p>
+  <ng-template #noResults>
+    <p>No events found</p>
+  </ng-template>
 </ng-template>

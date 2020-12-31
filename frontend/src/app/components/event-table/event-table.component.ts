@@ -7,12 +7,12 @@ import {EventService} from "../../services/event.service";
 import {mockEvents} from "../../models/mockEvents";
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from "../../models/event";
-import {Tag} from "../../models/tag";
 import {States} from "../../models/states";
+import {EventTableData, EventTableRow, EventTableRowTag} from '../../models/event-table-data';
 
-const PAGE_SIZE = 10; // TODO: discuss this
+const BASE_TAG = "base";
 
-export type SortColumn = 'dev_name' | 'place_ident' | 'created' | 'udpated' | '';
+export type SortColumn = 'name' | 'place_ident' | 'created' | 'udpated' | '';
 export type SortDirection = 'asc' | 'desc' | '';
 const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
 
@@ -58,7 +58,8 @@ export class EventTableComponent implements OnInit {
   @ViewChildren(SortableHeader) headers: QueryList<SortableHeader>;
   queryOptions: QueryOptions;
   totalResults: number = 0;
-  events: Event[] = [];
+  events: EventTableRow[] = [];
+  loading: boolean = false;
   statesColorMapping: {[key in States]: string} = { 
     CORRECT: 'success', 
     FAULTY: 'warning', 
@@ -70,7 +71,7 @@ export class EventTableComponent implements OnInit {
               private eventService: EventService) {
                 this.queryOptions = {
                   page: 1,
-                  pageSize: PAGE_SIZE,
+                  pageSize: 5,
                   searchTerm: new FormControl('')
                 };
                 this.headers = new QueryList<SortableHeader>();
@@ -81,7 +82,6 @@ export class EventTableComponent implements OnInit {
   }
 
   onPageChange() {
-    console.log(this.queryOptions);
     this.getEvents();
   }
 
@@ -96,23 +96,21 @@ export class EventTableComponent implements OnInit {
 
     this.queryOptions.sortColumn = column;
     this.queryOptions.sortDirection = direction;
-    console.log(this.queryOptions);
     this.getEvents();
   }
 
   onSubmitSearch() {
-    console.log(this.queryOptions.searchTerm?.value);
     this.getEvents();
   }
 
   public getEvents() {
-    // make api request if query options changed
-
+    this.loading = true;
     this.eventService.getAll(this.queryOptions)
-      .subscribe((data) => {console.log(data)});
-
-    this.events = mockEvents;
-    this.totalResults = mockEvents.length;
+      .subscribe((data: EventTableData) => {
+        this.events = data.events;
+        this.totalResults = data.total_items;
+        this.loading = false;
+      });
   }
 
   public eventClicked(id: string) {
@@ -126,9 +124,9 @@ export class EventTableComponent implements OnInit {
     return convertUnixDateToString(date);
   }
 
-  public convertTagNames(tags?: Tag[]): string {
+  public convertTagNames(tags?: EventTableRowTag[]): string {
     if (!tags) return '';
     // TODO: If too many tags occur, append ...
-    return tags.slice(0, 2).map(tag => tag.name).join(", ");
+    return tags.filter(({tag_name}) => tag_name !== BASE_TAG).slice(0, 2).map(({tag_name}) => tag_name).join(", ");
   }
 }

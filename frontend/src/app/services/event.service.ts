@@ -5,6 +5,7 @@ import {environment} from "../../environments/environment";
 
 import {QueryOptions} from "../components/event-table/event-table.component";
 import {Event} from "../models/event";
+import {EventTableData} from "../models/event-table-data";
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,7 @@ export class EventService {
       params = params.set('search', query.searchTerm.value.trim());
     }
     console.log(params);
-    return this.http.get(this.url, {params});
+    return this.http.get<EventTableData>(this.url, {params});
   }
 
   getById(id: string) {
