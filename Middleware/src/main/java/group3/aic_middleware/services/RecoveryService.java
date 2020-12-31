@@ -47,11 +47,11 @@ public class RecoveryService {
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist in Image Object Storage.");
-                URL_IOS = IOSConnection + "/images";
                 try {
                     retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
                     imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
                     HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
+                    URL_IOS = IOSConnection + "/images";
                     restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
                 } catch (EventNotFoundException ex) {
                     log.info("Requested sensing event doesn't exist in Image File Storage.");
@@ -60,6 +60,7 @@ public class RecoveryService {
             }
         }
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
+        URL_IOS = IOSConnection + "/images";
 
         // query an image using ImageFileStorageService (secondary/backup)
         if(imageIOS != null) {
