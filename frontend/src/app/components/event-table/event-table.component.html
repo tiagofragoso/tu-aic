@@ -1,10 +1,10 @@
 <h2>Event Table</h2>
 <a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
-<div *ngIf="state && state.totalResults > 0; else noResults">
+<div *ngIf="events && totalResults > 0; else noResults">
   <form (ngSubmit)="onSubmitSearch()" novalidate>
     <div class="row row-cols-lg-auto g-3">
       <div class="col-auto">
-        <input class="form-control" placeholder="Search..." type="text" [formControl]="state.searchTerm"/>
+        <input class="form-control" placeholder="Search..." type="text" [formControl]="queryOptions.searchTerm"/>
       </div>
       <div class="col-auto">
         <button class="col-auto btn btn-primary" type="submit">GO</button>
@@ -15,7 +15,7 @@
   <table class="table table-striped">
     <thead>
     <tr>
-      <th scope="col" sortable="dev_name" (sort)="onSort($event)">Name</th>
+      <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
       <th scope="col" sortable="place_ident" (sort)="onSort($event)">Place ID</th>
       <th scope="col" sortable="created" (sort)="onSort($event)">Created</th>
       <th scope="col" sortable="udpated" (sort)="onSort($event)">Last updated</th>
@@ -24,7 +24,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let event of state?.events">
+    <tr *ngFor="let event of events">
       <!-- TODO: In case of empty value, add placeholder text  -->
       <td>{{ event?.metadata?.dev_name }}</td>
       <td>{{ event?.metadata?.place_ident }}</td>
@@ -44,13 +44,13 @@
 
   <div class="row row-cols-lg-auto justify-content-between">
     <div class="col-auto">
-      <ngb-pagination [collectionSize]="state.totalResults" [(page)]="state.page" [pageSize]="state.pageSize" (pageChange)="onPageChange()" [size]="'sm'">
+      <ngb-pagination [collectionSize]="totalResults" [(page)]="queryOptions.page" [pageSize]="queryOptions.pageSize" (pageChange)="onPageChange()" [size]="'sm'">
       </ngb-pagination>
     </div>
 
     <div class="col-auto">
       <!-- TODO: Might be helpful to bind the ngModel to a different property that doesn't interfere with the pagination widget  -->
-      <select class="form-select" [(ngModel)]="state.pageSize" (ngModelChange)="onPageChange()">
+      <select class="form-select" [(ngModel)]="queryOptions.pageSize" (ngModelChange)="onPageChange()">
         <option [ngValue]="10">10 items per page</option>
         <option [ngValue]="15">15 items per page</option>
         <option [ngValue]="20">20 items per page</option>

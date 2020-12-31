@@ -1,6 +1,9 @@
 import {Component, OnInit, Directive, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {FormControl} from '@angular/forms';
+
+import {EventService} from "../../services/event.service";
+
 import {mockEvents} from "../../models/mockEvents";
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from "../../models/event";
@@ -38,11 +41,9 @@ export class SortableHeader {
   }
 }
 
-interface TableState {
+export interface QueryOptions {
   page: number,
   pageSize: number,
-  totalResults: number,
-  events: Event[],
   sortColumn?: SortColumn,
   sortDirection?: SortDirection,
   searchTerm: FormControl
@@ -55,7 +56,9 @@ interface TableState {
 })
 export class EventTableComponent implements OnInit {
   @ViewChildren(SortableHeader) headers: QueryList<SortableHeader>;
-  state: TableState;
+  queryOptions: QueryOptions;
+  totalResults: number = 0;
+  events: Event[] = [];
   statesColorMapping: {[key in States]: string} = { 
     CORRECT: 'success', 
     FAULTY: 'warning', 
@@ -63,12 +66,11 @@ export class EventTableComponent implements OnInit {
   };
 
   constructor(public router: Router,
-              private activatedRoute: ActivatedRoute) {
-                this.state = {
+              private activatedRoute: ActivatedRoute,
+              private eventService: EventService) {
+                this.queryOptions = {
                   page: 1,
                   pageSize: PAGE_SIZE,
-                  totalResults: 0,
-                  events: [],
                   searchTerm: new FormControl('')
                 };
                 this.headers = new QueryList<SortableHeader>();
@@ -79,7 +81,7 @@ export class EventTableComponent implements OnInit {
   }
 
   onPageChange() {
-    console.log(this.state);
+    console.log(this.queryOptions);
     this.getEvents();
   }
 
@@ -92,20 +94,25 @@ export class EventTableComponent implements OnInit {
       }
     });
 
-    this.state.sortColumn = column;
-    this.state.sortDirection = direction;
-    console.log(this.state);
+    this.queryOptions.sortColumn = column;
+    this.queryOptions.sortDirection = direction;
+    console.log(this.queryOptions);
+    this.getEvents();
   }
 
   onSubmitSearch() {
-    console.log(this.state.searchTerm?.value);
+    console.log(this.queryOptions.searchTerm?.value);
     this.getEvents();
   }
 
   public getEvents() {
-    // make api request if state changed
-    this.state.events = mockEvents;
-    this.state.totalResults = mockEvents.length;
+    // make api request if query options changed
+
+    this.eventService.getAll(this.queryOptions)
+      .subscribe((data) => {console.log(data)});
+
+    this.events = mockEvents;
+    this.totalResults = mockEvents.length;
   }
 
   public eventClicked(id: string) {
