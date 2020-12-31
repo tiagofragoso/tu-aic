@@ -33,7 +33,7 @@ public class RecoveryService {
     public String recoverImage(String fileName, int hashStored) {
         RestTemplate restTemplate = new RestTemplate();
         String retImage = "";
-        String URL_IOS = IOSConnection + "/images/" + fileName;
+        String URL_IOS = IOSConnection + "/images";
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = null;
 
         // query an image using ImageObjectStorageService (primary)
@@ -47,7 +47,6 @@ public class RecoveryService {
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist in Image Object Storage.");
-                URL_IOS = IOSConnection + "/images";
                 try {
                     retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
                     imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
