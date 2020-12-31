@@ -12,7 +12,7 @@ import {EventTableData, EventTableRow, EventTableRowTag} from '../../models/even
 
 const BASE_TAG = "base";
 
-export type SortColumn = 'name' | 'place_ident' | 'created' | 'udpated' | '';
+export type SortColumn = 'name' | 'place_ident' | 'created' | 'updated' | '';
 export type SortDirection = 'asc' | 'desc' | '';
 const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
 

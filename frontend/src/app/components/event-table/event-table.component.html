@@ -1,5 +1,4 @@
 <h2>Event Table</h2>
-<a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
   <div>
     <form (ngSubmit)="onSubmitSearch()" novalidate>
       <div class="row row-cols-lg-auto g-3">
@@ -12,7 +11,7 @@
       </div>
     </form>
 
-    <table class="table table-striped my-4">
+    <table class="table table-hover my-4">
       <thead>
       <tr>
         <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
@@ -24,7 +23,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let event of events">
+      <tr *ngFor="let event of events" (click)="eventClicked(event.event_id)">
         <!-- TODO: In case of empty value, add placeholder text  -->
         <td>{{ event.name }}</td>
         <td>{{ event.place_ident }}</td>

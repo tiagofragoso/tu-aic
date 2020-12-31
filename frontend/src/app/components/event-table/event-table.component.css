@@ -5,3 +5,7 @@ table {
 td {
   padding: 12px 8px;
 }
+
+tbody tr {
+  cursor: pointer;
+}
