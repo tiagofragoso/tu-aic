@@ -31,7 +31,7 @@
         <td>{{ convertDate(event.updated) }}</td>
         <!-- TODO: Kevin span -->
         <td>{{ convertTagNames(event.tags) }}
-          <span *ngIf="event.tags.length > 2" class="text-muted"> & {{event.tags.length - 2}} more</span>
+          <span *ngIf="event.tags.length > 3" class="text-muted"> & {{event.tags.length - 3}} more</span>
         </td>
         <td>
           <span [className]="'text-' + statesColorMapping[event.state]">
