@@ -18,6 +18,10 @@ export class EventMapComponent {
   layers: Layer[] = [this.baseLayer];
   zoom: number = 6;
   map?: Map;
+  events: EventTableRow[] = [];
+  loading = true;
+  showSearchCircle = true;
+  radius = 0;
 
   options = {
     zoom: this.zoom,
@@ -46,18 +50,30 @@ export class EventMapComponent {
     if (!this.map)
       return;
 
+    this.loading = true;
+
     const centerEast = latLng(this.center.lat, this.map.getBounds().getEast());
     const dist = this.center.distanceTo(centerEast);
-    const radius = dist * 0.9 / 1000;
+    this.radius = dist * 0.9 / 1000;
 
-    // uncomment to debug search radius
-
-    this.eventService.findInRadius(radius, this.center.lat, this.center.lng)
+    this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
     .subscribe((data: EventTableRow[]) => {
-      this.layers = [this.baseLayer, 
-        circle(this.center, {radius: radius * 1000, fillOpacity: 0.15, opacity: 0.2}),
-        ...data.map((e) => this.createMarker(e))];
+      this.events = data;
+      this.refreshMap();
+      this.loading = false;
     });
+  }
+
+  onShowSearchCircleChange() {
+    this.refreshMap();
+  }
+
+  refreshMap() {
+    this.layers = [this.baseLayer];
+    if (this.showSearchCircle) {
+      this.layers.push(circle(this.center, {radius: this.radius * 1000, fillOpacity: 0.15, opacity: 0.2}));
+    }
+    this.layers = [...this.layers, ...this.events.map((e) => this.createMarker(e))]; 
   }
 
   private createMarker(event: EventTableRow) {

@@ -1,5 +1,22 @@
 <h2>Event Map</h2>
 
+<div class="d-flex justify-content-between">
+     <div class="mb-2">
+          <span *ngIf="loading; else results">
+               Loading...
+          </span>
+          <ng-template #results>
+               <span>Found events <b>{{ events.length }}</b> in this area</span>
+          </ng-template>
+     </div>
+     <div class="form-check">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="showSearchCircle" (change)="onShowSearchCircleChange()">
+          <label class="form-check-label" for="flexCheckChecked">
+            Show search circle
+          </label>
+     </div>
+</div>
+
 <div style="height: 700px;"
      leaflet 
      [leafletOptions]="options"
