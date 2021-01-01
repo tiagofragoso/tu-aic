@@ -5,7 +5,7 @@ import {environment} from "../../environments/environment";
 
 import {QueryOptions} from "../components/event-table/event-table.component";
 import {Event} from "../models/event";
-import {EventTableData} from "../models/event-table-data";
+import {EventTableData, EventTableRow} from "../models/event-table-data";
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,6 @@ export class EventService {
   constructor(private http: HttpClient) { }
 
   getAll(query: QueryOptions) {
-    console.log(query);
     let params = new HttpParams()
       .set('page', (query.page - 1).toString())
       .set('size', query.pageSize.toString());
@@ -32,18 +31,22 @@ export class EventService {
   }
 
   getById(id: string) {
-    return "";
+    return this.http.get<Event>(`${this.url}/${id}`);
   }
 
   findInRadius(radius: number, latitude: number, longitude: number) {
-    return "";
+    const params = new HttpParams()
+      .set('size', radius.toString())
+      .set('lon', longitude.toString())
+      .set('lat', latitude.toString());
+    return this.http.get<EventTableRow[]>(`${this.url}/radius`, {params});
   }
 
   update(id: string, event: Event) {
-    return "";
+    return this.http.put(`${this.url}/${id}`, event);
   }
 
   delete(id: string) {
-    return "";
+    return this.http.delete(`${this.url}/${id}`);
   }
 }
