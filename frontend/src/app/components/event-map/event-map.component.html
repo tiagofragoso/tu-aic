@@ -1,3 +1,13 @@
 <h2>Event Map</h2>
-<a (click)="eventClicked('1')" class="nav-link">Link to an event with the id 1</a>
+
+<div style="height: 700px;"
+     leaflet 
+     [leafletOptions]="options"
+     [(leafletCenter)]="center"
+     [(leafletZoom)]="zoom"
+     [leafletLayers]="layers"
+     (leafletMapMoveEnd)="onMapMove()"
+     (leafletMapZoomEnd)="onMapZoom()"
+     (leafletMapReady)="onMapReady($event)">
+</div>
 
