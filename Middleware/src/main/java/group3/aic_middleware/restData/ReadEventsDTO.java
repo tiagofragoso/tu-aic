@@ -51,12 +51,12 @@ public class ReadEventsDTO {
     @Getter
     @Setter
     // valid / faulty / missing
-    @JsonProperty(value = "state")
+    @JsonProperty(required = true, value = "state")
     private String state;
 
     @Getter
     @Setter
     @JsonProperty(required = false, value="tags")
-    private List<SimpleTagDTO> tags;
+    private List<TagDTO> tags;
 
 }

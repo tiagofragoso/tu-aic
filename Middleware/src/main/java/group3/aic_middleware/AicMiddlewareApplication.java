@@ -2,9 +2,7 @@ package group3.aic_middleware;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@EnableJpaRepositories
 @SpringBootApplication
 public class AicMiddlewareApplication {
 

@@ -1,7 +1,6 @@
 package com.example.MetadataService.DTOs;
 
 import com.example.MetadataService.Entities.Tag;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.*;
@@ -22,8 +21,7 @@ public class EventDTO {
     @JsonProperty(required = true, value = "dev_id")
     private String deviceIdentifier;
 
-    @JsonAlias({"timestamp"})
-    @JsonProperty(required = true, value="created")
+    @JsonProperty(required = true, value = "timestamp")
     private long timestamp;
 
     @JsonProperty(required = true, value = "longitude")
@@ -44,6 +42,4 @@ public class EventDTO {
     @JsonProperty(required = false, value="event_frames")
     private long eventFrames;
 
-    @JsonProperty(required = false, value="updated")
-    private long updated;
 }

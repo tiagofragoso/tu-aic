@@ -50,15 +50,14 @@ public class ImageFileService {
             throw new EventNotCreatedException("Could not save image:\n" + ex.getMessage());
         }
     }
-
-    public void deleteImage (String imageName) throws EventNotFoundException {
-        if (!imageName.endsWith(".jpg")) {
-            imageName = imageName + ".jpg";
-        }
-        try {
-            this.client.files().deleteV2("/" + imageName);
-        } catch (DbxException ex) {
-            throw new EventNotFoundException("Could not delete image:\n" + ex.getMessage());
+        public void deleteImage (String imageName) throws EventNotFoundException {
+            if (!imageName.endsWith(".jpg")) {
+                imageName = imageName + ".jpg";
+            }
+            try {
+                this.client.files().deleteV2("/" + imageName);
+            } catch (DbxException ex) {
+                throw new EventNotFoundException("Could not delete image:\n" + ex.getMessage());
+            }
         }
     }
-}
