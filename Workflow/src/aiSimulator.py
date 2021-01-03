@@ -39,6 +39,7 @@ def changeImage(dic) :
 def putNewTag(url, dic) :
     data = tagFormatter(dic)
     try:
+        print(" ------ AI SIMULATOR ------")
         print(str(dic["datetime"]) + " : tag created with name : "+str(data["tag_name"])+" on image with id : " + str(dic["seq_id"]))
         putResp = requests.put(url, json=data)
     except requests.exceptions.RequestException as e:

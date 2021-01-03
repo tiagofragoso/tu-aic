@@ -65,6 +65,7 @@ def changeDependingOnCategory(metadataToChange,chosenCat ="name") :
 def putMetadata(url, dic, imagePath, chosenCat) :
     data = dicAndImageFormatter(dic, imagePath)
     try:
+        print(" ------ METADATA MODIFIER ------")
         print(str(data["metadata"]["datetime"]) + " : changed "+chosenCat+" in the metadata on image with id : " + str(data["metadata"]["seq_id"]))
         putResp = requests.put(url, json=data)
     except requests.exceptions.RequestException as e:
