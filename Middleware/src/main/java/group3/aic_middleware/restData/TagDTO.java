@@ -1,6 +1,5 @@
 package group3.aic_middleware.restData;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -21,7 +20,7 @@ public class TagDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = true, value = "image_hash", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(required = true, value = "image_hash")
     private int imageHash;
 
     @Getter

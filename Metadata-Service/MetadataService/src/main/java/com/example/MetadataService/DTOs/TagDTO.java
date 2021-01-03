@@ -13,8 +13,5 @@ public class TagDTO {
     private String tagName;
 
     @JsonProperty(required = true, value = "image_hash")
-    private int imageHash;
-
-    @JsonProperty(value="created")
-    private long created;
+    private String imageHash;
 }

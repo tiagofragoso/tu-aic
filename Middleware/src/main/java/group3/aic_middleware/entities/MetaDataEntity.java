@@ -1,6 +1,5 @@
 package group3.aic_middleware.entities;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import group3.aic_middleware.restData.TagDTO;
@@ -29,8 +28,7 @@ public class MetaDataEntity {
     @Getter
     @Setter
     // "seq_id": "6ea10ab8-2e32-11e9-b03f-dca9047ef277"
-    @JsonAlias({"seq_id"})
-    @JsonProperty(required = true, value = "event_id")
+    @JsonProperty(required = true, value = "seq_id")
     private String seqId;
 
     @Getter

@@ -1,15 +1,9 @@
 package com.example.MetadataService.Endpoints;
 
 import com.example.MetadataService.DTOs.EventDTO;
-import com.example.MetadataService.DTOs.PageMetaPlusItemDTO;
-import com.example.MetadataService.DTOs.SimpleEventDTO;
 import com.example.MetadataService.Services.CRUDService;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,13 +50,13 @@ public class EventEndpoint {
     }
 
     @GetMapping("events")
-    public PageMetaPlusItemDTO getAllEvents(@PageableDefault(size=20) Pageable pageable, @RequestParam(required = false) String search) throws Exception {
-        log.info(String.format("Get all events from page %s", pageable.getPageNumber()));
-        return crudService.getAllEvents(pageable, search);
+    public List<EventDTO> getAllEvents() throws Exception {
+        log.info("Get all events.");
+        return crudService.getAllEvents();
     }
 
     @GetMapping("events/radius")
-    public List<SimpleEventDTO> getAllEventsInRadius(@RequestParam(required = true) double size, @RequestParam(required = true) double lon, @RequestParam(required = true) double lat) throws Exception {
+    public List<EventDTO> getAllEventsInRadius(@RequestParam(required = true) double size, @RequestParam(required = true) double lon, @RequestParam(required = true) double lat) throws Exception {
         log.info(String.format("Get all events in radius size: %.2f  lon: %.2f lat: %.2f", size, lon, lat));
         return crudService.getAllEventsInRadius(size, lon, lat);
     }
