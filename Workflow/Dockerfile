@@ -8,6 +8,5 @@ RUN pip install numpy
 RUN pip install opencv-python-headless
 COPY ./little_data ./little_data
 COPY ./src ./src
-WORKDIR /app
 # The -u flag is important if you want to observe the logs, otherwise python buffers the output
 ENTRYPOINT [ "python", "-u", "./src/workflow.py" ]
