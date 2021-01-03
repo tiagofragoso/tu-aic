@@ -486,7 +486,7 @@ public class FederationService {
         String ret = "";
 
         ret += String.format("?page=%d", pageable.getPageNumber());
-        ret += String.format("&size=%d", pageable.getPageNumber());
+        ret += String.format("&size=%d", pageable.getPageSize());
 
         for(Sort.Order ord : pageable.getSort().toList()) {
             ret += String.format("&sort=%s,%s", ord.getProperty(), ord.getDirection().toString());

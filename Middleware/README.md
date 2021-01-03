@@ -19,3 +19,5 @@ Middleware service that keeps control of the replication, distribution and hashi
   ```
 
 
+## Swagger
+You can find the swagger ui under: http://127.0.0.1:9999/swagger-ui/index.html
