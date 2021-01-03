@@ -81,13 +81,14 @@ services:
       - mongodb
     ports:
       - 1331:8080
-    environment:
-          API_ENDPOINT: ${API_ENDPOINT}
+    
       
-  iot-simulator-service:
-    build: ./IOT-Simulator
+  workflow-service:
+    build: ./Workflow
     depends_on:
         - middleware
+    environment:
+          API_ENDPOINT: ${API_ENDPOINT}
   
   middleware:
     build: ./Middleware
