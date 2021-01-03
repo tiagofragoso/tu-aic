@@ -10,7 +10,7 @@ from dataManager import dicAndImageFormatter, getImagePathWithDic
 
 env_path = Path('.') / '.env'
 # load_dotenv(dotenv_path=env_path)
-# PATH = "../data/iwildcam_synthesized_idaho"
+# PATH = "./data/iwildcam_synthesized_idaho"
 # for the moment, we take data from the little_data_repo
 PATH = "./little_data/iwildcam_synthesized_idaho"
 # API_ENDPOINT = os.getenv("API_ENDPOINT")

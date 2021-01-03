@@ -1,12 +1,12 @@
 import datetime
+import os
 import random
 
 import requests
 
 from dataManager import dicAndImageFormatter, getImagePathWithDic
 
-API_ENDPOINT = "http://localhost:3000"
-
+API_ENDPOINT = os.getenv("API_ENDPOINT")
 
 def changeString(metadataToChange,cat) :
     changedCat = metadataToChange[cat] + "_new"

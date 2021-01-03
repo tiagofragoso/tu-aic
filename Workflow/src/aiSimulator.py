@@ -1,10 +1,11 @@
+import os
 import random
 import cv2
 
 import requests
 
 from dataManager import tagFormatter, getImagePathWithDic
-API_ENDPOINT = "http://localhost:3000"
+API_ENDPOINT = os.getenv("API_ENDPOINT")
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
 
 def changeImage(dic) :
