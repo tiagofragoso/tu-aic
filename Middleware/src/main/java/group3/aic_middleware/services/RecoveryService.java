@@ -31,7 +31,6 @@ public class RecoveryService {
         RestTemplate restTemplate = new RestTemplate();
         String retImage = "";
         String URL_IOS = FederationService.IOSConnection + "/images/" + fileName;
-        System.out.println("URL_IOS = " + URL_IOS);
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = null;
 
         // query an image using ImageObjectStorageService (primary)
@@ -59,13 +58,10 @@ public class RecoveryService {
         }
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
         URL_IOS = FederationService.IOSConnection + "/images";
-        System.out.println("imageIOS = " + (imageIOS != null));
 
         // query an image using ImageFileStorageService (secondary/backup)
         if(imageIOS != null) {
             retImage = imageIOS.getBase64Image();
-            System.out.println("hashStored = " + hashStored);
-            System.out.println("this.hashingService.getHash(retImage) = " + this.hashingService.getHash(retImage));
             if(hashStored == this.hashingService.getHash(retImage)) {
                 try {
                     this.imageFileService.saveImage(fileName, retImage);

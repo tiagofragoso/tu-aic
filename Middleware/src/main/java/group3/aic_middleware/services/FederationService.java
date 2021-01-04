@@ -62,7 +62,6 @@ public class FederationService {
         }
 
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
-        System.out.println("metaDataDTO = " + metaDataDTO);
 
         fileName = metaDataDTO.getSensingEventId() + "_base.jpg";
 
@@ -216,7 +215,6 @@ public class FederationService {
         metaDataDTO.setTags(tagList);
         HttpEntity<MetaDataServiceDTO> request = null;
         request = new HttpEntity<>(metaDataDTO);
-        System.out.println("metaDataDTO = " + metaDataDTO);
         try {
             restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
         } catch(HttpClientErrorException e) {
