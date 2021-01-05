@@ -84,6 +84,7 @@ services:
     
       
   workflow-service:
+    command: sh -c './wait-for middleware:${API_ENDPOINT} -- npm start'
     build: ./Workflow
     depends_on:
         - middleware

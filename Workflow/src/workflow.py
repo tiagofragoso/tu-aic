@@ -20,9 +20,9 @@ with open(PATH + "/metadata.json") as f:
     picturesDic = json.load(f)
 
 # Change the PORT if specified in the command
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        PORT = int(sys.argv[1])
+# if __name__ == '__main__':
+#     if len(sys.argv) > 1:
+#         PORT = int(sys.argv[1])
 
 #sort data chronologically
 picturesDic = sortDataChronologically(picturesDic)
