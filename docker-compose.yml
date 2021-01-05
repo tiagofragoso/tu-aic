@@ -84,12 +84,12 @@ services:
     
       
   workflow-service:
-    command: sh -c './wait-for middleware:${API_ENDPOINT} -- npm start'
     build: ./Workflow
+    command: sh -c './wait-for middleware:8080 -t 120 -- python -u ./src/workflow.py'
     depends_on:
         - middleware
     environment:
-          API_ENDPOINT: ${API_ENDPOINT}
+          API_ENDPOINT: "http://middleware:8080"
   
   middleware:
     build: ./Middleware
