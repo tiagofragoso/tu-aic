@@ -125,8 +125,7 @@ export class EventTableComponent implements OnInit {
   }
 
   public convertTagNames(tags?: EventTableRowTag[]): string {
-    if (!tags) return '';
-    // TODO: If too many tags occur, append ...
+    if (!tags || tags.length < 2) return 'Not tagged yet';
     return tags.filter(({tag_name}) => tag_name !== BASE_TAG).slice(0, 2).map(({tag_name}) => tag_name).join(", ");
   }
 }
