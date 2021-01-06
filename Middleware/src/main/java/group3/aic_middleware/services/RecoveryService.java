@@ -24,16 +24,13 @@ public class RecoveryService {
     private HashingService hashingService = new HashingService();
     private ImageFileService imageFileService = new ImageFileService();
 
-    String MDSConnection = "http://metadata-service:8080";
-    String IOSConnection = "http://image-object-service:8000";
-
     public RecoveryService() throws NoSuchAlgorithmException {
     }
 
     public String recoverImage(String fileName, int hashStored) {
         RestTemplate restTemplate = new RestTemplate();
         String retImage = "";
-        String URL_IOS = IOSConnection + "/images/" + fileName;
+        String URL_IOS = FederationService.IOSConnection + "/images/" + fileName;
         ImageObjectServiceCreateDTO imageObjectServiceCreateDTO = null;
 
         // query an image using ImageObjectStorageService (primary)
@@ -51,16 +48,16 @@ public class RecoveryService {
                     retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
                     imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
                     HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
-                    URL_IOS = IOSConnection + "/images";
+                    URL_IOS = FederationService.IOSConnection + "/images";
                     restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
                 } catch (EventNotFoundException ex) {
                     log.info("Requested sensing event doesn't exist in Image File Storage.");
-                    ex.printStackTrace();
+                    return "";
                 }
             }
         }
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
-        URL_IOS = IOSConnection + "/images";
+        URL_IOS = FederationService.IOSConnection + "/images";
 
         // query an image using ImageFileStorageService (secondary/backup)
         if(imageIOS != null) {
@@ -79,8 +76,8 @@ public class RecoveryService {
                     HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
                     restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
                 } catch (EventNotFoundException e) {
-                    e.printStackTrace();
                     log.info("Requested sensing event couldn't be recovered from Image File Storage: " + e.getMessage());
+                    return "";
                 }
             }
         }
@@ -90,7 +87,7 @@ public class RecoveryService {
 
     public String getEventStatus(MetaDataServiceDTO metaDataDTO) {
         String fileName = metaDataDTO.getSensingEventId() + "_base.jpg";
-        String URL_IOS = IOSConnection + "/images/" + fileName;
+        String URL_IOS = FederationService.IOSConnection + "/images/" + fileName;
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = null;
         ImageEntity imageIFS = null;
@@ -105,6 +102,8 @@ public class RecoveryService {
                 try {
                     imageIFS = this.imageFileService.readImage(fileName);
                     int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+
+                    // compare the hash value of an image from IFS with the stored hash in Metadata Storage
                     if(hashedImageIFS == this.getHashValue(metaDataDTO)) {
                         return "FAULTY";
                     } else {
@@ -119,32 +118,21 @@ public class RecoveryService {
         }
 
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
-        try {
-            imageIFS = this.imageFileService.readImage(fileName);
-        } catch (EventNotFoundException ex) {
-            log.info("Requested sensing event doesn't exist in Image File Storage.");
-            int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
-            if(hashedImageIOS == this.getHashValue(metaDataDTO)) {
-                return "FAULTY";
-            } else {
-                log.info("Requested sensing event is corrupted in Image Object Storage.");
-                return "MISSING";
-            }
-        }
 
-        int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
         int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
-        if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
-            log.info("Saved images are not identical.");
+
+        // compare the hash value of an image from IOS with the stored hash in Metadata Storage
+        if(hashedImageIOS == this.getHashValue(metaDataDTO)) {
+            return "CORRECT";
+        } else {
+            log.info("Requested sensing event is corrupted in Image Object Storage.");
             return "FAULTY";
         }
-
-        return "CORRECT";
     }
 
     public String getEventStatus(ReadEventsDTO metaDataDTO) {
         String fileName = metaDataDTO.getSeqId() + "_base.jpg";
-        String URL_IOS = IOSConnection + "/images/" + fileName;
+        String URL_IOS = FederationService.IOSConnection + "/images/" + fileName;
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ImageObjectServiceLoadDTO> responseIOS = null;
         ImageEntity imageIFS = null;
@@ -159,6 +147,8 @@ public class RecoveryService {
                 try {
                     imageIFS = this.imageFileService.readImage(fileName);
                     int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+
+                    // compare the hash value of an image from IFS with the stored hash in Metadata Storage
                     if(hashedImageIFS == this.getHashValue(metaDataDTO)) {
                         return "FAULTY";
                     } else {
@@ -173,27 +163,16 @@ public class RecoveryService {
         }
 
         ImageObjectServiceLoadDTO imageIOS = responseIOS.getBody();
-        try {
-            imageIFS = this.imageFileService.readImage(fileName);
-        } catch (EventNotFoundException ex) {
-            log.info("Requested sensing event doesn't exist in Image File Storage.");
-            int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
-            if(hashedImageIOS == this.getHashValue(metaDataDTO)) {
-                return "FAULTY";
-            } else {
-                log.info("Requested sensing event is corrupted in Image Object Storage.");
-                return "MISSING";
-            }
-        }
 
-        int hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
         int hashedImageIOS = this.hashingService.getHash(imageIOS.getBase64Image());
-        if(!this.hashingService.compareHash(hashedImageIFS, hashedImageIOS)) {
-            log.info("Saved images are not identical.");
+
+        // compare the hash value of an image from IOS with the stored hash in Metadata Storage
+        if(hashedImageIOS == this.getHashValue(metaDataDTO)) {
+            return "CORRECT";
+        } else {
+            log.info("Requested sensing event is corrupted in Image Object Storage.");
             return "FAULTY";
         }
-
-        return "CORRECT";
     }
 
     public int getHashValue(MetaDataServiceDTO metaDataServiceDTO) {

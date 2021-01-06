@@ -32,9 +32,8 @@ public class FederationService {
     private ImageFileService imageFileService = new ImageFileService();
     private RecoveryService recoveryService = new RecoveryService();
 
-    // TODO Transform into environment variables
-    String MDSConnection = "http://metadata-service:8080";
-    String IOSConnection = "http://image-object-service:8000";
+    protected static final String MDSConnection = "http://metadata-service:8080";
+    protected static final String IOSConnection = "http://image-object-service:8000";
 
     public FederationService() throws NoSuchAlgorithmException {
     }
@@ -90,12 +89,16 @@ public class FederationService {
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist.");
-                throw new EventNotFoundException("Requested sensing event doesn't exist.");
+                throw new EventNotFoundException("Requested sensing event with the given tag doesn't exist.");
             }
         }
 
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
         copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
+        if(!this.checkTagExistence(tagName, metaDataDTO)) {
+            log.info("Requested sensing event with the given tag doesn't exist.");
+            throw new EventNotFoundException("Requested sensing event with the given tag doesn't exist.");
+        }
 
         tagDataDTO.setTagName(tagName);
         tagDataDTO.setCreated(metaDataDTO.getCreated(tagName));
@@ -252,9 +255,10 @@ public class FederationService {
 
         // save new tag using the MetaDataService
         URL_MDS = MDSConnection + "/events/" + seqId + "/tags";
-        HttpEntity<TagDataDTO> request = new HttpEntity<>(tagDataDTO);
+        TagDTO tagDTO = new TagDTO(tagDataDTO.getTagName(), this.hashingService.getHash(tagDataDTO.getImage()));
+        HttpEntity<TagDTO> request = new HttpEntity<>(tagDTO);
         try {
-            ResponseEntity<TagDataDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDataDTO.class);
+            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDTO.class);
         } catch(HttpClientErrorException e) {
             log.info(e.getMessage());
             throw new EventNotUpdatedException(e.getMessage());
@@ -357,13 +361,20 @@ public class FederationService {
     }
 
 
-    public void deleteTag(String seqId, String tagName) {
+    public void deleteTag(String seqId, String tagName) throws EventNotUpdatedException {
         RestTemplate restTemplate = new RestTemplate();
         String fileName = seqId + "_" + tagName + ".jpg";
         String URL_MDS = MDSConnection + "/events/" + seqId + "/tags/" + tagName;
 
         // delete metadata using the MetadataService
-        restTemplate.delete(URL_MDS);
+        try {
+            restTemplate.delete(URL_MDS);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Sensing event with a given tag doesn't exist.");
+                throw new EventNotUpdatedException("Sensing event with a given tag doesn't exist.");
+            }
+        }
         this.deleteImages(fileName);
     }
 
@@ -480,6 +491,17 @@ public class FederationService {
         }
         if(metaDataServiceDTO.getEventFrames() != (metaDataEntity.getEventFrames())) {
             return true;
+        }
+        return false;
+    }
+
+    private boolean checkTagExistence(String tagName, MetaDataServiceDTO metaDataServiceDTO) {
+        Iterator<TagDTO> it = metaDataServiceDTO.getTags().iterator();
+        while(it.hasNext()) {
+            TagDTO tagDTO = it.next();
+            if(tagDTO.getTagName().equals(tagName)) {
+                return true;
+            }
         }
         return false;
     }
