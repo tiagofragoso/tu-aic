@@ -161,9 +161,8 @@ public class FederationService {
             readEventsDTO.setUpdated(metaDataDTO.getCreated("base"));
             readEventsDTO.setLongitude(metaDataDTO.getLongitude());
             readEventsDTO.setLatitude(metaDataDTO.getLatitude());
-            System.out.println("Hello");
-            //readEventsDTO.setState(this.recoveryService.getEventStatus(metaDataDTO));
-            readEventsDTO.setState("CORRECT");
+            readEventsDTO.setState(this.recoveryService.getEventStatus(metaDataDTO));
+            //readEventsDTO.setState("CORRECT");
             readEventsDTO.setTags(convertTagDtoToSimpleTagDto(metaDataDTO.getTags()));
             readEventsDTO.setCreated(metaDataDTO.getTimestamp());
             readEventsDTO.setUpdated(metaDataDTO.getUpdated());
