@@ -37,10 +37,14 @@
           <span [className]="'text-' + statesColorMapping[event.state]">
             {{event.state}}
           </span>
-      </td>
+        </td>
       </tr>
       </tbody>
     </table>
+
+    <div *ngIf="!loading && totalResults == 0" class="d-flex justify-content-center">
+      <span>No results found</span>
+    </div>
 
     <div *ngIf="loading" class="d-flex justify-content-center">
       <span>Loading...</span>

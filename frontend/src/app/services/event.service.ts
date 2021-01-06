@@ -26,7 +26,6 @@ export class EventService {
     if (query.searchTerm.value.trim() !== '') {
       params = params.set('search', query.searchTerm.value.trim());
     }
-    console.log(params);
     return this.http.get<EventTableData>(this.url, {params});
   }
 
