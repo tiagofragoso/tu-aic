@@ -20,5 +20,5 @@ public class EventDetailsTagDTO {
     @Getter
     @Setter
     @JsonProperty(required = false, value = "image_hash", access = JsonProperty.Access.WRITE_ONLY)
-    private int imageHash;
+    private String imageHash;
 }
