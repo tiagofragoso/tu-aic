@@ -9,11 +9,14 @@
                <span>Found events <b>{{ events.length }}</b> in this area</span>
           </ng-template>
      </div>
-     <div class="form-check">
-          <input class="form-check-input" type="checkbox" [(ngModel)]="showSearchCircle" (change)="onShowSearchCircleChange()">
-          <label class="form-check-label" for="flexCheckChecked">
+     <div class="form-check d-flex align-items-center">
+          <label class="me-2">Search circle radius</label>
+          <input type="range" class="form-range me-3" min="0.05" max="1.25" step="0.05" 
+               [(ngModel)]="radiusFactor" (change)="onChangeRadiusFactor()" [(disabled)]="!showSearchCircle">
+          <label class="me-2">
             Show search circle
           </label>
+          <input type="checkbox" [(ngModel)]="showSearchCircle" (change)="onShowSearchCircleChange()">
      </div>
 </div>
 

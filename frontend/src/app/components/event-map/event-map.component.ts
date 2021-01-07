@@ -17,7 +17,8 @@ const CONSTANTS = Object.freeze({
   DEFAULT_CENTER_LAT: 42.854912879552664,
   DEFAULT_CENTER_LON: -115.06896547973157,
   REQUEST_WAIT_TIME: 250,
-  M_TO_KM: 1/1000
+  M_TO_KM: 1/1000,
+  DEAFULT_RADIUS_FACTOR: 0.95
 });
 
 @Component({
@@ -46,6 +47,7 @@ export class EventMapComponent {
   showSearchCircle = true;
   radius = 0;
   id: string | null;
+  radiusFactor = CONSTANTS.DEAFULT_RADIUS_FACTOR;
 
   options = {
     zoom: this.zoom,
@@ -90,7 +92,7 @@ export class EventMapComponent {
 
     const centerNorth = latLng(this.map.getBounds().getNorth(), this.center.lng);
     const dist = this.center.distanceTo(centerNorth);
-    this.radius = dist * 0.95 * CONSTANTS.M_TO_KM;
+    this.radius = dist * this.radiusFactor * CONSTANTS.M_TO_KM;
 
     this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
     .subscribe((data: EventTableRow[]) => {
@@ -102,6 +104,10 @@ export class EventMapComponent {
 
   onShowSearchCircleChange() {
     this.refreshMap();
+  }
+
+  onChangeRadiusFactor() {
+    this.getEvents();
   }
 
   refreshMap() {
