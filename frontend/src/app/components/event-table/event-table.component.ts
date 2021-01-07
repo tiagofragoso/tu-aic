@@ -117,6 +117,11 @@ export class EventTableComponent implements OnInit {
     this.router.navigate(['/events/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
   }
 
+  public eventMapClicked(event: any, id: string) {
+    event.stopPropagation();
+    this.router.navigate(['/events/map/' + id], {relativeTo: this.activatedRoute}).catch(console.error);
+  }
+
   public convertDate(date?: Date): string {
     if (!date) {
       return '';

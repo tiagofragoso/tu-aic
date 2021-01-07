@@ -6,6 +6,19 @@ import {latLng, tileLayer, icon, marker, Layer, LatLng, Map, circle, point} from
 import {EventService} from 'src/app/services/event.service';
 import {EventTableRow} from '../../models/event-table-data';
 import {convertUnixDateToString} from "../../utils/date";
+import {Event} from 'src/app/models/event';
+import { Observable } from 'rxjs';
+
+const CONSTANTS = Object.freeze({
+  MIN_ZOOM: 1,
+  MAX_ZOOM: 14,
+  DEFAULT_ZOOM: 6,
+  CURR_EVENT_ZOOM: 10,
+  DEFAULT_CENTER_LAT: 42.854912879552664,
+  DEFAULT_CENTER_LON: -115.06896547973157,
+  REQUEST_WAIT_TIME: 250,
+  M_TO_KM: 1/1000
+});
 
 @Component({
   selector: 'app-event-map',
@@ -23,15 +36,16 @@ export class EventMapComponent {
       } 
     }
 
-  baseLayer = tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 14, minZoom: 1 });
-  center: LatLng = latLng(42.854912879552664, -115.06896547973157);
+  baseLayer = tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: CONSTANTS.MAX_ZOOM, minZoom: CONSTANTS.MIN_ZOOM });
+  center: LatLng = latLng(CONSTANTS.DEFAULT_CENTER_LAT, CONSTANTS.DEFAULT_CENTER_LON);
   layers: Layer[] = [this.baseLayer];
-  zoom: number = 6;
+  zoom: number = CONSTANTS.DEFAULT_ZOOM;
   map?: Map;
   events: EventTableRow[] = [];
   loading = true;
   showSearchCircle = true;
   radius = 0;
+  id: string | null;
 
   options = {
     zoom: this.zoom,
@@ -41,19 +55,31 @@ export class EventMapComponent {
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute,
               private eventService: EventService) {
-  }
+                this.id = this.activatedRoute.snapshot.paramMap.get('id');
+              }
 
   onMapReady(map: Map) {
     this.map = map;
-    this.getEvents();
+    if (this.id) {
+      this.eventService.getById(this.id)
+      .subscribe((data: Event) => {
+        if (data.metadata?.latitude && data.metadata?.longitude) {
+          this.map?.flyTo(latLng(data.metadata.latitude, data.metadata.longitude), CONSTANTS.CURR_EVENT_ZOOM, {noMoveStart: true});
+        } else {
+          console.error("Invalid event details");
+        }
+      });
+    } else {
+      this.getEvents();
+    }
   }
 
   onMapMove() {
-    this.getEvents();
+    setTimeout(() => this.getEvents(), CONSTANTS.REQUEST_WAIT_TIME);
   }
 
   onMapZoom() {
-    this.getEvents();
+    setTimeout(() => this.getEvents(), CONSTANTS.REQUEST_WAIT_TIME);  
   }
 
   getEvents() {
@@ -62,9 +88,9 @@ export class EventMapComponent {
 
     this.loading = true;
 
-    const centerEast = latLng(this.center.lat, this.map.getBounds().getEast());
-    const dist = this.center.distanceTo(centerEast);
-    this.radius = dist * 0.9 / 1000;
+    const centerNorth = latLng(this.map.getBounds().getNorth(), this.center.lng);
+    const dist = this.center.distanceTo(centerNorth);
+    this.radius = dist * 0.95 * CONSTANTS.M_TO_KM;
 
     this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
     .subscribe((data: EventTableRow[]) => {
@@ -81,7 +107,7 @@ export class EventMapComponent {
   refreshMap() {
     this.layers = [this.baseLayer];
     if (this.showSearchCircle) {
-      this.layers.push(circle(this.center, {radius: this.radius * 1000, fillOpacity: 0.15, opacity: 0.2}));
+      this.layers.push(circle(this.center, {radius: this.radius / CONSTANTS.M_TO_KM, fillOpacity: 0.15, opacity: 0.2}));
     }
     this.layers = [...this.layers, ...this.events.map((e) => this.createMarker(e))]; 
   }
@@ -91,7 +117,9 @@ export class EventMapComponent {
       icon: icon({
         iconSize: [ 25, 41 ],
         iconAnchor: [ 13, 41 ],
-        iconUrl: 'leaflet/marker-icon.png',
+        iconUrl: (this.id && this.id === event.event_id)? 
+          'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png'
+          : 'leaflet/marker-icon-2x.png',
         shadowUrl: 'leaflet/marker-shadow.png'
       })  
     });

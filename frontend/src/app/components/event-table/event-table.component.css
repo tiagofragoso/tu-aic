@@ -9,3 +9,7 @@ td {
 tbody tr {
   cursor: pointer;
 }
+
+.map-btn {
+  padding: 0px 6px;
+}

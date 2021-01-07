@@ -8,6 +8,7 @@ import {EventDetailsComponent} from "./components/event-details/event-details.co
 const routes: Routes = [
   {path: 'events', component: EventTableComponent},
   {path: 'events/map', component: EventMapComponent},
+  {path: 'events/map/:id', component: EventMapComponent},
   {path: 'events/:id', component: EventDetailsComponent},
   {path: '**', redirectTo: 'events', pathMatch: 'full'}
 ];
