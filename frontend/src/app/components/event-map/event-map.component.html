@@ -12,7 +12,7 @@
      <div class="form-check d-flex align-items-center">
           <label class="me-2">Search circle radius</label>
           <input type="range" class="form-range me-3" min="0.05" max="1.25" step="0.05" 
-               [(ngModel)]="radiusFactor" (change)="onChangeRadiusFactor()" [(disabled)]="!showSearchCircle">
+               [(ngModel)]="radiusFactor" (change)="onChangeRadiusFactor()" [disabled]="!showSearchCircle">
           <label class="me-2">
             Show search circle
           </label>
