@@ -89,7 +89,8 @@ services:
     depends_on:
         - middleware
     environment:
-          API_ENDPOINT: "http://middleware:8080"
+          API_ENDPOINT: ${API_ENDPOINT}
+          PATH_TO_IMAGE_DIR: ${PATH_TO_IMAGE_DIR}
   
   middleware:
     build: ./Middleware
