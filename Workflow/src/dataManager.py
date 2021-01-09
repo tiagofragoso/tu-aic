@@ -1,9 +1,15 @@
 import base64
 import datetime
-PATH = "./little_data/iwildcam_synthesized_idaho"
+import json
+import os
+PATH = os.getenv("PATH_TO_IMAGE_DIR")
+# PATH = "../little_data/iwildcam_synthesized_idaho"
 
+def getOrderedData():
+    # Load the metadata
+    with open(PATH + "/metadata.json") as f:
+        dicToSort = json.load(f)
 
-def sortDataChronologically(dicToSort):
     linkDateToIndex = []
     for i in range(len(dicToSort)):
         # print(dicToSort[i]["datetime"])
@@ -43,3 +49,4 @@ def getImagePathWithDic(dic) :
     picName = dic["filename"]
     linkedFile = PATH + "/images/" + picName
     return linkedFile
+

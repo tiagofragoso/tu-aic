@@ -5,8 +5,8 @@ import random
 import requests
 
 from dataManager import dicAndImageFormatter, getImagePathWithDic
+from apiCalls import putMetadata
 
-API_ENDPOINT = os.getenv("API_ENDPOINT")
 
 def changeString(metadataToChange,cat) :
     changedCat = metadataToChange[cat] + "_new"
@@ -38,7 +38,8 @@ def changeSeq_num_frames(metadataToChange) :
     metadataToChange["seq_num_frames"] += 1
     return metadataToChange
 
-def changeDependingOnCategory(metadataToChange,chosenCat ="name") :
+def changeWithAttributeNotGiven(metadataToChange,chosenCat ="name") :
+    attToChange = metadataToChange[chosenCat]
     if chosenCat == "name" :
         changedMetadata = changeString(metadataToChange, "name")
     elif chosenCat == "device_id":
@@ -57,33 +58,25 @@ def changeDependingOnCategory(metadataToChange,chosenCat ="name") :
         changedMetadata = metadataToChange
         print("error : ",chosenCat," doesn't exist")
 
-    print(changedMetadata)
-    print("")
-    return changedMetadata
+    return (changedMetadata,attToChange)
+
+def changeWithAttributeGiven(metadataToChange,chosenAtt, chosenCat ="name") :
+    attToChange = metadataToChange[chosenCat]
+    if type(chosenAtt) == type(attToChange) :
+        metadataToChange[chosenCat] = chosenAtt
+    else :
+        (metadataToChange,attToChange) = changeWithAttributeNotGiven(metadataToChange,chosenCat)
+    return (metadataToChange,attToChange)
 
 
-def putMetadata(url, dic, imagePath, chosenCat) :
-    data = dicAndImageFormatter(dic, imagePath)
-    try:
-        print(" ------ METADATA MODIFIER ------")
-        print(str(data["metadata"]["datetime"]) + " : changed "+chosenCat+" in the metadata on image with id : " + str(data["metadata"]["seq_id"]))
-        putResp = requests.put(url, json=data)
-    except requests.exceptions.RequestException as e:
-        print("Error sending image :", e)
-        return
-
-    status_code = putResp.status_code
-
-    if status_code != 200:
-        print("Error sending image. Got HTTP", status_code)
-
-
-def changeMetadata(metadataToChange, chosenCat="name"):
-    print(metadataToChange)
-    # rdmCat = categories[random.randint(0,len(categories)-1)]
-    changedMetadata = changeDependingOnCategory(metadataToChange, chosenCat)
+def changeMetadata(metadataToChange, chosenCat="name", newAttribute=None):
+    if newAttribute == None :
+        (changedMetadata,changedAttribute) = changeWithAttributeNotGiven(metadataToChange, chosenCat)
+    else :
+        (changedMetadata, changedAttribute) = changeWithAttributeGiven(metadataToChange, newAttribute, chosenCat)
 
     imagePath = getImagePathWithDic(changedMetadata)
 
-    metadataEndpoint = str(API_ENDPOINT) + "/events"
-    putMetadata(metadataEndpoint, changedMetadata, imagePath, chosenCat)
+    dataFormatted = dicAndImageFormatter(changedMetadata, imagePath)
+
+    putMetadata(changedMetadata, dataFormatted, chosenCat, changedAttribute)

@@ -2,10 +2,10 @@ import os
 import random
 import cv2
 
-import requests
-
 from dataManager import tagFormatter, getImagePathWithDic
-API_ENDPOINT = os.getenv("API_ENDPOINT")
+from apiCalls import putNewTag
+DOCKER = True
+
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
 
 def changeImage(dic) :
@@ -31,30 +31,19 @@ def changeImage(dic) :
     else :
         dic["tags"] = []
         dic["tags"].append({"tag_name" : tagName})
+    if DOCKER :
+        filename = "./data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
+    else :
+        filename = "../data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
 
-    filename = "./data_created/" + str(dic["filename"]) + tagName + ".jpg"
+    print(filename)
     cv2.imwrite(filename, image)
-    return (filename, dic)
+    return dic
 
-def putNewTag(url, dic) :
-    data = tagFormatter(dic)
-    try:
-        print(" ------ AI SIMULATOR ------")
-        print(str(dic["datetime"]) + " : tag created with name : "+str(data["tag_name"])+" on image with id : " + str(dic["seq_id"]))
-        putResp = requests.put(url, json=data)
-    except requests.exceptions.RequestException as e:
-        print("Error sending image :", e)
-        return
 
-    status_code = putResp.status_code
-    if status_code != 201:
-        print("Error sending image. Got HTTP", status_code)
 
 def addTag(dic) :
-
-    (imagePath,dicWithTag) = changeImage(dic)
-
-
-    tagEndpoint = str(API_ENDPOINT) + "/events/" + dic["seq_id"] + "/tags"
-    putNewTag(tagEndpoint,dicWithTag)
+    dicWithTag = changeImage(dic)
+    data = tagFormatter(dicWithTag)
+    putNewTag(data,dicWithTag)
 
