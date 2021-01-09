@@ -2,9 +2,8 @@ import os
 import random
 import cv2
 
-from dataManager import tagFormatter, getImagePathWithDic
+from dataManager import tagFormatter, getImagePathWithDic, DOCKER
 from apiCalls import putNewTag
-DOCKER = True
 
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
 

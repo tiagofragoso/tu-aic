@@ -1,8 +1,5 @@
 import datetime
-import os
 import random
-
-import requests
 
 from dataManager import dicAndImageFormatter, getImagePathWithDic
 from apiCalls import putMetadata

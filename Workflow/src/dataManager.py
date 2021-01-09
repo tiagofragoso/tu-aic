@@ -2,8 +2,11 @@ import base64
 import datetime
 import json
 import os
-PATH = os.getenv("PATH_TO_IMAGE_DIR")
-# PATH = "../little_data/iwildcam_synthesized_idaho"
+DOCKER = True
+if DOCKER :
+    PATH = os.getenv("PATH_TO_IMAGE_DIR")
+else :
+    PATH = "../little_data/iwildcam_synthesized_idaho"
 
 def getOrderedData():
     # Load the metadata

@@ -1,7 +1,7 @@
 import os
 from iotSimulator import postEvent
-from aiSimulator import addTag, DOCKER
-from dataManager import getOrderedData
+from aiSimulator import addTag
+from dataManager import getOrderedData, DOCKER
 from metadataModifier import changeMetadata
 from apiCalls import delete
 if DOCKER :
