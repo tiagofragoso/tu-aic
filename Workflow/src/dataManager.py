@@ -6,6 +6,7 @@ DOCKER = True
 if DOCKER :
     PATH = os.getenv("PATH_TO_IMAGE_DIR")
 else :
+    # PATH = "../../../iwildcam_synthesized_idaho"
     PATH = "../little_data/iwildcam_synthesized_idaho"
 
 def getOrderedData():
@@ -13,19 +14,20 @@ def getOrderedData():
     with open(PATH + "/metadata.json") as f:
         dicToSort = json.load(f)
 
+
     linkDateToIndex = []
     for i in range(len(dicToSort)):
-        # print(dicToSort[i]["datetime"])
         date_i = datetime.datetime.strptime(dicToSort[i]["datetime"], '%d-%b-%Y (%H:%M:%S.%f)')
         linkDateToIndex.append([i, date_i])
-    sortedList = sorted(linkDateToIndex, key=lambda l: l[1])
+
+    sortedList = sorted(linkDateToIndex, key=lambda l: l[1]) # sort the tuple (index,date) according to date
     getIndexes = []
     for i in range(len(sortedList)):
         getIndexes.append(sortedList[i][0])
-    # print(getIndexes)
+
     dataSortedList = []
     for k in getIndexes:
-        dataSortedList.append(dicToSort[k])
+        dataSortedList.append(dicToSort[k]) # order the good dates without iterating, thanks to saving the index
 
     return dataSortedList
 
