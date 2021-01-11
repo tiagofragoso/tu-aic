@@ -162,7 +162,7 @@ public class GatewayController {
 
 
     /**
-     * The call which creates adds a new tag to the event
+     * The call which adds a new tag to the event
      */
     @PutMapping("/{seqId}/tags")
     @ResponseStatus(HttpStatus.OK)

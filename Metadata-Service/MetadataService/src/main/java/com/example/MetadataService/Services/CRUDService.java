@@ -176,6 +176,7 @@ public class CRUDService {
         }
 
         event.getTags().remove(tag);
+        event.updateTagsConcatString();
         eventRepository.save(event);
     }
 
@@ -193,6 +194,7 @@ public class CRUDService {
         }
 
         event.getTags().add(tagDtoToReal(tag, Instant.now().getEpochSecond()));
+        event.updateTagsConcatString();
         eventRepository.save(event);
     }
 

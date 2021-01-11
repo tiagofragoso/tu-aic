@@ -9,6 +9,8 @@ This template is intended to serve as an *example* on how you might want to stru
 
 ## Team
 
+Lichner Ivan, 01226385
+
 TODO
 
 ## Overview
@@ -20,6 +22,14 @@ TODO
 TODO
 
 ## Components
+
+### Middleware
+
+Middleware service that keeps control of the replication, distribution and hashing services. Also it provides a gateway for the IoT devices as well as the user application.
+
+### Swagger
+You can find the swagger ui under: http://127.0.0.1:9999/swagger-ui/index.html
+
 
 ### Image Object Service
 
