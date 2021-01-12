@@ -91,6 +91,7 @@ services:
   
   middleware:
     build: ./Middleware
+    command: sh -c './wait-for logdb:3306 -t 120 -- java -jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar'
     depends_on:
       - metadata-service
       - image-object-service
