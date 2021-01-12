@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 DOCKER = True
+# TODO : Change the path in env variables to fit the volume
 if DOCKER :
     PATH = os.getenv("PATH_TO_IMAGE_DIR")
 else :

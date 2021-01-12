@@ -88,6 +88,8 @@ services:
     command: sh -c './wait-for middleware:8080 -t 120 -- python -u ./src/workflow.py'
     depends_on:
         - middleware
+    volumes:
+      - "/aic/g2/:/app/data"
     environment:
           API_ENDPOINT: ${API_ENDPOINT}
           PATH_TO_IMAGE_DIR: ${PATH_TO_IMAGE_DIR}
