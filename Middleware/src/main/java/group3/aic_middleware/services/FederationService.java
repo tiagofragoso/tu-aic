@@ -288,7 +288,7 @@ public class FederationService {
      *
      * @return
      */
-    public void createTag(TagDataDTO tagDataDTO, String seqId) throws EventNotUpdatedException {
+    public void createTag(TagDataDTO tagDataDTO, String seqId) throws EventNotUpdatedException, EventNotFoundException {
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
 
@@ -302,7 +302,7 @@ public class FederationService {
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist.");
-                throw new EventNotUpdatedException("Requested sensing event doesn't exist.");
+                throw new EventNotFoundException("Requested sensing event doesn't exist.");
             }
         }
 
@@ -345,7 +345,7 @@ public class FederationService {
      *
      * @return
      */
-    public void updateEvent(StoreEventDTO storeEventDTO) throws EventNotUpdatedException {
+    public void updateEvent(StoreEventDTO storeEventDTO) throws EventNotUpdatedException, EventNotFoundException {
         String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetadata().getSensingEventId();
         RestTemplate restTemplate = new RestTemplate();
         MetaDataServiceDTO metaDataServiceDTO = null;
@@ -360,7 +360,7 @@ public class FederationService {
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist.");
-                throw new EventNotUpdatedException("Requested sensing event doesn't exist.");
+                throw new EventNotFoundException("Requested sensing event doesn't exist.");
             }
         }
         metaDataServiceDTO = responseMDS.getBody();
@@ -442,7 +442,7 @@ public class FederationService {
         String fileName = seqId + "_" + tagName + ".jpg";
         String URL_MDS = MDSConnection + "/events/" + seqId + "/tags/" + tagName;
 
-        // delete metadata using the MetadataService
+        // delete a tag using the MetadataService
         try {
             restTemplate.delete(URL_MDS);
         } catch (HttpClientErrorException e) {
