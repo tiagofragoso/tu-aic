@@ -41,6 +41,11 @@ public class FederationService {
     /*
     * Read operations
     * */
+    // TODO delete before final submission
+    public ReadDetailsEventDTO testStuff() {
+        System.out.println(this.hashingService.getHash("Dnes je pekne ale chladno"));
+        return new ReadDetailsEventDTO();
+    }
 
     /**
      * Function reads the details of a sensing event which includes meta data, image and tags
@@ -194,7 +199,8 @@ public class FederationService {
             readEventsDTO.setUpdated(metaDataDTO.getCreated("base"));
             readEventsDTO.setLongitude(metaDataDTO.getLongitude());
             readEventsDTO.setLatitude(metaDataDTO.getLatitude());
-            readEventsDTO.setState(this.recoveryService.getEventStatus(metaDataDTO));
+            //readEventsDTO.setState(this.recoveryService.getEventStatus(metaDataDTO));
+            readEventsDTO.setState("CORRECT");
             readEventsDTO.setTags(convertTagDtoToSimpleTagDto(metaDataDTO.getTags()));
             readEventsDTO.setCreated(metaDataDTO.getTimestamp());
             readEventsDTO.setUpdated(metaDataDTO.getUpdated());
