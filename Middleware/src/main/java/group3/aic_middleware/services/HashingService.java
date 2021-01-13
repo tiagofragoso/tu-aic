@@ -3,6 +3,7 @@ package group3.aic_middleware.services;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 public class HashingService {
 
@@ -19,7 +20,7 @@ public class HashingService {
      * @return hashed value of the image
      */
     protected String getHash(String base64EncodedImage) {
-        return new String(this.hasher.digest(base64EncodedImage.getBytes(StandardCharsets.UTF_8)));
+        return Base64.getEncoder().encodeToString(this.hasher.digest(base64EncodedImage.getBytes(StandardCharsets.UTF_8)));
     }
 
     /**
