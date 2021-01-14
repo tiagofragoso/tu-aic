@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 public class TagDTO {
 
-    public TagDTO(String tagName, int imageHash) {
+    public TagDTO(String tagName, String imageHash) {
         this.tagName = tagName;
         this.imageHash = imageHash;
     }
@@ -21,8 +21,8 @@ public class TagDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = true, value = "image_hash", access = JsonProperty.Access.WRITE_ONLY)
-    private int imageHash;
+    @JsonProperty(required = true, value = "image_hash")
+    private String imageHash;
 
     @Getter
     @Setter

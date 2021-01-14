@@ -50,7 +50,7 @@ public class ReadEventsDTO {
 
     @Getter
     @Setter
-    // valid / faulty / missing
+    // CORRECT / FAULTY / MISSING
     @JsonProperty(value = "state")
     private String state;
 

@@ -32,9 +32,8 @@ public class FederationService {
     private ImageFileService imageFileService = new ImageFileService();
     private RecoveryService recoveryService = new RecoveryService();
 
-    // TODO Transform into environment variables
-    String MDSConnection = "http://metadata-service:8080";
-    String IOSConnection = "http://image-object-service:8000";
+    protected static final String MDSConnection = "http://metadata-service:8080";
+    protected static final String IOSConnection = "http://image-object-service:8000";
 
     public FederationService() throws NoSuchAlgorithmException {
     }
@@ -42,6 +41,14 @@ public class FederationService {
     /*
     * Read operations
     * */
+
+    /**
+     * Function reads the details of a sensing event which includes meta data, image and tags
+     *
+     * @param seqId unique identifier of a sensing event to be read
+     *
+     * @return DTO that contains details of a sensing event
+     */
     public ReadDetailsEventDTO readEvent(String seqId) throws EventNotFoundException {
         String fileName = "";
         String URL_MDS = MDSConnection + "/events/" + seqId;
@@ -67,12 +74,20 @@ public class FederationService {
         fileName = metaDataDTO.getSensingEventId() + "_base.jpg";
 
         storeEventDTO.setMetadata(convertMetaDataServiceToMetaDataDetail(metaDataDTO));
-        storeEventDTO.setImage(this.recoveryService.recoverImage(fileName, this.recoveryService.getHashValue(metaDataDTO)));
+        storeEventDTO.setImage(this.recoveryService.recoverImage(fileName, this.recoveryService.getHashValue(metaDataDTO, "base")));
         storeEventDTO.setTags(convertTagDtoToEventDetailTagDto(metaDataDTO.getTags()));
 
         return storeEventDTO;
     }
 
+    /**
+     * Function reads the details of a tag of a sensing event which includes tag name, tag image and creation datetime
+     *
+     * @param seqId unique identifier of a sensing event
+     * @param tagName identifier of a tag to be read for a given sensing event
+     *
+     * @return DTO that contains tag data
+     */
     public TagDataDTO readTagData(String seqId, String tagName) throws EventNotFoundException {
         TagDataDTO tagDataDTO = new TagDataDTO();
         String fileName = seqId + "_" + tagName + ".jpg";
@@ -90,21 +105,33 @@ public class FederationService {
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.info("Requested sensing event doesn't exist.");
-                throw new EventNotFoundException("Requested sensing event doesn't exist.");
+                throw new EventNotFoundException("Requested sensing event with the given tag doesn't exist.");
             }
         }
 
         MetaDataServiceDTO metaDataDTO = responseMDS.getBody();
         copyMetaDataFromDTOToEntity(metaDataEntity, metaDataDTO);
+        if(!this.checkTagExistence(tagName, metaDataDTO)) {
+            log.info("Requested sensing event with the given tag doesn't exist.");
+            throw new EventNotFoundException("Requested sensing event with the given tag doesn't exist.");
+        }
 
         tagDataDTO.setTagName(tagName);
         tagDataDTO.setCreated(metaDataDTO.getCreated(tagName));
-        tagDataDTO.setImage(this.recoveryService.recoverImage(fileName, this.recoveryService.getHashValue(metaDataDTO)));
+        tagDataDTO.setImage(this.recoveryService.recoverImage(fileName, this.recoveryService.getHashValue(metaDataDTO, tagName)));
 
         return tagDataDTO;
     }
 
-
+    /**
+     * Function reads overview information for all events contained in meta data storage
+     * for the UI Event table and also provides search capability
+     *
+     * @param pageable requested page settings from UI
+     * @param search search term
+     *
+     * @return DTO that contains list of events and page information
+     */
     public MetadataPageDTO readEvents(Pageable pageable, String search) {
         String URL_MDS = "";
         RestTemplate restTemplate = new RestTemplate();
@@ -127,6 +154,15 @@ public class FederationService {
         return ret;
     }
 
+    /**
+     * Function reads overview information for all events contained in meta data storage for the UI Event map
+     *
+     * @param size radius of the search space
+     * @param longitude coordinate of a center of search space
+     * @param latitude coordinate of a center of search space
+     *
+     * @return DTO that contains list of events
+     */
     public List<ReadEventsDTO> readEvents(double size, double longitude, double latitude) {
         ArrayList<ReadEventsDTO> eventList = new ArrayList<>();
         String URL_MDS = "";
@@ -172,10 +208,18 @@ public class FederationService {
     /*
      * Create operations
      * */
+
+    /**
+     * Function stores and replicates a given event
+     *
+     * @param storeEventDTO event to store
+     *
+     * @return
+     */
     public void saveEvent(StoreEventDTO storeEventDTO) throws EventNotCreatedException {
         RestTemplate restTemplate = new RestTemplate();
         String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetadata().getSensingEventId();
-        int hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImage());
+        String hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImage());
         MetaDataServiceDTO metaDataDTO = null;
 
         // check existence of an image using MetaDataService and request old hash
@@ -230,6 +274,14 @@ public class FederationService {
         this.imageFileService.saveImage(fileName, storeEventDTO.getImage());
     }
 
+    /**
+     * Function stores and replicates a new tag for a given event
+     *
+     * @param tagDataDTO tag data to be stored (tag name + tag image)
+     * @param seqId unique identifier of a sensing event
+     *
+     * @return
+     */
     public void createTag(TagDataDTO tagDataDTO, String seqId) throws EventNotUpdatedException {
         String URL_MDS = MDSConnection + "/events/" + seqId;
         RestTemplate restTemplate = new RestTemplate();
@@ -250,9 +302,10 @@ public class FederationService {
 
         // save new tag using the MetaDataService
         URL_MDS = MDSConnection + "/events/" + seqId + "/tags";
-        HttpEntity<TagDataDTO> request = new HttpEntity<>(tagDataDTO);
+        TagDTO tagDTO = new TagDTO(tagDataDTO.getTagName(), this.hashingService.getHash(tagDataDTO.getImage()));
+        HttpEntity<TagDTO> request = new HttpEntity<>(tagDTO);
         try {
-            ResponseEntity<TagDataDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDataDTO.class);
+            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDTO.class);
         } catch(HttpClientErrorException e) {
             log.info(e.getMessage());
             throw new EventNotUpdatedException(e.getMessage());
@@ -278,6 +331,14 @@ public class FederationService {
     /*
      * Update operations
      * */
+
+    /**
+     * Function the meta data for a given event
+     *
+     * @param storeEventDTO event data to be updated
+     *
+     * @return
+     */
     public void updateEvent(StoreEventDTO storeEventDTO) throws EventNotUpdatedException {
         String URL_MDS = MDSConnection + "/events/" + storeEventDTO.getMetadata().getSensingEventId();
         RestTemplate restTemplate = new RestTemplate();
@@ -323,6 +384,14 @@ public class FederationService {
     /*
      * Delete operations
      * */
+
+    /**
+     * Function cascade deletes a sensing event from all storage
+     *
+     * @param seqId unique identifier of a sensing event
+     *
+     * @return
+     */
     public void deleteEvent(String seqId) throws EventNotFoundException {
         RestTemplate restTemplate = new RestTemplate();
         String fileName = "";
@@ -354,17 +423,38 @@ public class FederationService {
         }
     }
 
-
-    public void deleteTag(String seqId, String tagName) {
+    /**
+     * Function deletes a given tag (tag from meta data storage and images from IOS and IFS) for a given event
+     *
+     * @param seqId unique identifier of a sensing event
+     * @param tagName tag to be deleted
+     *
+     * @return
+     */
+    public void deleteTag(String seqId, String tagName) throws EventNotUpdatedException {
         RestTemplate restTemplate = new RestTemplate();
         String fileName = seqId + "_" + tagName + ".jpg";
         String URL_MDS = MDSConnection + "/events/" + seqId + "/tags/" + tagName;
 
         // delete metadata using the MetadataService
-        restTemplate.delete(URL_MDS);
+        try {
+            restTemplate.delete(URL_MDS);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.info("Sensing event with a given tag doesn't exist.");
+                throw new EventNotUpdatedException("Sensing event with a given tag doesn't exist.");
+            }
+        }
         this.deleteImages(fileName);
     }
 
+    /**
+     * Function deletes images from IOS and IFS for a given file name
+     *
+     * @param fileName image to be deleted
+     *
+     * @return
+     */
     private void deleteImages(String fileName) {
         RestTemplate restTemplate = new RestTemplate();
         String URL_IOS = IOSConnection + "/images/" + fileName;
@@ -383,6 +473,15 @@ public class FederationService {
     /*
      * Support functions
      * */
+
+    /**
+     * Function copies the data from given metaDataServiceDTO into metaDataEntity provided
+     *
+     * @param metaDataEntity entity that should be filled
+     * @param metaDataServiceDTO entity that serves as a source
+     *
+     * @return
+     */
     private void copyMetaDataFromDTOToEntity(MetaDataEntity metaDataEntity, MetaDataServiceDTO metaDataServiceDTO) {
         metaDataEntity.setSeqId(metaDataServiceDTO.getSensingEventId());
         metaDataEntity.setName(metaDataServiceDTO.getName());
@@ -397,50 +496,14 @@ public class FederationService {
         metaDataEntity.setFilename(metaDataServiceDTO.getSensingEventId() + ".jpg");
     }
 
-    private List<EventDetailsTagDTO> convertTagDtoToEventDetailTagDto(List<TagDTO> tags) {
-
-        ArrayList<EventDetailsTagDTO> ret = new ArrayList<>();
-        for (TagDTO tag: tags) {
-            ret.add(new EventDetailsTagDTO(tag.getTagName(), tag.getCreated(), tag.getImageHash()));
-        }
-        return ret;
-    }
-
-    private List<SimpleTagDTO> convertTagDtoToSimpleTagDto(List<TagDTO> tags) {
-
-        ArrayList<SimpleTagDTO> ret = new ArrayList<>();
-        for (TagDTO tag: tags) {
-            ret.add(new SimpleTagDTO(tag.getTagName(), tag.getImageHash()));
-        }
-        return ret;
-    }
-
-    private List<TagDTO> convertEventDetailsTagsDtoToTagDto(List<EventDetailsTagDTO> tags) {
-        ArrayList<TagDTO> ret = new ArrayList<>();
-        for (EventDetailsTagDTO tag : tags) {
-            ret.add(new TagDTO(tag.getTagName(), tag.getImageHash()));
-        }
-        return ret;
-    }
-
-    /*
-     * Support functions
-     * */
-    private MetaDataDetailsDTO convertMetaDataServiceToMetaDataDetail(MetaDataServiceDTO metaDataEntity) {
-
-        MetaDataDetailsDTO ret = new MetaDataDetailsDTO();
-        ret.setSensingEventId(metaDataEntity.getSensingEventId());
-        ret.setName(metaDataEntity.getName());
-        ret.setDeviceIdentifier(metaDataEntity.getDeviceIdentifier());
-        ret.setTimestamp(metaDataEntity.getTimestamp());
-        ret.setLongitude(metaDataEntity.getLongitude());
-        ret.setLatitude(metaDataEntity.getLatitude());
-        ret.setFrameNum(metaDataEntity.getFrameNum());
-        ret.setPlaceIdent(metaDataEntity.getPlaceIdent());
-        ret.setEventFrames(metaDataEntity.getEventFrames());
-        return ret;
-    }
-
+    /**
+     * Function copies the data from given metaDataEntity into metaDataServiceDTO provided
+     *
+     * @param metaDataServiceDTO entity that should be filled
+     * @param metaDataEntity entity that serves as a source
+     *
+     * @return
+     */
     public void copyMetaDataFromEntityToDTO(MetaDataServiceDTO metaDataServiceDTO, MetaDataEntity metaDataEntity) {
         metaDataServiceDTO.setSensingEventId(metaDataEntity.getSeqId());
         metaDataServiceDTO.setName(metaDataEntity.getName());
@@ -454,6 +517,68 @@ public class FederationService {
         metaDataServiceDTO.setTags(metaDataEntity.getTags());
     }
 
+    /**
+     * Function transforms list of TagDTOs into EventDetailsTagDTOs
+     *
+     * @param tags list of TagDTOs to be converted
+     *
+     * @return list of EventDetailsTagDTOs
+     */
+    private List<EventDetailsTagDTO> convertTagDtoToEventDetailTagDto(List<TagDTO> tags) {
+
+        ArrayList<EventDetailsTagDTO> ret = new ArrayList<>();
+        for (TagDTO tag: tags) {
+            ret.add(new EventDetailsTagDTO(tag.getTagName(), tag.getCreated(), tag.getImageHash()));
+        }
+        return ret;
+    }
+
+    /**
+     * Function transforms list of TagDTOs into SimpleTagDTOs
+     *
+     * @param tags list of TagDTOs to be converted
+     *
+     * @return list of SimpleTagDTOs
+     */
+    private List<SimpleTagDTO> convertTagDtoToSimpleTagDto(List<TagDTO> tags) {
+
+        ArrayList<SimpleTagDTO> ret = new ArrayList<>();
+        for (TagDTO tag: tags) {
+            ret.add(new SimpleTagDTO(tag.getTagName(), tag.getImageHash()));
+        }
+        return ret;
+    }
+
+    /**
+     * Function transforms a MetaDataServiceDTO into MetaDataDetailsDTO
+     *
+     * @param metaDataServiceDTO meta data to be converted
+     *
+     * @return MetaDataDetailsDTO
+     */
+    private MetaDataDetailsDTO convertMetaDataServiceToMetaDataDetail(MetaDataServiceDTO metaDataServiceDTO) {
+
+        MetaDataDetailsDTO ret = new MetaDataDetailsDTO();
+        ret.setSensingEventId(metaDataServiceDTO.getSensingEventId());
+        ret.setName(metaDataServiceDTO.getName());
+        ret.setDeviceIdentifier(metaDataServiceDTO.getDeviceIdentifier());
+        ret.setTimestamp(metaDataServiceDTO.getTimestamp());
+        ret.setLongitude(metaDataServiceDTO.getLongitude());
+        ret.setLatitude(metaDataServiceDTO.getLatitude());
+        ret.setFrameNum(metaDataServiceDTO.getFrameNum());
+        ret.setPlaceIdent(metaDataServiceDTO.getPlaceIdent());
+        ret.setEventFrames(metaDataServiceDTO.getEventFrames());
+        return ret;
+    }
+
+    /**
+     * Function compares the meta data stored in given metaDataEntity and metaDataServiceDTO
+     *
+     * @param metaDataServiceDTO entity to be compared
+     * @param metaDataEntity entity to be compared
+     *
+     * @return true if a change occurred on any parameter of meta data, false otherwise
+     */
     private boolean compareMetadataChanged(MetaDataServiceDTO metaDataServiceDTO, MetaDataServiceDTO metaDataEntity) {
         if(!metaDataServiceDTO.getName().equals(metaDataEntity.getName())) {
             return true;
@@ -482,6 +607,32 @@ public class FederationService {
         return false;
     }
 
+    /**
+     * Function looks for a tag with given tag name in a given metaDataServiceDTO
+     *
+     * @param tagName tag we look for
+     * @param metaDataServiceDTO entity to be searched in
+     *
+     * @return true if metaDataServiceDTO contains a given tag, false otherwise
+     */
+    private boolean checkTagExistence(String tagName, MetaDataServiceDTO metaDataServiceDTO) {
+        Iterator<TagDTO> it = metaDataServiceDTO.getTags().iterator();
+        while(it.hasNext()) {
+            TagDTO tagDTO = it.next();
+            if(tagDTO.getTagName().equals(tagName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Function builds a page part of a POST request to the MetadataService using the data sent from the UI
+     *
+     * @param pageable page data obtained from UI
+     *
+     * @return page part of POST request for MetadataService
+     */
     private String createPageString(Pageable pageable) {
         String ret = "";
 
@@ -495,6 +646,13 @@ public class FederationService {
         return ret;
     }
 
+    /**
+     * Function builds a search part of a POST request to the MetadataService using the data sent from the UI
+     *
+     * @param search search string
+     *
+     * @return search part of POST request for MetadataService
+     */
     private String createSearchString(String search) {
 
         if(search == null || search.isEmpty())

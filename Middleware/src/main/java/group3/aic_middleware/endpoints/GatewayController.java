@@ -119,10 +119,14 @@ public class GatewayController {
      */
     @GetMapping("/{seqId}/tags/{tagName}")
     @ResponseStatus(HttpStatus.OK)
-    public TagDataDTO getTagData(@PathVariable("seqId") String seqId, @PathVariable("seqId") String tagName) {
+    public TagDataDTO getTagData(@PathVariable("seqId") String seqId, @PathVariable("tagName") String tagName) {
         log.info("Reading data for an event with seqId = " + seqId + " with a tag = " + tagName);
         try {
             return  this.federationService.readTagData(seqId, tagName);
+        } catch (EventNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage());
+
         } catch (Exception exc) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", exc);
@@ -158,7 +162,7 @@ public class GatewayController {
 
 
     /**
-     * The call which creates adds a new tag to the event
+     * The call which adds a new tag to the event
      */
     @PutMapping("/{seqId}/tags")
     @ResponseStatus(HttpStatus.OK)
@@ -208,6 +212,9 @@ public class GatewayController {
         log.info("Deleting a tag: " + tagName+ " for an event with the seqId = " + seqId);
         try {
             this.federationService.deleteTag(seqId, tagName);
+        } catch (EventNotUpdatedException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred: ", e);

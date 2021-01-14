@@ -16,5 +16,5 @@ public class SimpleTagDTO {
     @Getter
     @Setter
     @JsonProperty(required = true, value = "image_hash", access = JsonProperty.Access.WRITE_ONLY)
-    private int imageHash;
+    private String imageHash;
 }

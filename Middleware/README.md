@@ -15,7 +15,7 @@ Middleware service that keeps control of the replication, distribution and hashi
 
   ```
   docker build -t middleware .
-  docker run -dp 8080:8082 middleware
+  docker run -dp 8080:9999 middleware
   ```
 
 
