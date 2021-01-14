@@ -87,18 +87,18 @@ services:
       
   workflow-service:
     build: ./Workflow
-    command: sh -c './wait-for middleware:8080 -t 120 -- python -u ./src/workflow.py'
+    command: sh -c './wait-for middleware:8080 -t 300 -- python -u ./src/workflow.py'
     depends_on:
         - middleware
     volumes:
-      - "${SENSING_EVENTS_REPO}:/app/data"
+      - "../iwildcam_synthesized_idaho:/app/data"
     environment:
           API_ENDPOINT: ${API_ENDPOINT}
           PATH_TO_IMAGE_DIR: ${PATH_TO_IMAGE_DIR}
   
   middleware:
     build: ./Middleware
-    command: sh -c './wait-for logdb:3306 -t 120 -- java -jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar'
+    command: sh -c './wait-for logdb:3306 -t 200 -- java -jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar'
     depends_on:
       - metadata-service
       - image-object-service
