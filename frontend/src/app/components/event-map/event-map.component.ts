@@ -129,7 +129,7 @@ export class EventMapComponent {
         shadowUrl: 'leaflet/marker-shadow.png'
       })  
     });
-    m.bindPopup(this.createPopupHtml(event), {minWidth: 200});
+    m.bindPopup(this.createPopupHtml(event), { minWidth: 200, autoPan: false });
     return m;
   }
 
