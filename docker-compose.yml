@@ -90,10 +90,12 @@ services:
     command: sh -c './wait-for middleware:8080 -t 300 -- python -u ./src/workflow.py'
     depends_on:
         - middleware
+        - image-object-service
     volumes:
       - "${PATH_TO_IMAGE_DIR}:/app/data"
     environment:
           API_ENDPOINT: ${API_ENDPOINT}
+          IOS_ENDPOINT: "http://image-object-service:${IMAGE_OBJECT_SERVICE_PORT}"
   
   middleware:
     build: ./Middleware

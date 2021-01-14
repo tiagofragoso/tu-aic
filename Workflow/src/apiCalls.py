@@ -4,7 +4,7 @@ import os
 # https://docs.python.org/3/library/os.html#os.getenv
 # os.getenv(key, default=None)
 API_ENDPOINT = os.getenv("API_ENDPOINT", "http://localhost:3000")
-
+IOS_ENDPOINT = os.getenv("IOS_ENDPOINT", "http://localhost:3000")
 def post(data) :
     url = str(API_ENDPOINT) + "/events"
     try:
@@ -60,3 +60,17 @@ def delete(id) :
     status_code = deleteResp.status_code
     if status_code != 200:
         print("Error deleting image. Got HTTP", status_code)
+
+def putFaultyImage(data,dic) :
+    url = IOS_ENDPOINT + "/images"
+    try:
+        print("sent faulty image with seqId : "+str(dic["seq_id"]))
+        putResp = requests.put(url, json=data)
+    except requests.exceptions.RequestException as e:
+        print("Error sending the image :", e)
+        return
+
+    status_code = putResp.status_code
+    if status_code != 200:
+        print("Error deleting image. Got HTTP", status_code)
+    return

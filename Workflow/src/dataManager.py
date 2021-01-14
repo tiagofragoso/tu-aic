@@ -3,7 +3,6 @@ import datetime
 import json
 import os
 
-# TODO : Change the path in env variables to fit the volume
 PATH = "./data"
 
 def getOrderedData():
@@ -48,7 +47,12 @@ def tagFormatter(dic) :
     return dataEncoded
 
 def getImagePathWithDic(dic) :
+    print(dic)
     picName = dic["filename"]
     linkedFile = PATH + "/images/" + picName
     return linkedFile
 
+def imageObjectServiceFormatter(filePath, name) :
+    encodedImage = getImageInB64(filePath)
+    dataEncoded = {"name": name, "image_file": encodedImage.decode('utf-8')}
+    return dataEncoded

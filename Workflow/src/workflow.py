@@ -2,7 +2,7 @@ import os
 import random
 
 from iotSimulator import postEvent
-from aiSimulator import addTag
+from aiSimulator import addTag, makeFaultyImage
 from dataManager import getOrderedData
 from metadataModifier import changeMetadata
 from apiCalls import delete
@@ -20,7 +20,7 @@ picturesDic = getOrderedData()
 
 # -- CREATE IMAGES
 print(" ------ IOT SIMULATOR ------")
-for i in range(40) :
+for i in range(25) :
     postEvent(picturesDic[i])
 
 # -- CHANGE METADATA TO IMAGES
@@ -45,6 +45,6 @@ print(" ------ IMAGE ERASER ------")
 delete(picturesDic[1]["seq_id"])
 
 # TODO : make an image faulty (put to the image-object service)
-
+makeFaultyImage(picturesDic[3])
 
 
