@@ -1,7 +1,9 @@
 import requests
+import os
 
-API_ENDPOINT = "http://localhost:3000"
-# API_ENDPOINT = os.getenv("API_ENDPOINT")
+# https://docs.python.org/3/library/os.html#os.getenv
+# os.getenv(key, default=None)
+API_ENDPOINT = os.getenv("API_ENDPOINT", "http://localhost:3000")
 
 def post(data) :
     url = str(API_ENDPOINT) + "/events"

@@ -3,15 +3,12 @@ import random
 
 from iotSimulator import postEvent
 from aiSimulator import addTag
-from dataManager import getOrderedData, DOCKER
+from dataManager import getOrderedData
 from metadataModifier import changeMetadata
 from apiCalls import delete
-if DOCKER :
-    if not os.path.exists('./data_created'):
-        os.makedirs('./data_created')
-else :
-    if not os.path.exists('../data_created'):
-        os.makedirs('../data_created')
+
+if not os.path.exists('./data_created'):
+    os.makedirs('./data_created')
 
 categoriesToChange = ["name", "device_id", "longitude", "latitude", "datetime", "frame_num", "seq_num_frames"]
 

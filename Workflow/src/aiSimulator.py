@@ -2,7 +2,7 @@ import os
 import random
 import cv2
 
-from dataManager import tagFormatter, getImagePathWithDic, DOCKER
+from dataManager import tagFormatter, getImagePathWithDic
 from apiCalls import putNewTag
 
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
@@ -30,10 +30,8 @@ def changeImage(dic) :
     else :
         dic["tags"] = []
         dic["tags"].append({"tag_name" : tagName})
-    if DOCKER :
-        filename = "./data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
-    else :
-        filename = "../data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
+
+    filename = "./data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
 
     print(filename)
     cv2.imwrite(filename, image)

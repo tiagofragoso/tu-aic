@@ -6,10 +6,10 @@ RUN pip install requests
 RUN pip install -U python-dotenv
 RUN pip install numpy
 RUN pip install opencv-python-headless
-COPY ./little_data ./little_data
+
 COPY ./src ./src
 COPY ./wait-for ./
 RUN chmod 777 ./wait-for
 
 # The -u flag is important if you want to observe the logs, otherwise python buffers the output
-# ENTRYPOINT [ "python", "-u", "./src/workflow.py" ]
+CMD [ "python", "-u", "./src/workflow.py" ]

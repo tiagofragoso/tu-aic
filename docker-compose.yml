@@ -91,10 +91,9 @@ services:
     depends_on:
         - middleware
     volumes:
-      - "../iwildcam_synthesized_idaho:/app/data"
+      - "${PATH_TO_IMAGE_DIR}:/app/data"
     environment:
           API_ENDPOINT: ${API_ENDPOINT}
-          PATH_TO_IMAGE_DIR: ${PATH_TO_IMAGE_DIR}
   
   middleware:
     build: ./Middleware
