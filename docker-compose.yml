@@ -89,7 +89,7 @@ services:
     depends_on:
         - middleware
     volumes:
-      - "/aic/g2/:/app/data"
+      - "${SENSING_EVENTS_REPO}:/app/data"
     environment:
           API_ENDPOINT: ${API_ENDPOINT}
           PATH_TO_IMAGE_DIR: ${PATH_TO_IMAGE_DIR}
