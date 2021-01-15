@@ -96,7 +96,7 @@ services:
     environment:
           API_ENDPOINT: ${API_ENDPOINT}
           IOS_ENDPOINT: "http://image-object-service:${IMAGE_OBJECT_SERVICE_PORT}"
-  
+          METADATA_ENDPOINT: "http://metadata-service:8080"
   middleware:
     build: ./Middleware
     command: sh -c './wait-for logdb:3306 -t 200 -- java -jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar'
