@@ -71,7 +71,7 @@ export class EventTableComponent implements OnInit {
               private eventService: EventService) {
                 this.queryOptions = {
                   page: 1,
-                  pageSize: 5,
+                  pageSize: 10,
                   searchTerm: new FormControl('')
                 };
                 this.headers = new QueryList<SortableHeader>();
