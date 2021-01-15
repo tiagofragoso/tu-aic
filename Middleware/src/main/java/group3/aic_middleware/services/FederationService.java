@@ -574,6 +574,7 @@ public class FederationService {
         ret.setFrameNum(metaDataServiceDTO.getFrameNum());
         ret.setPlaceIdent(metaDataServiceDTO.getPlaceIdent());
         ret.setEventFrames(metaDataServiceDTO.getEventFrames());
+        ret.setUpdated(metaDataServiceDTO.getUpdated());
         return ret;
     }
 
