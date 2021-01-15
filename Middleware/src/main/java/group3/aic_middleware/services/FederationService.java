@@ -38,15 +38,6 @@ public class FederationService {
     public FederationService() throws NoSuchAlgorithmException {
     }
 
-    /*
-    * Read operations
-    * */
-    // TODO delete before final submission
-    public ReadDetailsEventDTO testStuff() {
-        System.out.println(this.hashingService.getHash("Dnes je pekne ale chladno"));
-        return new ReadDetailsEventDTO();
-    }
-
     /**
      * Function reads the details of a sensing event which includes meta data, image and tags
      *
