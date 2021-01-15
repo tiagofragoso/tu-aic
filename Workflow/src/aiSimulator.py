@@ -5,9 +5,6 @@ import cv2
 from dataManager import tagFormatter, getImagePathWithDic
 from apiCalls import putNewTag
 
-from dataManager import imageObjectServiceFormatter
-
-from apiCalls import putFaultyImage
 
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
 def drawCircle(dic) :
@@ -40,18 +37,8 @@ def changeImage(dic) :
 
     filename = "./data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
 
-    print(filename)
     cv2.imwrite(filename, image)
     return dic
-
-def makeFaultyImage(dic) :
-    image = drawCircle(dic)
-    print(dic)
-    imName = dic["seq_id"] + "_base.jpg"
-    filePath = f"./data_created/temp{imName}"
-    cv2.imwrite(filePath, image)
-    dataFormatted = imageObjectServiceFormatter(filePath, imName)
-    putFaultyImage(dataFormatted,dic)
 
 def addTag(dic) :
     dicWithTag = changeImage(dic)

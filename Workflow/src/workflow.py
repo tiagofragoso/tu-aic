@@ -1,12 +1,13 @@
 import os
 import random
+import time
 
 from iotSimulator import postEvent
-from aiSimulator import addTag, makeFaultyImage
+from aiSimulator import addTag
 from dataManager import getOrderedData
 from metadataModifier import changeMetadata
 from apiCalls import delete
-
+from faultyMissingMaker import makeFaultyImage, makeMissingImage
 if not os.path.exists('./data_created'):
     os.makedirs('./data_created')
 
@@ -20,7 +21,8 @@ picturesDic = getOrderedData()
 
 # -- CREATE IMAGES
 print(" ------ IOT SIMULATOR ------")
-for i in range(25) :
+for i in range(4) :
+    time.sleep(3)
     postEvent(picturesDic[i])
 
 # -- CHANGE METADATA TO IMAGES
@@ -44,7 +46,12 @@ for i in range(10) :
 print(" ------ IMAGE ERASER ------")
 delete(picturesDic[1]["seq_id"])
 
-# TODO : make an image faulty (put to the image-object service)
+# CORRUPT 1 IMAGE (STATE "FAULTY")
+print(" ------ IMAGE CORRUPTER ------")
+
 makeFaultyImage(picturesDic[3])
+
+# MAKE 1 IMAGE STATE "MISSING"
+makeMissingImage(picturesDic[-1])
 
 

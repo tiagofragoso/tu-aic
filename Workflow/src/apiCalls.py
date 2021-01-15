@@ -5,6 +5,8 @@ import os
 # os.getenv(key, default=None)
 API_ENDPOINT = os.getenv("API_ENDPOINT", "http://localhost:3000")
 IOS_ENDPOINT = os.getenv("IOS_ENDPOINT", "http://localhost:3000")
+METADATA_ENDPOINT = os.getenv("METADATA_ENDPOINT", "http://localhost:3000/metadata")
+
 def post(data) :
     url = str(API_ENDPOINT) + "/events"
     try:
@@ -74,3 +76,16 @@ def putFaultyImage(data,dic) :
     if status_code != 200:
         print("Error deleting image. Got HTTP", status_code)
     return
+
+def postMissingImage(data) :
+    url = str(METADATA_ENDPOINT) + "/events"
+    try:
+        print(str(data["datetime"]) + " : image sent to metadata-service (state missing) with id : " + str(data["seq_id"]))
+        postResp = requests.post(url, json=data)
+    except requests.exceptions.RequestException as e:
+        print("Error sending image :", e)
+        return
+
+    status_code = postResp.status_code
+    if status_code != requests.codes.created:
+        print("Error sending image. Got HTTP", status_code)
