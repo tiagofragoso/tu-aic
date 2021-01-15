@@ -8,6 +8,7 @@ import {EventTableRow} from '../../models/event-table-data';
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from 'src/app/models/event';
 import { Observable, Subscription } from 'rxjs';
+import {States} from '../../models/states';
 
 const CONSTANTS = Object.freeze({
   MIN_ZOOM: 1,
@@ -53,6 +54,12 @@ export class EventMapComponent {
   options = {
     zoom: this.zoom,
     center: this.center,
+  };
+
+  statesColorMapping: {[key in States]: string} = { 
+    CORRECT: 'success', 
+    FAULTY: 'warning', 
+    MISSING: 'danger' 
   };
 
   constructor(public router: Router,
@@ -169,7 +176,9 @@ export class EventMapComponent {
           State:
         </div>
         <div class="col-8">
-          ${event.state}
+          <span class="text-${this.statesColorMapping[event.state]}">
+            ${event.state}
+          </span>
         </div>
       </div>
       <div class="row mt-4">

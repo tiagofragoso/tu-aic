@@ -14,13 +14,13 @@
     <table class="table table-hover my-4">
       <thead>
       <tr>
-        <th scope="col" sortable="name" (sort)="onSort($event)">Name</th>
-        <th scope="col" sortable="place_ident" (sort)="onSort($event)">Place ID</th>
-        <th scope="col" sortable="created" (sort)="onSort($event)">Created</th>
-        <th scope="col" sortable="updated" (sort)="onSort($event)">Last updated</th>
-        <th scope="col">Tags</th>
-        <th scope="col">State</th>
-        <th scope="col"></th>
+        <th style="width: 20%;" scope="col" sortable="name" (sort)="onSort($event)">Name</th>
+        <th style="width: 15%;" scope="col" sortable="place_ident" (sort)="onSort($event)">Place ID</th>
+        <th style="width: 15%;" scope="col" sortable="created" (sort)="onSort($event)">Created</th>
+        <th style="width: 15%;" scope="col" sortable="updated" (sort)="onSort($event)">Last updated</th>
+        <th style="width: 15%;" scope="col">Tags</th>
+        <th style="width: 15%;" scope="col">State</th>
+        <th style="width: 5%;" scope="col"></th>
       </tr>
       </thead>
       <tbody>
@@ -31,7 +31,7 @@
         <td>{{ convertDate(event.created) }}</td>
         <td>{{ convertDate(event.updated) }}</td>
         <!-- TODO: Kevin span -->
-        <td>{{ convertTagNames(event.tags) }}
+        <td [class.text-muted]="event.tags.length < 2">{{ convertTagNames(event.tags) }}
           <span *ngIf="event.tags.length > 3" class="text-muted"> & {{event.tags.length - 3}} more</span>
         </td>
         <td>

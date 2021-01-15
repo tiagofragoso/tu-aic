@@ -48,7 +48,9 @@
                               State:
                          </div>
                          <div class="col-9 ellipsis">
-                              {{event.state}}
+                              <span [className]="'text-' + statesColorMapping[event.state]">
+                                   {{event.state}}
+                              </span>
                          </div>
                     </div>
                     <div class="row">
