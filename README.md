@@ -1,4 +1,3 @@
-
 ![DSG](./docs/dsg_logo.png)
 
 # Advanced Internet Computing WS 2020 - Group 3 Topic 3
@@ -8,10 +7,13 @@ This template is intended to serve as an *example* on how you might want to stru
 **Important**: The specific subdirectories are *not* meant to be extended but to serve as an example on how to write a `Dockerfile` and a `docker-compose.yml` file. Your first task should be to replace them with your own.
 
 ## Team
-
+Dominik Fenzl, 01526544
+Kevin Al-Chater, 
 Lichner Ivan, 01226385
+Nils Moynac, 
+Tiago Fragoso, 
 
-TODO
+TODO add mtrNmbr
 
 ## Overview
 
@@ -48,3 +50,21 @@ docker-compose up
 ## How to debug
 
 TODO
+
+
+## Effort Breakdown
+
+|                      | DF  |  LI | KA  | NM  | TF |
+|----------------------|------|-----|-----|-----|----|    
+|Middleware            |      |  x  |     |     |    |
+|Metadata Service      |  x   |     |     |     |    |
+|Image Object Service  |      |     |     |     |  x |
+|Image File Service    |      |     |  x  |     |    |
+|Web Application       |      |     |  x  |     |  x |
+|Workflow Script       |      |     |     |  x  |    |
+|Integration Fixes     |  x   |  x  |     |     |  x |
+|Presentation          |  x   |   x |  x  |  x  | x  |
+|Architecture Planning |  x   |     |     |     |    |
+|Manual Testing        |      |     |     |  x  |    |
+
+
