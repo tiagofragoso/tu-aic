@@ -1,13 +1,12 @@
-import {Component, HostListener} from '@angular/core';
+import {Component, HostListener, Input} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 
-import {latLng, tileLayer, icon, marker, Layer, LatLng, Map, circle, point} from 'leaflet';
+import {circle, icon, LatLng, latLng, Layer, Map, marker, tileLayer} from 'leaflet';
 
 import {EventService} from 'src/app/services/event.service';
 import {EventTableRow} from '../../models/event-table-data';
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from 'src/app/models/event';
-import { Observable } from 'rxjs';
 
 const CONSTANTS = Object.freeze({
   MIN_ZOOM: 1,
@@ -29,13 +28,7 @@ const CONSTANTS = Object.freeze({
 export class EventMapComponent {
 
   // Popup content is rendered as static HTML so we can't bind (click), see used fix below:
-  // https://github.com/Asymmetrik/ngx-leaflet/issues/60#issuecomment-493716598
-  @HostListener('document:click', ['$event']) 
-    clickout(event: any) {
-      if (event.target.classList.contains("popup-link")){ 
-        this.eventClicked(event.target.dataset.eventId); 
-      } 
-    }
+  @Input() singleEvent: Event | undefined;
 
   baseLayer = tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: CONSTANTS.MAX_ZOOM, minZoom: CONSTANTS.MIN_ZOOM });
   center: LatLng = latLng(CONSTANTS.DEFAULT_CENTER_LAT, CONSTANTS.DEFAULT_CENTER_LON);
@@ -54,86 +47,14 @@ export class EventMapComponent {
     center: this.center,
   };
 
+// TODO: sidebar with all visible events, adjust popup style, radius so that max is map visible and a slider for its radius
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute,
               private eventService: EventService) {
-                this.id = this.activatedRoute.snapshot.paramMap.get('id');
-              }
-
-  onMapReady(map: Map) {
-    this.map = map;
-    if (this.id) {
-      this.eventService.getById(this.id)
-      .subscribe((data: Event) => {
-        if (data.metadata?.latitude && data.metadata?.longitude) {
-          this.map?.flyTo(latLng(data.metadata.latitude, data.metadata.longitude), CONSTANTS.CURR_EVENT_ZOOM, {noMoveStart: true});
-        } else {
-          console.error("Invalid event details");
-        }
-      });
-    } else {
-      this.getEvents();
-    }
+    this.id = this.activatedRoute.snapshot.paramMap.get('id');
   }
 
-  onMapMove() {
-    setTimeout(() => this.getEvents(), CONSTANTS.REQUEST_WAIT_TIME);
-  }
-
-  onMapZoom() {
-    setTimeout(() => this.getEvents(), CONSTANTS.REQUEST_WAIT_TIME);  
-  }
-
-  getEvents() {
-    if (!this.map)
-      return;
-
-    this.loading = true;
-
-    const centerNorth = latLng(this.map.getBounds().getNorth(), this.center.lng);
-    const dist = this.center.distanceTo(centerNorth);
-    this.radius = dist * this.radiusFactor * CONSTANTS.M_TO_KM;
-
-    this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
-    .subscribe((data: EventTableRow[]) => {
-      this.events = data;
-      this.refreshMap();
-      this.loading = false;
-    });
-  }
-
-  onShowSearchCircleChange() {
-    this.refreshMap();
-  }
-
-  onChangeRadiusFactor() {
-    this.getEvents();
-  }
-
-  refreshMap() {
-    this.layers = [this.baseLayer];
-    if (this.showSearchCircle) {
-      this.layers.push(circle(this.center, {radius: this.radius / CONSTANTS.M_TO_KM, fillOpacity: 0.15, opacity: 0.2}));
-    }
-    this.layers = [...this.layers, ...this.events.map((e) => this.createMarker(e))]; 
-  }
-
-  private createMarker(event: EventTableRow) {
-    const m = marker([event.latitude, event.longitude], {
-      icon: icon({
-        iconSize: [ 25, 41 ],
-        iconAnchor: [ 13, 41 ],
-        iconUrl: (this.id && this.id === event.event_id)? 
-          'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png'
-          : 'leaflet/marker-icon-2x.png',
-        shadowUrl: 'leaflet/marker-shadow.png'
-      })  
-    });
-    m.bindPopup(this.createPopupHtml(event), {minWidth: 200});
-    return m;
-  }
-
-  private createPopupHtml(event: EventTableRow) {
+  private static createPopupHtml(event: EventTableRow) {
     return `<div>
       <div class="row">
         <div class="col-4 text-muted">
@@ -161,7 +82,7 @@ export class EventMapComponent {
       </div>
       <div class="row">
         <div class="col-4 text-muted">
-          Created: 
+          Created:
         </div>
         <div class="col-8">
           ${convertUnixDateToString(event.created)}
@@ -169,7 +90,7 @@ export class EventMapComponent {
       </div>
       <div class="row">
         <div class="col-4 text-muted">
-          Updated: 
+          Updated:
         </div>
         <div class="col-8">
           ${convertUnixDateToString(event.updated)}
@@ -177,7 +98,7 @@ export class EventMapComponent {
       </div>
       <div class="row">
         <div class="col-4 text-muted">
-          Tags: 
+          Tags:
         </div>
         <div class="col-8">
           ${event.tags.length > 1 ? event.tags.length - 1 : 'Not tagged yet'}
@@ -187,6 +108,91 @@ export class EventMapComponent {
         <button class="btn btn-link btn-sm popup-link" data-event-id="${event.event_id}">See event details</button>
       </div>
     </div>`;
+  }
+
+  // https://github.com/Asymmetrik/ngx-leaflet/issues/60#issuecomment-493716598
+  @HostListener('document:click', ['$event'])
+  clickout(event: any) {
+    if (event.target.classList.contains("popup-link")) {
+      this.eventClicked(event.target.dataset.eventId);
+    }
+  }
+
+  onMapMove() {
+    setTimeout(() => this.getEvents(), CONSTANTS.REQUEST_WAIT_TIME);
+  }
+
+  onMapReady(map: Map) {
+    this.map = map;
+    if (this.id) {
+      this.eventService.getById(this.id)
+        .subscribe((data: Event) => {
+          if (data.metadata?.latitude && data.metadata?.longitude) {
+            this.map?.flyTo(latLng(data.metadata.latitude, data.metadata.longitude), CONSTANTS.CURR_EVENT_ZOOM, {noMoveStart: true});
+          } else {
+            console.error("Invalid event details");
+          }
+        });
+    } else {
+      this.getEvents();
+    }
+  }
+
+  onMapZoom() {
+    setTimeout(() => this.getEvents(), CONSTANTS.REQUEST_WAIT_TIME);
+  }
+
+  onShowSearchCircleChange() {
+    this.refreshMap();
+  }
+
+  onChangeRadiusFactor() {
+    this.getEvents();
+  }
+
+  getEvents() {
+    if (!this.map)
+      return;
+
+    this.loading = true;
+
+    const centerNorth = latLng(this.map.getBounds().getNorth(), this.center.lng);
+    const dist = this.center.distanceTo(centerNorth);
+    this.radius = dist * this.radiusFactor * CONSTANTS.M_TO_KM;
+
+    this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
+      .subscribe((data: EventTableRow[]) => {
+          this.events = data;
+          this.refreshMap();
+          this.loading = false;
+        },
+        () => {
+          // this.events = null;
+          this.loading = false;
+        },);
+  }
+
+  refreshMap() {
+    this.layers = [this.baseLayer];
+    if (this.showSearchCircle) {
+      this.layers.push(circle(this.center, {radius: this.radius / CONSTANTS.M_TO_KM, fillOpacity: 0.15, opacity: 0.2}));
+    }
+    this.layers = [...this.layers, ...this.events.map((e) => this.createMarker(e))];
+  }
+
+  private createMarker(event: EventTableRow) {
+    const m = marker([event.latitude, event.longitude], {
+      icon: icon({
+        iconSize: [25, 41],
+        iconAnchor: [13, 41],
+        iconUrl: (this.id && this.id === event.event_id) ?
+          'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png'
+          : 'leaflet/marker-icon-2x.png',
+        shadowUrl: 'leaflet/marker-shadow.png'
+      })
+    });
+    m.bindPopup(EventMapComponent.createPopupHtml(event), {minWidth: 200});
+    return m;
   }
 
   public eventClicked(id: string) {

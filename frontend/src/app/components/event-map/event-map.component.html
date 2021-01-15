@@ -1,27 +1,24 @@
-<h2>Event Map</h2>
+<h2 *ngIf="!singleEvent">Event Map</h2>
 
-<div class="d-flex justify-content-between">
-     <div class="mb-2">
+<div *ngIf="!singleEvent" class="d-flex justify-content-between">
+  <div class="mb-2">
           <span *ngIf="loading; else results">
                Loading...
           </span>
-          <ng-template #results>
-               <span>Found events <b>{{ events.length }}</b> in this area</span>
-          </ng-template>
-     </div>
-     <div class="form-check d-flex align-items-center">
-          <label class="me-2">Search circle radius</label>
-          <input type="range" class="form-range me-3" min="0.05" max="1.25" step="0.05" 
-               [(ngModel)]="radiusFactor" (change)="onChangeRadiusFactor()" [disabled]="!showSearchCircle">
-          <label class="me-2">
-            Show search circle
-          </label>
-          <input type="checkbox" [(ngModel)]="showSearchCircle" (change)="onShowSearchCircleChange()">
-     </div>
+    <ng-template #results>
+      <span>Found <b [ngClass]="{'text-danger': events.length===0 && !loading}">{{ events.length }}</b> event{{events.length != 1 ? 's' : ''}} in this area</span>
+    </ng-template>
+  </div>
+  <div class="form-check">
+    <input (change)="onShowSearchCircleChange()" [(ngModel)]="showSearchCircle" class="form-check-input" id="flexCheckChecked" type="checkbox">
+    <label class="form-check-label" for="flexCheckChecked">
+      Show search circle
+    </label>
+  </div>
 </div>
 
-<div style="height: 700px;"
-     leaflet 
+<div [class.preview]="singleEvent" class="map"
+     leaflet
      [leafletOptions]="options"
      [(leafletCenter)]="center"
      [(leafletZoom)]="zoom"
@@ -30,4 +27,3 @@
      (leafletMapZoomEnd)="onMapZoom()"
      (leafletMapReady)="onMapReady($event)">
 </div>
-

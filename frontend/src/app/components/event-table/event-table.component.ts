@@ -1,12 +1,10 @@
-import {Component, OnInit, Directive, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
+import {Component, Directive, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {FormControl} from '@angular/forms';
 
 import {EventService} from "../../services/event.service";
 
-import {mockEvents} from "../../models/mockEvents";
 import {convertUnixDateToString} from "../../utils/date";
-import {Event} from "../../models/event";
 import {States} from "../../models/states";
 import {EventTableData, EventTableRow, EventTableRowTag} from '../../models/event-table-data';
 
@@ -60,22 +58,22 @@ export class EventTableComponent implements OnInit {
   totalResults: number = 0;
   events: EventTableRow[] = [];
   loading: boolean = false;
-  statesColorMapping: {[key in States]: string} = { 
-    CORRECT: 'success', 
-    FAULTY: 'warning', 
-    MISSING: 'danger' 
+  statesColorMapping: { [key in States]: string } = {
+    CORRECT: 'success',
+    FAULTY: 'warning',
+    MISSING: 'danger'
   };
 
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute,
               private eventService: EventService) {
-                this.queryOptions = {
-                  page: 1,
-                  pageSize: 5,
-                  searchTerm: new FormControl('')
-                };
-                this.headers = new QueryList<SortableHeader>();
-              }
+    this.queryOptions = {
+      page: 1,
+      pageSize: 5,
+      searchTerm: new FormControl('')
+    };
+    this.headers = new QueryList<SortableHeader>();
+  }
 
   ngOnInit(): void {
     this.getEvents();
@@ -107,10 +105,13 @@ export class EventTableComponent implements OnInit {
     this.loading = true;
     this.eventService.getAll(this.queryOptions)
       .subscribe((data: EventTableData) => {
-        this.events = data.events;
-        this.totalResults = data.total_items;
-        this.loading = false;
-      });
+          this.events = data.events;
+          this.totalResults = data.total_items;
+          this.loading = false;
+        },
+        () => {
+          this.loading = false;
+        },);
   }
 
   public eventClicked(id: string) {

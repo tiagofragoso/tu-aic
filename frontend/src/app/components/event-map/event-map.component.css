@@ -1,3 +1,12 @@
 label {
-	white-space: nowrap;
+  white-space: nowrap;
+}
+
+.map {
+  height: 700px;
+}
+
+.map.preview {
+  height: 250px;
+  min-width: 27.7vw;
 }

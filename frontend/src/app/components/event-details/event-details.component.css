@@ -1,3 +1,175 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  grid-template-rows: 1fr;
+  gap: 0 2em;
+  grid-template-areas: "Details Images";
+}
+
+.Details {
+  grid-area: Details;
+}
+
+.Images {
+  grid-area: Images;
+}
+
 .main-img {
-  max-width: 100%;
+  min-height: 820px;
+  display: inline-block;
+  margin-top: -45px;
+  padding: 12px;
+}
+
+.carousel-caption > h1 {
+  text-shadow: 3px 0 0 #000, 0 -3px 0 #000, 0 3px 0 #000, -3px 0 0 #000;
+  cursor: default;
+
+}
+
+:host ::ng-deep .main-img *:focus {
+  outline: 0 !important;
+}
+
+:host ::ng-deep .carousel-control-prev {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+:host ::ng-deep .carousel-control-next {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.btn-danger.text-white {
+  width: 42px;
+  font-size: 25px;
+  padding: 0;
+}
+
+.btn-edit {
+  width: 40px;
+  font-size: 25px;
+  padding: 0;
+}
+
+.header-line {
+  width: 32.8%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-default {
+  font-size: 30px;
+  padding: 0;
+}
+
+.modal-header {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.header-line > span {
+  margin-top: -7px;
+}
+
+tr > td:first-child {
+  color: darkgrey;
+  white-space: nowrap;
+  width: 30%;
+}
+
+input.form-control {
+  padding: 0 0 0 3px;
+}
+
+.space-right {
+  margin-right: 5px;
+}
+
+.space-left {
+  margin-left: 5px;
+}
+
+label {
+  width: 100%;
+}
+
+.created-padding-top {
+  padding-top: 3em;
+}
+
+.map {
+  position: absolute;
+  left: 2vw;
+  bottom: 0;
+}
+
+:host ::ng-deep app-event-map > div {
+  position: relative;
+}
+
+.image-arrows {
+  font-size: 150px;
+  color: white;
+  border: none;
+}
+
+:host ::ng-deep .carousel-control-prev-icon {
+  width: 6rem !important;
+  height: 6rem !important;
+  text-shadow: 3px 0 0 #000, 0 -3px 0 #000, 0 3px 0 #000, -3px 0 0 #000;
+}
+
+:host ::ng-deep .carousel-control-next-icon {
+  width: 6rem !important;
+  height: 6rem !important;
+  text-shadow: 3px 0 0 #000, 0 -3px 0 #000, 0 3px 0 #000, -3px 0 0 #000;
+}
+
+:host ::ng-deep .carousel-indicators li {
+  border: 0 !important;
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  font-family: math, sans-serif;
+  background: rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.carousel-thumbnail {
+  list-style-type: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-thumbnail__item {
+  cursor: pointer;
+}
+
+.carousel-thumbnail__img {
+  width: 160px;
+  height: 140px;
+}
+
+.thumbnail_selected_border {
+  border: 3px solid #3f9eff;
+}
+
+h1 {
+  display: inline-block;
+  padding: 0 5px 0 5px;
+}
+
+ngb-carousel {
+  width: fit-content;
+  background: lightgray;
+  min-height: 645px;
 }
