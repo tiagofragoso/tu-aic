@@ -65,23 +65,6 @@ public class GatewayController {
         }
     }
 
-    // TODO delete before final submission
-    @GetMapping("/test")
-    @ResponseStatus(HttpStatus.OK)
-    public ReadDetailsEventDTO testStuff() { // 3
-        System.out.println("I am in testStuff");
-        try {
-            return this.federationService.testStuff();
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionAsString = sw.toString();
-            log.warn(exceptionAsString);
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
-        }
-    }
-
     /**
      * The call which queries an event
      *
