@@ -45,7 +45,7 @@ This service exposes a **REST API** wrapping a **MinIO object server** responsib
 
 ### Workflow Service
 
-TODO
+This service is charged of managing a basic workflow that shows the application potential. It gets data from the chosen repository, format them and order them chronologically. It sends sensing events to the middleware, changes metadata of sent sensing events, mocks a computing vision algorithm that adds tags to sensing events. It corrupt images to make their tag as "faulty".
 
 ### Webapplication
 TODO
@@ -70,8 +70,8 @@ TODO
 
 ## Effort Breakdown
 
-|                      | DF  |  LI | KA  | NM  | TF |
-|----------------------|------|-----|-----|-----|----|    
+|                      | DF  | IL | KA  | NM  | TF |
+|----------------------|------|-----|-----|-----|----|
 |Middleware            |      |  x  |     |     |    |
 |Metadata Service      |  x   |     |     |     |    |
 |Image Object Service  |      |     |     |     |  x |
