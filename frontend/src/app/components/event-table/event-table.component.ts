@@ -110,6 +110,12 @@ export class EventTableComponent implements OnInit {
         this.events = data.events;
         this.totalResults = data.total_items;
         this.loading = false;
+      },
+      (err) => {
+        console.error(err);
+        this.events = [];
+        this.totalResults = 0;
+        this.loading = false;
       });
   }
 

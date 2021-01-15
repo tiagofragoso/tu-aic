@@ -71,6 +71,9 @@ export class EventMapComponent {
         } else {
           console.error("Invalid event details");
         }
+      },
+      (err) => {
+        console.error(err);
       });
     } else {
       this.getEvents();
@@ -106,6 +109,11 @@ export class EventMapComponent {
           latLng(a.latitude, a.longitude).distanceTo(this.center) - latLng(b.latitude, b.longitude).distanceTo(this.center)
       );
       this.refreshMap();
+      this.loading = false;
+    },
+    (err) => {
+      console.error(err);
+      this.events = [];
       this.loading = false;
     });
   }
