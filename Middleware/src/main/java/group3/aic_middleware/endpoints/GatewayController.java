@@ -31,6 +31,10 @@ public class GatewayController {
 
     /**
      * The call which creates an event
+     *
+     * @param sensingEvent sensing event to be saved, includes meta data and image
+     *
+     * @return STATUS Created (201) OR Exception (304, 500)
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -61,8 +65,29 @@ public class GatewayController {
         }
     }
 
+    // TODO delete before final submission
+    @GetMapping("/test")
+    @ResponseStatus(HttpStatus.OK)
+    public ReadDetailsEventDTO testStuff() { // 3
+        System.out.println("I am in testStuff");
+        try {
+            return this.federationService.testStuff();
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            log.warn(exceptionAsString);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", e);
+        }
+    }
+
     /**
      * The call which queries an event
+     *
+     * @param seqId unique sensing event id
+     *
+     * @return STATUS OK (200) && details of a requested event OR Exception (404, 500)
      */
     @GetMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK)
@@ -84,7 +109,12 @@ public class GatewayController {
     }
 
     /**
-     * The call which queries all events stored in the system
+     * The call which queries given (in pageable input variable) number of events stored in the system
+     *
+     * @param pageable page request information
+     * @param search search string
+     *
+     * @return STATUS OK (200) && list of events with page meta data OR Exception (500)
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -100,6 +130,12 @@ public class GatewayController {
 
     /**
      * The call which queries all events stored in the system within a radius of specific longitude/latitude
+     *
+     * @param size size of the search radius
+     * @param lon longitude of the center of the search radius
+     * @param lat latitude of the center of the search radius
+     *
+     * @return STATUS OK (200) && list of events in a given radius OR Exception (500)
      */
     @GetMapping("/radius")
     @ResponseStatus(HttpStatus.OK)
@@ -116,6 +152,11 @@ public class GatewayController {
 
     /**
      * The call which queries the data for a tag
+     *
+     * @param seqId unique sensing event id
+     * @param tagName name of the queried tag
+     *
+     * @return STATUS OK (200) && tag data including tag name, image and creation time OR Exception (404, 500)
      */
     @GetMapping("/{seqId}/tags/{tagName}")
     @ResponseStatus(HttpStatus.OK)
@@ -135,7 +176,11 @@ public class GatewayController {
     }
 
     /**
-     * The call which updates an event
+     * The call which updates the meta data of an event
+     *
+     * @param storeEventDTO updated meta data to store
+     *
+     * @return STATUS OK (200) OR Exception (304, 404, 500)
      */
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
@@ -149,6 +194,9 @@ public class GatewayController {
         } catch (EventNotUpdatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Sensing event update failed. Reason: " + e.getMessage());
+        } catch (EventNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Sensing event update failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
@@ -163,6 +211,11 @@ public class GatewayController {
 
     /**
      * The call which adds a new tag to the event
+     *
+     * @param tagDataDTO tag to be stored
+     * @param seqId unique sensing event id
+     *
+     * @return STATUS OK (200) OR Exception (304, 404, 500)
      */
     @PutMapping("/{seqId}/tags")
     @ResponseStatus(HttpStatus.OK)
@@ -175,6 +228,9 @@ public class GatewayController {
         } catch (EventNotUpdatedException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_MODIFIED, "Tag creation failed. Reason: " + e.getMessage());
+        } catch (EventNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Tag creation failed. Reason: " + e.getMessage());
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
@@ -187,6 +243,10 @@ public class GatewayController {
 
     /**
      * The call which cascade deletes an event
+     *
+     * @param seqId unique sensing event id
+     *
+     * @return STATUS OK (200) OR Exception (404, 500)
      */
     @DeleteMapping("/{seqId}")
     @ResponseStatus(HttpStatus.OK)
@@ -205,6 +265,11 @@ public class GatewayController {
 
     /**
      * The call which deletes a tag of an event and corresponding images from primary and backup storage
+     *
+     * @param seqId unique sensing event id
+     * @param tagName name of the tag to delete
+     *
+     * @return STATUS OK (200) OR Exception (404, 500)
      */
     @DeleteMapping("/{seqId}/tags/{tagName}")
     @ResponseStatus(HttpStatus.OK)
