@@ -6,6 +6,8 @@ from aiSimulator import drawCircle
 from apiCalls import putFaultyImage, postMissingImage
 from dataManager import imageObjectServiceFormatter
 
+from dataManager import metadataServiceFormatter
+
 
 def makeFaultyImage(dic) :
     image = drawCircle(dic)
@@ -16,4 +18,5 @@ def makeFaultyImage(dic) :
     putFaultyImage(dataFormatted,dic)
 
 def makeMissingImage(dic) :
-    postMissingImage(dic)
+    dataFormatted = metadataServiceFormatter(dic)
+    postMissingImage(dataFormatted)

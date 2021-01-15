@@ -56,3 +56,16 @@ def imageObjectServiceFormatter(filePath, name) :
     encodedImage = getImageInB64(filePath)
     dataEncoded = {"name": name, "image_file": encodedImage.decode('utf-8')}
     return dataEncoded
+
+def metadataServiceFormatter(dic) :
+    dic["dev_id"] = dic["device_id"]
+    dic.pop("device_id")
+    dic["event_id"] = dic["seq_id"]
+    dic.pop("seq_id")
+    date = datetime.datetime.strptime(dic["datetime"], '%d-%b-%Y (%H:%M:%S.%f)')
+    dic["timestamp"] = datetime.datetime.timestamp(date)
+    dic.pop("datetime")
+    dic["event_frames"] = dic["seq_num_frames"]
+    dic.pop("seq_num_frames")
+    dic["tags"] = []
+    return dic

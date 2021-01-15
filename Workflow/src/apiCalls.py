@@ -1,5 +1,6 @@
 import requests
 import os
+import datetime
 
 # https://docs.python.org/3/library/os.html#os.getenv
 # os.getenv(key, default=None)
@@ -66,7 +67,7 @@ def delete(id) :
 def putFaultyImage(data,dic) :
     url = IOS_ENDPOINT + "/images"
     try:
-        print("sent faulty image with seqId : "+str(dic["seq_id"]))
+        print(dic["datetime"]+" : image sent to image-object-service (mocks a FAULTY state) "+str(dic["seq_id"]))
         putResp = requests.put(url, json=data)
     except requests.exceptions.RequestException as e:
         print("Error sending the image :", e)
@@ -79,8 +80,11 @@ def putFaultyImage(data,dic) :
 
 def postMissingImage(data) :
     url = str(METADATA_ENDPOINT) + "/events"
+    print(url)
+    print(data)
     try:
-        print(str(data["datetime"]) + " : image sent to metadata-service (state missing) with id : " + str(data["seq_id"]))
+        date = datetime.datetime.fromtimestamp(data["timestamp"])
+        print(str(date) + " : image sent to metadata-service (mocks a MISSING state) with id : " + str(data["event_id"]))
         postResp = requests.post(url, json=data)
     except requests.exceptions.RequestException as e:
         print("Error sending image :", e)
