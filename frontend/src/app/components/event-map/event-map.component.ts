@@ -7,7 +7,7 @@ import {EventService} from 'src/app/services/event.service';
 import {EventTableRow} from '../../models/event-table-data';
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from 'src/app/models/event';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 const CONSTANTS = Object.freeze({
   MIN_ZOOM: 1,
@@ -16,7 +16,7 @@ const CONSTANTS = Object.freeze({
   CURR_EVENT_ZOOM: 10,
   DEFAULT_CENTER_LAT: 42.854912879552664,
   DEFAULT_CENTER_LON: -115.06896547973157,
-  REQUEST_WAIT_TIME: 250,
+  REQUEST_WAIT_TIME: 100,
   M_TO_KM: 1/1000,
   DEAFULT_RADIUS_FACTOR: 0.95
 });
@@ -48,6 +48,7 @@ export class EventMapComponent {
   radius = 0;
   id: string | null;
   radiusFactor = CONSTANTS.DEAFULT_RADIUS_FACTOR;
+  subscription: Subscription | null = null;
 
   options = {
     zoom: this.zoom,
@@ -88,15 +89,22 @@ export class EventMapComponent {
     if (!this.map)
       return;
 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+
     this.loading = true;
 
     const centerNorth = latLng(this.map.getBounds().getNorth(), this.center.lng);
     const dist = this.center.distanceTo(centerNorth);
     this.radius = dist * this.radiusFactor * CONSTANTS.M_TO_KM;
 
-    this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
+    this.subscription = this.eventService.findInRadius(this.radius, this.center.lat, this.center.lng)
     .subscribe((data: EventTableRow[]) => {
-      this.events = data;
+      this.events = data.sort(
+        (a, b) => 
+          latLng(a.latitude, a.longitude).distanceTo(this.center) - latLng(b.latitude, b.longitude).distanceTo(this.center)
+      );
       this.refreshMap();
       this.loading = false;
     });
@@ -116,6 +124,11 @@ export class EventMapComponent {
       this.layers.push(circle(this.center, {radius: this.radius / CONSTANTS.M_TO_KM, fillOpacity: 0.15, opacity: 0.2}));
     }
     this.layers = [...this.layers, ...this.events.map((e) => this.createMarker(e))]; 
+  }
+
+  selectEvent(event_id: string) {
+    this.id = event_id;
+    this.refreshMap();
   }
 
   private createMarker(event: EventTableRow) {

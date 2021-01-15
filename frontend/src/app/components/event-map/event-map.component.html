@@ -1,15 +1,7 @@
 <h2>Event Map</h2>
 
-<div class="d-flex justify-content-between">
-     <div class="mb-2">
-          <span *ngIf="loading; else results">
-               Loading...
-          </span>
-          <ng-template #results>
-               <span>Found events <b>{{ events.length }}</b> in this area</span>
-          </ng-template>
-     </div>
-     <div class="form-check d-flex align-items-center">
+<div class="d-flex">
+     <div class="d-flex align-items-center">
           <label class="me-2">Search circle radius</label>
           <input type="range" class="form-range me-3" min="0.05" max="1.25" step="0.05" 
                [(ngModel)]="radiusFactor" (change)="onChangeRadiusFactor()" [disabled]="!showSearchCircle">
@@ -20,14 +12,68 @@
      </div>
 </div>
 
-<div style="height: 700px;"
-     leaflet 
-     [leafletOptions]="options"
-     [(leafletCenter)]="center"
-     [(leafletZoom)]="zoom"
-     [leafletLayers]="layers"
-     (leafletMapMoveEnd)="onMapMove()"
-     (leafletMapZoomEnd)="onMapZoom()"
-     (leafletMapReady)="onMapReady($event)">
+<div class="d-flex flex-row content-wrapper">
+     <div style="height: 100%;width: 80%;"
+          leaflet 
+          [leafletOptions]="options"
+          [(leafletCenter)]="center"
+          [(leafletZoom)]="zoom"
+          [leafletLayers]="layers"
+          (leafletMapMoveEnd)="onMapMove()"
+          (leafletMapZoomEnd)="onMapZoom()"
+          (leafletMapReady)="onMapReady($event)">
+     </div>
+     
+     <div class="events-list">
+          <div class="py-2 event-list-header" *ngIf="loading; else resultsList">
+               <span>Loading...</span>
+          </div>
+          <ng-template #resultsList>
+               <div class="py-2 event-list-header">
+                    <span>
+                         Found events <b>{{ events.length }}</b> in this area
+                    </span>
+               </div>     
+               <div *ngFor="let event of events" class="event-list-item" [class.curr]="event.event_id === id" (click)="selectEvent(event.event_id)">
+                    <div class="row">
+                         <div class="col-3 text-muted">
+                              Name:
+                         </div>
+                         <div class="col-9 ellipsis">
+                              <b>{{event.name}}</b>
+                         </div>
+                    </div>
+                    <div class="row">
+                         <div class="col-3 text-muted">
+                              State:
+                         </div>
+                         <div class="col-9 ellipsis">
+                              {{event.state}}
+                         </div>
+                    </div>
+                    <div class="row">
+                         <div class="col-3 text-muted">
+                              Place:
+                         </div>
+                         <div class="col-9 ellipsis">
+                              {{event.place_ident}}
+                         </div>
+                    </div>
+                    <div class="row">
+                         <div class="col-3 text-muted">
+                              Tags:
+                         </div>
+                         <div class="col-9 ellipsis">
+                              {{event.tags.length > 1 ? event.tags.length - 1 : 'Not tagged yet'}}
+                         </div>
+                    </div>    
+                    <div class="row">
+                         <div class="col">
+                              <button class="btn btn-link btn-sm popup-link" [attr.data-event-id]="event.event_id">See event details</button>
+                         </div>
+                    </div>
+               </div>
+          </ng-template>
+     </div>
 </div>
 
