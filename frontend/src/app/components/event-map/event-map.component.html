@@ -31,7 +31,7 @@
           <ng-template #resultsList>
                <div class="py-2 event-list-header">
                     <span>
-                         Found events <b>{{ events.length }}</b> in this area
+                         Found <b>{{ events.length }}</b> events in this area
                     </span>
                </div>     
                <div *ngFor="let event of events" class="event-list-item" [class.curr]="event.event_id === id" (click)="selectEvent(event.event_id)">
