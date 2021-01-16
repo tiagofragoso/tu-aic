@@ -50,6 +50,8 @@ services:
     image: logger-mysql
     volumes:
       - logger_container:/data/logdb
+    logging:
+        driver: none
     command: --init-file /data/logdb/init.sql 
     environment:
        MYSQL_ROOT_PASSWORD: pw

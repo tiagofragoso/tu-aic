@@ -57,5 +57,6 @@ public class MetaDataDetailsDTO {
 
     @Getter
     @Setter
+    @JsonProperty(required = true, value="updated")
     private long updated;
 }

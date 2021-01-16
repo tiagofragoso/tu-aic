@@ -102,7 +102,7 @@ public class SensingEvent {
 
     public void setTags(List<Tag> tags) {
         this.tags = tags;
-        this.tagConcat = tags.stream().map(Tag::getTagName).collect(Collectors.joining(","));
+        updateTagsConcatString();
     }
 
     public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude, long frameNum, String placeIdent, long eventFrames, long updated) {
@@ -123,6 +123,10 @@ public class SensingEvent {
         this.createdHumanReadable = formatter.format(Instant.ofEpochSecond(timestamp));
         this.updatedHumanReadable = formatter.format(Instant.ofEpochSecond(timestamp));
 
+        updateTagsConcatString();
+    }
+
+    public void updateTagsConcatString() {
         this.tagConcat = tags.stream().map(Tag::getTagName).collect(Collectors.joining(","));
     }
 }
