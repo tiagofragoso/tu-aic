@@ -215,3 +215,16 @@ body {
     transform: rotate(360deg);
   }
 }
+.marker-cluster-small {
+  background-color: rgba(140, 180, 226, 0.6)!important;
+}
+.marker-cluster-small div {
+  background-color: rgba(57, 103, 204, 0.6)!important;
+}
+
+.marker-cluster-small.highlight {
+  background-color: rgba(181, 226, 140, 0.6)!important;
+}
+.marker-cluster-small.highlight div {
+  background-color: rgba(110, 204, 57, 0.6)!important;
+}

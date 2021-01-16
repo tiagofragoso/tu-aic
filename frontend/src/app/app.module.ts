@@ -5,6 +5,7 @@ import {HttpClientModule} from '@angular/common/http';
 
 import {NgbDateParserFormatter, NgbModalModule, NgbModule, NgbToastModule, NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
 import {LeafletModule} from '@asymmetrik/ngx-leaflet';
+import {LeafletMarkerClusterModule} from '@asymmetrik/ngx-leaflet-markercluster';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
@@ -34,6 +35,7 @@ import {ToastsContainerComponent} from "./utils/Toast/toast-container.component"
     HttpClientModule,
     NgbModule,
     LeafletModule,
+    LeafletMarkerClusterModule,
     NgbModalModule,
     BrowserAnimationsModule,
     NgbToastModule,

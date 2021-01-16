@@ -15,7 +15,7 @@ const BASE_TAG = "base";
 
 export type SortColumn = 'name' | 'place_ident' | 'created' | 'updated' | '';
 export type SortDirection = 'asc' | 'desc' | '';
-const rotate: { [key: string]: SortDirection } = {'asc': 'desc', 'desc': '', '': 'asc'};
+const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
 
 export interface SortEvent {
   column: SortColumn;
@@ -69,13 +69,13 @@ export class EventTableComponent implements OnInit {
     if (this.router.getCurrentNavigation()?.extras.state?.deletedEventId) {
       this.toastService.showToast('Event ' + this.router.getCurrentNavigation()?.extras.state?.deletedEventId + 'was successfully deleted!', ColorCodes.SUCCESS);
     }
-    this.queryOptions = {
-      page: 1,
-      pageSize: 5,
-      searchTerm: new FormControl('')
-    };
-    this.headers = new QueryList<SortableHeader>();
-  }
+                this.queryOptions = {
+                  page: 1,
+                  pageSize: 10,
+                  searchTerm: new FormControl('')
+                };
+                this.headers = new QueryList<SortableHeader>();
+              }
 
   ngOnInit(): void {
     this.getEvents();
@@ -107,13 +107,16 @@ export class EventTableComponent implements OnInit {
     this.loading = true;
     this.eventService.getAll(this.queryOptions)
       .subscribe((data: EventTableData) => {
-          this.events = data.events;
-          this.totalResults = data.total_items;
-          this.loading = false;
-        },
-        () => {
-          this.loading = false;
-        },);
+        this.events = data.events;
+        this.totalResults = data.total_items;
+        this.loading = false;
+      },
+      (err) => {
+        console.error(err);
+        this.events = [];
+        this.totalResults = 0;
+        this.loading = false;
+      });
   }
 
   public eventClicked(id: string) {
