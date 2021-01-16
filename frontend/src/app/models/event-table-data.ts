@@ -1,4 +1,4 @@
-import {States} from './states';
+import {State} from './state';
 
 export interface EventTableData {
 	events: EventTableRow[];
@@ -8,15 +8,15 @@ export interface EventTableData {
 }
 
 export interface EventTableRow {
-	event_id: string;
-  state: States;
+  event_id: string;
+  state: State;
   name: string;
   created: Date;
   updated: Date;
   place_ident: string;
   longitude: number;
-	latitude: number;
-	tags: EventTableRowTag[];
+  latitude: number;
+  tags: EventTableRowTag[];
 }
 
 export interface EventTableRowTag {

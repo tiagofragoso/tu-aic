@@ -5,14 +5,17 @@ import {FormControl} from '@angular/forms';
 import {EventService} from "../../services/event.service";
 
 import {convertUnixDateToString} from "../../utils/date";
-import {States} from "../../models/states";
+import {stateToColor} from "../../utils/Color/state-to-color";
 import {EventTableData, EventTableRow, EventTableRowTag} from '../../models/event-table-data';
+import {State} from "../../models/state";
+import {ToastService} from "../../utils/Toast/toast.service";
+import {ColorCodes} from "../../utils/Color/color-codes";
 
 const BASE_TAG = "base";
 
 export type SortColumn = 'name' | 'place_ident' | 'created' | 'updated' | '';
 export type SortDirection = 'asc' | 'desc' | '';
-const rotate: {[key: string]: SortDirection} = { 'asc': 'desc', 'desc': '', '': 'asc' };
+const rotate: { [key: string]: SortDirection } = {'asc': 'desc', 'desc': '', '': 'asc'};
 
 export interface SortEvent {
   column: SortColumn;
@@ -58,15 +61,14 @@ export class EventTableComponent implements OnInit {
   totalResults: number = 0;
   events: EventTableRow[] = [];
   loading: boolean = false;
-  statesColorMapping: { [key in States]: string } = {
-    CORRECT: 'success',
-    FAULTY: 'warning',
-    MISSING: 'danger'
-  };
 
   constructor(public router: Router,
               private activatedRoute: ActivatedRoute,
-              private eventService: EventService) {
+              private eventService: EventService,
+              private toastService: ToastService) {
+    if (this.router.getCurrentNavigation()?.extras.state?.deletedEventId) {
+      this.toastService.showToast('Event ' + this.router.getCurrentNavigation()?.extras.state?.deletedEventId + 'was successfully deleted!', ColorCodes.SUCCESS);
+    }
     this.queryOptions = {
       page: 1,
       pageSize: 5,
@@ -133,5 +135,9 @@ export class EventTableComponent implements OnInit {
   public convertTagNames(tags?: EventTableRowTag[]): string {
     if (!tags || tags.length < 2) return 'Not tagged yet';
     return tags.filter(({tag_name}) => tag_name !== BASE_TAG).slice(0, 2).map(({tag_name}) => tag_name).join(", ");
+  }
+
+  public getColor(state: State) {
+    return stateToColor(state);
   }
 }

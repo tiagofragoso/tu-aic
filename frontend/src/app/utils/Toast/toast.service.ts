@@ -1,4 +1,5 @@
 import {Injectable, TemplateRef} from "@angular/core";
+import {ColorCodes} from "../Color/color-codes";
 
 @Injectable({providedIn: 'root'})
 export class ToastService {
@@ -8,19 +9,10 @@ export class ToastService {
     this.toasts = this.toasts.filter(t => t !== toast);
   }
 
-  showToastError(errMess: string): void {
-    this.show(errMess, {
-      classname: 'bg-danger text-light',
-      delay: 6000,
-    });
-  }
-
-  showToastSuccess(message: string): void {
+  showToast(message: string, color: ColorCodes): void {
     this.show(message, {
-      classname: 'bg-success text-light',
-      delay: 4000,
-
-      autohide: false
+      classname: 'bg-' + color + ' text-light',
+      delay: 6000,
     });
   }
 

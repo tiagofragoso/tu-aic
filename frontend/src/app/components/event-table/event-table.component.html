@@ -10,31 +10,31 @@
       </div>
     </div>
   </form>
+
   <table class="table table-hover my-4">
     <thead>
     <tr>
-      <th (sort)="onSort($event)" scope="col" sortable="name">Name</th>
-      <th (sort)="onSort($event)" scope="col" sortable="place_ident">Place ID</th>
-      <th (sort)="onSort($event)" scope="col" sortable="created">Created</th>
-      <th (sort)="onSort($event)" scope="col" sortable="updated">Last updated</th>
-      <th scope="col">Tags</th>
-      <th scope="col">State</th>
-      <th scope="col"></th>
+      <th (sort)="onSort($event)" class="long-width" scope="col" sortable="name">Name</th>
+      <th (sort)="onSort($event)" class="medium-width" scope="col" sortable="place_ident">Place ID</th>
+      <th (sort)="onSort($event)" class="medium-width" scope="col" sortable="created">Created</th>
+      <th (sort)="onSort($event)" class="medium-width" scope="col" sortable="updated">Last updated</th>
+      <th class="long-width" scope="col">Tags</th>
+      <th class="small-width" scope="col">State</th>
+      <th class="tiny-width" scope="col"></th>
     </tr>
     </thead>
     <tbody>
     <tr (click)="eventClicked(event.event_id)" *ngFor="let event of events">
       <!-- TODO: In case of empty value, add placeholder text  -->
-      <td>{{ event.name }}</td>
+      <td>{{ event.name ? event.name : 'No name found' }}</td>
       <td>{{ event.place_ident }}</td>
       <td>{{ convertDate(event.created) }}</td>
       <td>{{ convertDate(event.updated) }}</td>
-      <!-- TODO: Kevin span -->
-      <td>{{ convertTagNames(event.tags) }}
+      <td [class.text-muted]="event.tags.length < 2">{{ convertTagNames(event.tags) }}
         <span *ngIf="event.tags.length > 3" class="text-muted"> & {{event.tags.length - 3}} more</span>
       </td>
       <td>
-          <span [className]="'text-' + statesColorMapping[event.state]">
+          <span [className]="'text-' + getColor(event.state)">
             {{event.state}}
           </span>
       </td>
@@ -62,7 +62,6 @@
     </div>
 
     <div class="col-auto">
-      <!-- TODO: Might be helpful to bind the ngModel to a different property that doesn't interfere with the pagination widget  -->
       <label><select (ngModelChange)="onPageChange()" [(ngModel)]="queryOptions.pageSize" class="form-select">
         <option [ngValue]="5">5 items per page</option>
         <option [ngValue]="10">10 items per page</option>
@@ -74,3 +73,4 @@
   </div>
 </div>
 
+<bc-app-toasts aria-atomic="true" aria-live="polite" class="toasty"></bc-app-toasts>

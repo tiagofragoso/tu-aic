@@ -13,5 +13,5 @@ export const convertUnixDateToDate = (d: number) => {
 
 export const convertStringDateToDate = (d: string) => {
   // example string: '13-Apr-2019 (04:35:23.000000)'
-  return new Date(moment.utc(d, 'DD-MMM-YYYY (HH:mm:ss.SSSSSS)').toDate());
+  return new Date(moment.utc(d, 'DD.MMM.YYYY').toDate());
 };

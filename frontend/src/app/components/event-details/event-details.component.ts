@@ -2,13 +2,14 @@ import {Component, OnInit, Output, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Event} from "../../models/event";
 import {convertStringDateToDate, convertUnixDateToDate, convertUnixDateToString} from "../../utils/date";
-import {States} from "../../models/states";
+import {State} from "../../models/state";
 import {NgbCarousel, NgbDateStruct, NgbModal, NgbTimeStruct} from "@ng-bootstrap/ng-bootstrap";
 import {EventService} from "../../services/event.service";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup, ValidationErrors, Validators} from "@angular/forms";
 import {Tag} from "../../models/tag";
 import {ToastService} from "../../utils/Toast/toast.service";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ColorCodes} from "../../utils/Color/color-codes";
 
 @Component({
   selector: 'app-event-details',
@@ -16,21 +17,10 @@ import {HttpErrorResponse} from "@angular/common/http";
   styleUrls: ['./event-details.component.css']
 })
 export class EventDetailsComponent implements OnInit {
-  // TODO: Validation in form
   @Output()
   public id: string | null = '';
-  public eventForm = new FormGroup({
-    name: new FormControl(''),
-    dev_id: new FormControl(''),
-    created_date: new FormControl(''),
-    created_time: new FormControl(''),
-    frame_num: new FormControl(''),
-    event_frames: new FormControl(''),
-    place_ident: new FormControl(''),
-    longitude: new FormControl(''),
-    latitude: new FormControl('')
-  });
-  statusEnum: typeof States = States;
+  public eventForm: FormGroup;
+  statusEnum: typeof State = State;
   loading = true;
   edit = false;
   event: Event = new Event();
@@ -44,9 +34,20 @@ export class EventDetailsComponent implements OnInit {
 
   constructor(public router: Router, public toastService: ToastService,
               public activatedRoute: ActivatedRoute, private modalService: NgbModal, private eventService: EventService) {
+    this.eventForm = new FormGroup({
+      name: new FormControl(''),
+      device_identifier: new FormControl(''),
+      created_date: new FormControl(''),
+      created_time: new FormControl(''),
+      frame_number: new FormControl(''),
+      event_frames: new FormControl(''),
+      place_identifier: new FormControl(''),
+      longitude: new FormControl(''),
+      latitude: new FormControl('')
+    });
   }
 
-  // TODO: Slider of tags (also should not display more than 5 before arrows appear so that one can navigate between them)
+  // TODO: thumbnail overflow should display all images
 
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -54,9 +55,9 @@ export class EventDetailsComponent implements OnInit {
       this.eventService.getById(this.id).subscribe((event: Event) => {
         this.event = this.tmpEvent = event;
         if (this.event.image && this.event.image.length === 0) {
-          this.event.metadata.state = States.MISSING;
+          this.event.metadata.state = State.MISSING;
         } else {
-          this.event.metadata.state = States.CORRECT;
+          this.event.metadata.state = State.CORRECT;
         }
         this.setCreatedTime(this.event.metadata.created);
         this.fillForm(this.event);
@@ -103,49 +104,63 @@ export class EventDetailsComponent implements OnInit {
     this.modalService.open(content);
   }
 
-  saveUpdate() {
-    if (!this.eventForm.valid) {
-
-      //  not valid
-      // TODO: Invalid inputs (longitude(-180 till 180), latitude(-90 till 90), created after updated or a date before 1970)
-    } else {
-      this.eventService.update(this.id!, this.getEventFormValues()).subscribe(() => {
-          this.toastService.showToastSuccess('Event was successfully updated!');
-          // TODO: Make map refresh itself if new latitude/longitude got set
-          this.tmpEvent = this.event = this.getEventFormValues();
-          this.edit = false;
-        },
-        (error: HttpErrorResponse) => {
-          let message: string;
-          if (error.status === 304) {
-            message = "Event metadata was not modified!";
-          } else {
-            message = "An error occurred:" + error.message;
-          }
-          this.toastService.showToastError(message);
-          this.cancel();
-        });
+  getFormControlError(): string {
+    let error = '';
+    if (this.eventForm.invalid) {
+      if (this.eventForm.errors) {
+        const controlErrors: ValidationErrors = this.eventForm.errors;
+        error = Object.keys(controlErrors).map(keyError => {
+          return controlErrors[keyError];
+        }).join('\n');
+      }
+      Object.keys(this.eventForm.controls).map((key: string) => {
+        if (this.eventForm.get(key)?.invalid) {
+          error += '"' +
+            key.split('_').map(value => {
+              return value.charAt(0).toUpperCase() + value.substring(1)
+            }).join(' ') + '" cannot be empty!\n';
+        }
+      });
     }
+    return error;
+  }
+
+  saveUpdate() {
+    this.eventService.update(this.id!, this.getEventFormValues()).subscribe(() => {
+        this.toastService.showToast('Event was successfully updated!', ColorCodes.SUCCESS);
+        // TODO: Make map refresh itself if new latitude/longitude got set
+        this.tmpEvent = this.event = this.getEventFormValues();
+        this.edit = false;
+      },
+      (error: HttpErrorResponse) => {
+        let message: string;
+        let color: ColorCodes;
+        if (error.status === 304) {
+          message = "Event metadata was not modified!";
+          color = ColorCodes.WARNING;
+        } else {
+          message = "An error occurred:" + error.message;
+          color = ColorCodes.DANGER;
+        }
+        this.toastService.showToast(message, color);
+        this.cancel();
+      });
   }
 
   deleteEvent() {
     this.eventService.delete(this.event.metadata.event_id).subscribe(() => {
-        this.toastService.showToastSuccess('Event ' + this.id + 'was successfully deleted!\nYou will be redirected in 5 seconds.');
-        setTimeout(() => {
-          this.router.navigate(['/events']);
-        }, 5000);
-      }
-    );
+      this.router.navigate(['/events'], {state: {deletedEventId: this.event.metadata.event_id}}).catch(console.error);
+    });
   }
 
   fillForm(event: Event) {
     const date = new Date(event.metadata.created);
     this.eventForm.setValue({
       name: event.metadata.name,
-      dev_id: event.metadata.dev_id,
-      frame_num: event.metadata.frame_num,
+      device_identifier: event.metadata.dev_id,
+      frame_number: event.metadata.frame_num,
       event_frames: event.metadata.event_frames,
-      place_ident: event.metadata.place_ident,
+      place_identifier: event.metadata.place_ident,
       longitude: event.metadata.longitude,
       latitude: event.metadata.latitude,
       created_date: {
@@ -155,15 +170,26 @@ export class EventDetailsComponent implements OnInit {
       },
       created_time: {hour: date.getUTCHours(), minute: date.getUTCMinutes()}
     });
+
+    this.eventForm.setValidators([Validators.required, this.validateFrames, this.validateCreatedDate]);
+    this.eventForm.get('name')?.setValidators(Validators.required);
+    this.eventForm.get('device_identifier')?.setValidators(Validators.required);
+    this.eventForm.get('created_date')?.setValidators(Validators.required);
+    this.eventForm.get('created_time')?.setValidators(Validators.required);
+    this.eventForm.get('frame_number')?.setValidators([Validators.required]);
+    this.eventForm.get('event_frames')?.setValidators([Validators.required]);
+    this.eventForm.get('place_identifier')?.setValidators(Validators.required);
+    this.eventForm.get('longitude')?.setValidators([Validators.required, this.validateLongitude]);
+    this.eventForm.get('latitude')?.setValidators([Validators.required, this.validateLatitude]);
   }
 
   getEventFormValues(): Event {
     let editedEvent = {...this.tmpEvent};
     editedEvent.metadata.name = this.eventForm.get('name')?.value;
-    editedEvent.metadata.dev_id = this.eventForm.get('dev_id')?.value;
-    editedEvent.metadata.frame_num = this.eventForm.get('frame_num')?.value;
+    editedEvent.metadata.dev_id = this.eventForm.get('device_identifier')?.value;
+    editedEvent.metadata.frame_num = this.eventForm.get('frame_number')?.value;
     editedEvent.metadata.event_frames = this.eventForm.get('event_frames')?.value;
-    editedEvent.metadata.place_ident = this.eventForm.get('place_ident')?.value;
+    editedEvent.metadata.place_ident = this.eventForm.get('place_identifier')?.value;
     editedEvent.metadata.longitude = this.eventForm.get('longitude')?.value;
     editedEvent.metadata.latitude = this.eventForm.get('latitude')?.value;
     const createdDate: NgbDateStruct = this.eventForm.get('created_date')?.value;
@@ -196,4 +222,41 @@ export class EventDetailsComponent implements OnInit {
     const slideId: number = this.event.tags.indexOf(tag);
     this.carousel.select('ngb-slide-' + slideId);
   }
+
+  validateLongitude(longitude: FormControl): ValidationErrors | null {
+    return (
+      longitude.value.toString().match('^-?\\d+(?:.\\d+)?$') && longitude.value >= -180 && longitude.value <= 180
+    ) ?
+      null :
+      {longitude: '"Longitude" has to be a number between -180 and 180!'};
+  }
+
+  validateLatitude(latitude: FormControl): ValidationErrors | null {
+    return (
+      latitude.value.toString().match('^-?\\d+(?:.\\d+)?$') && latitude.value >= -90 && latitude.value <= 90
+    ) ?
+      null :
+      {latitude: '"Latitude" has to be a number between -90 and 90!'};
+  }
+
+  validateCreatedDate(fg: FormGroup): ValidationErrors | null {
+    const createdDateInput = fg?.get('created_date')?.value as NgbDateStruct;
+    const createdDateTimeInput = fg?.get('created_time')?.value as NgbTimeStruct;
+    const createdDate = new Date(createdDateInput.year, createdDateInput.month - 1, createdDateInput.day, createdDateTimeInput.hour, createdDateTimeInput.minute);
+    return (
+      createdDate
+      &&
+      createdDate.valueOf() >= (new Date(0).valueOf())
+      &&
+      createdDate.valueOf() <= Date.now()
+    ) ?
+      null :
+      {createdDate: '"Created Date" has to be a valid date in the expected format (e.g.: "15.11.2020"), greater or equal to 01.01.1970 and has to be lesser or equal than the current date!'};
+  }
+
+  validateFrames(fg: FormGroup): ValidationErrors | null {
+    return fg?.get('frame_number')?.value <= fg?.get('event_frames')?.value
+      ? null :
+      {frames: '"Frame Number" has to be lesser or equal to "Event Frames"!'};
+  };
 }

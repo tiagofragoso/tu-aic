@@ -1,4 +1,4 @@
-export enum States {
+export enum State {
   CORRECT = 'CORRECT',
   FAULTY = 'FAULTY',
   MISSING = 'MISSING'

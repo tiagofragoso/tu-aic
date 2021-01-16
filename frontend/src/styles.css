@@ -12,6 +12,10 @@ body * {
   font-family: math, sans-serif;
 }
 
+.wrapper {
+  height: 100%;
+}
+
 .page-content-wrapper {
   padding-top: 84px;
 }
@@ -46,7 +50,7 @@ body * {
 }
 
 .toast-body {
-
+  white-space: pre-wrap;
 }
 
 .main-content {

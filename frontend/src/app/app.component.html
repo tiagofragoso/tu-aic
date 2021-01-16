@@ -14,9 +14,8 @@
           <div class="px-0 sidebar-bg width">
             <div class="sidebar">
               <ul class="nav nav-pills flex-column">
-                <!-- TODO: Insert burger menu instead of sidebar starting with a certain screen-width -->
                 <li
-                  *ngIf="router.url.includes('events/') && !router.url.endsWith('events/') && !router.url.endsWith('events') && !router.url.endsWith('events/map')"
+                  *ngIf="router.url.includes('events/') && !router.url.endsWith('events/') && !router.url.endsWith('events') && !router.url.includes('events/map')"
                   [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'"
                   role="presentation">
                   <a (click)="goBack()" class="return nav-link" routerLink="/events/{{id}}">Back</a>
@@ -24,7 +23,7 @@
                 <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
                   <a class="nav-link" routerLink="events">Event Table</a>
                 </li>
-                <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
+                <li [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'" role="presentation">
                   <a class="nav-link" routerLink="events/map">Event Map</a>
                 </li>
               </ul>

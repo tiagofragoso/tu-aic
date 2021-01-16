@@ -2,15 +2,15 @@
   <div class="spinner"></div>
 </div>
 
-<h4 *ngIf="error" class="text-danger">The event with the id {{id}} could not be found!</h4>
+<h4 *ngIf="error" class="text-danger">The event with the id '{{id}}' could not be found!</h4>
 
-<div *ngIf="!error && !loading">
+<div *ngIf="!error && !loading" class="h-100 w-100">
   <div class="header-line">
     <h2>Event Details</h2>
     <span>
-    <!-- TODO: style tooltips with css/bootstrap -->
+
     <button (click)="edit?saveUpdate():edit=!edit" [ngClass]="edit?'btn-info':'btn-warning'" [title]="edit?'Save':'Edit'"
-            class="btn btn-edit text-white"
+            [disabled]="edit && eventForm.invalid" class="btn btn-edit text-white"
             type="button">{{edit ? '🖫' : '✎'}}</button>
       <!-- Eventform valid-->
     <button (click)="openDeleteDialogue(content)" [hidden]="edit" class="btn btn-danger text-white m-lg-2" title="Delete" type="button">🗑</button>
@@ -19,7 +19,7 @@
   </div>
 
   <div class="row">
-    <div class="col-4">
+    <div class="col-4 h-100">
       <div class="row m-1">
         <table class=" table table-borderless table-sm">
           <tbody [formGroup]="eventForm">
@@ -43,7 +43,7 @@
           </tr>
           <tr>
             <td class="fw-bold">Last Updated:</td>
-            <td class="fw-bold">{{event?.metadata?.updated ? convertDate(event?.metadata?.updated) : convertDate(event?.metadata?.created)}}</td>
+            <td class="fw-bold">{{convertDate(event?.metadata?.updated)}}</td>
           </tr>
           <tr>
             <td></td>
@@ -59,14 +59,15 @@
           <tr>
             <td>Name:</td>
             <td *ngIf="!edit">{{event?.metadata?.name}}</td>
-            <td *ngIf="edit"><label><input aria-describedby="inputName" class="form-control" formControlName="name" id="inputName"
+            <td *ngIf="edit"><label><input aria-describedby="inputName" autocomplete="off" class="form-control" formControlName="name" id="inputName"
                                            type="text"></label>
             </td>
           </tr>
           <tr>
-            <td>Device ID:</td>
+            <td>Device Identifier:</td>
             <td *ngIf="!edit">{{event?.metadata?.dev_id}}</td>
-            <td *ngIf="edit"><label><input aria-describedby="inputDevId" class="form-control" formControlName="dev_id" id="inputDevId"
+            <td *ngIf="edit"><label><input aria-describedby="inputDevId" autocomplete="off" class="form-control" formControlName="device_identifier"
+                                           id="inputDevId"
                                            type="text"></label>
             </td>
           </tr>
@@ -75,7 +76,7 @@
             <td *ngIf="!edit">{{event?.metadata?.created ? convertDate(event?.metadata?.created) : ''}}</td>
             <td *ngIf="edit" class="d-flex">
               <label class="w-50 d-flex align-items-center">
-                <input #d="ngbDatepicker" class="form-control w-50 h-25" formControlName="created_date" name="dp" ngbDatepicker
+                <input #d="ngbDatepicker" autocomplete="off" class="form-control w-50 h-25" formControlName="created_date" name="dp" ngbDatepicker
                        placeholder="yyyy-mm-dd">
                 <button (click)="d.toggle()" class="btn btn-outline-secondary calendar btn-sm h-25" type="button">📅</button>
               </label>
@@ -89,35 +90,44 @@
             <td *ngIf="!edit">{{event?.metadata ? event?.metadata?.frame_num + '/' + event?.metadata?.event_frames : ''}}</td>
             <td *ngIf="edit">
               <div class="d-flex">
-                <label><input aria-describedby="inputFrameNum" class="form-control w-50 space-right" formControlName="frame_num" id="inputFrameNum"
-                              title="Frame of this specific event" type="text"></label>
+                <label><input aria-describedby="inputFrameNum" autocomplete="off" class="form-control w-50 space-right" formControlName="frame_number"
+                              id="inputFrameNum"
+                              min="1" title="Frame of this specific event" type="number"></label>
                 <span>/</span>
-                <label><input aria-describedby="inputEventFrames" class="form-control w-50 space-left float-end" formControlName="event_frames"
+                <label><input aria-describedby="inputEventFrames" autocomplete="off" class="form-control w-50 space-left float-end"
+                              formControlName="event_frames"
                               id="inputEventFrames"
-                              title="Sum of all frames for this specific event" type="text"></label>
+                              min="1" title="Sum of all frames for this specific event" type="number"></label>
               </div>
             </td>
           </tr>
           <tr>
-            <td>Place ID:</td>
+            <td>Place Identifier:</td>
             <td *ngIf="!edit">{{event?.metadata?.place_ident}}</td>
-            <td *ngIf="edit"><label><input aria-describedby="inputPlaceId" class="form-control" formControlName="place_ident" id="inputPlaceId"
+            <td *ngIf="edit"><label><input aria-describedby="inputPlaceId" autocomplete="off" class="form-control" formControlName="place_identifier"
+                                           id="inputPlaceId"
                                            type="text"></label>
           </tr>
           <tr>
             <td>Longitude:</td>
             <td *ngIf="!edit">{{event?.metadata?.longitude}}</td>
-            <td *ngIf="edit"><label><input aria-describedby="inputLongitude" class="form-control" formControlName="longitude" id="inputLongitude"
+            <td *ngIf="edit"><label><input aria-describedby="inputLongitude" autocomplete="off" class="form-control" formControlName="longitude"
+                                           id="inputLongitude"
                                            type="text"></label>
           </tr>
           <tr>
             <td>Latitude:</td>
             <td *ngIf="!edit">{{event?.metadata?.latitude}}</td>
-            <td *ngIf="edit"><label><input aria-describedby="inputLatitude" class="form-control" formControlName="latitude" id="inputLatitude"
+            <td *ngIf="edit"><label><input aria-describedby="inputLatitude" autocomplete="off" class="form-control" formControlName="latitude"
+                                           id="inputLatitude"
                                            type="text"></label>
           </tr>
           </tbody>
         </table>
+        <div *ngIf="eventForm.invalid" class="text-danger line-break">
+          {{getFormControlError()}}
+        </div>
+        <app-event-map [class.map-m-top]="!edit" [showSearchCircle]="false" [singleEvent]="event" class="w-100 p-0"></app-event-map>
       </div>
     </div>
     <div class="col-8">
@@ -147,16 +157,12 @@
       </div>
     </div>
   </div>
-  <!-- TODO: Navigate to event maps with this event at the center - via button? -->
-  <div class="map">
-    <app-event-map [singleEvent]="event"></app-event-map>
-  </div>
 </div>
 
 <!-- Modal -->
 <ng-template #content let-c="close" let-d="dismiss" let-modal>
   <!-- To prevent auto focus -->
-  <label><input class="d-none" type="text"/></label>
+  <label><input autocomplete="off" class="d-none" type="text"/></label>
   <div class="modal-header d-flex justify-content-between">
     <h3>Confirmation required</h3>
     <button (click)="d('Cross click')" aria-label="Close" class="close btn btn-default" type="button">

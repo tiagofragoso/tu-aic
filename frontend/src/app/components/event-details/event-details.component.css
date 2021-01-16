@@ -15,10 +15,10 @@
 }
 
 .main-img {
-  min-height: 820px;
   display: inline-block;
-  margin-top: -45px;
-  padding: 12px;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .carousel-caption > h1 {
@@ -97,12 +97,6 @@ label {
   padding-top: 3em;
 }
 
-.map {
-  position: absolute;
-  left: 2vw;
-  bottom: 0;
-}
-
 :host ::ng-deep app-event-map > div {
   position: relative;
 }
@@ -148,6 +142,8 @@ label {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  overflow: auto;
 }
 
 .carousel-thumbnail__item {
@@ -157,6 +153,20 @@ label {
 .carousel-thumbnail__img {
   width: 160px;
   height: 140px;
+}
+
+:host ::ng-deep .carousel-item {
+  float: none;
+  height: 100%;
+}
+
+:host ::ng-deep .picsum-img-wrapper {
+  height: 100%;
+}
+
+:host ::ng-deep .picsum-img-wrapper.text-center > img {
+  height: 100%;
+  width: 100%;
 }
 
 .thumbnail_selected_border {
@@ -169,7 +179,35 @@ h1 {
 }
 
 ngb-carousel {
-  width: fit-content;
+  display: block;
   background: lightgray;
-  min-height: 645px;
+  height: 80%;
+}
+
+ngb-timepicker {
+  flex-direction: row-reverse;
+}
+
+:host ::ng-deep .carousel-inner {
+  height: 100%;
+}
+
+.map-m-top {
+  margin-top: 4vw;
+}
+
+.row {
+  height: 90%;
+  width: 100%;
+  margin: 0;
+}
+
+.col-8 {
+  height: 100%;
+  margin-top: -47px;
+  padding-right: 0;
+}
+
+.line-break {
+  white-space: pre-wrap;
 }
