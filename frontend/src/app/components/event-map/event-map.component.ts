@@ -1,7 +1,7 @@
 import {Component, HostListener} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 
-import {latLng, tileLayer, icon, marker, Layer, LatLng, Map, circle, point} from 'leaflet';
+import {latLng, tileLayer, icon, marker, Layer, LatLng, Map as LMap, circle, point, markerClusterGroup, MarkerCluster, Point, DivIcon} from 'leaflet';
 
 import {EventService} from 'src/app/services/event.service';
 import {EventTableRow} from '../../models/event-table-data';
@@ -17,7 +17,7 @@ const CONSTANTS = Object.freeze({
   CURR_EVENT_ZOOM: 10,
   DEFAULT_CENTER_LAT: 42.854912879552664,
   DEFAULT_CENTER_LON: -115.06896547973157,
-  REQUEST_WAIT_TIME: 100,
+  REQUEST_WAIT_TIME: 250,
   M_TO_KM: 1/1000,
   DEAFULT_RADIUS_FACTOR: 0.95
 });
@@ -35,14 +35,16 @@ export class EventMapComponent {
     clickout(event: any) {
       if (event.target.classList.contains("popup-link")){ 
         this.eventClicked(event.target.dataset.eventId); 
-      } 
+      } else if (event.target.classList.contains("popup-select")) {
+        this.selectEvent(event.target.dataset.eventId);
+      }
     }
 
   baseLayer = tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: CONSTANTS.MAX_ZOOM, minZoom: CONSTANTS.MIN_ZOOM });
   center: LatLng = latLng(CONSTANTS.DEFAULT_CENTER_LAT, CONSTANTS.DEFAULT_CENTER_LON);
   layers: Layer[] = [this.baseLayer];
   zoom: number = CONSTANTS.DEFAULT_ZOOM;
-  map?: Map;
+  map?: LMap;
   events: EventTableRow[] = [];
   loading = true;
   showSearchCircle = true;
@@ -68,7 +70,7 @@ export class EventMapComponent {
                 this.id = this.activatedRoute.snapshot.paramMap.get('id');
               }
 
-  onMapReady(map: Map) {
+  onMapReady(map: LMap) {
     this.map = map;
     if (this.id) {
       this.eventService.getById(this.id)
@@ -138,13 +140,50 @@ export class EventMapComponent {
     if (this.showSearchCircle) {
       this.layers.push(circle(this.center, {radius: this.radius / CONSTANTS.M_TO_KM, fillOpacity: 0.15, opacity: 0.2}));
     }
-    this.layers = [...this.layers, ...this.events.map((e) => this.createMarker(e))]; 
+    this.layers = [...this.layers, ...this.groupEvents()]; 
+  }
+
+  groupEvents() {
+    const map : Map<String, Array<EventTableRow>> = new Map();
+    this.events.forEach(e => {
+      const coords = e.latitude.toString() + e.longitude.toString();
+      if (map.get(coords)) {
+        map.set(coords, [...map.get(coords), e]);
+      } else {
+        map.set(coords, [e]);
+      }
+    });
+    return [...map.values() ].map((arr) => {
+      if (arr.length === 1) {
+        return this.createMarker(arr[0]);
+      } else {
+        const markers = markerClusterGroup({
+	        showCoverageOnHover: false,
+          zoomToBoundsOnClick: false,
+          iconCreateFunction: (c) => this.clusterIcon(c, arr.find((e) => e.event_id === this.id))
+        });
+        arr.forEach(e => markers.addLayer(this.createMarker(e)));
+        return markers;
+      }
+    });
+
+    //return this.events.map((e) => this.createMarker(e));
   }
 
   selectEvent(event_id: string) {
     this.id = event_id;
     this.refreshMap();
   }
+
+  private clusterIcon(cluster: MarkerCluster, highlight: boolean) {
+    var childCount = cluster.getChildCount();
+    
+    return new DivIcon({ 
+      html: '<div><span>' + childCount + '</span></div>', 
+      className: 'marker-cluster marker-cluster-small' + (highlight? ' highlight' : ''),
+      iconSize: new Point(40, 40) 
+    });
+	}
 
   private createMarker(event: EventTableRow) {
     const m = marker([event.latitude, event.longitude], {
@@ -214,7 +253,12 @@ export class EventMapComponent {
         </div>
       </div>
       <div class="row mt-2 justify-content-center">
-        <button class="btn btn-link btn-sm popup-link" data-event-id="${event.event_id}">See event details</button>
+        <div class="col-3">
+          <button class="btn btn-link btn-sm popup-select" data-event-id="${event.event_id}">Select</button>
+        </div>
+        <div class="col-9">
+          <button class="btn btn-link btn-sm popup-link" data-event-id="${event.event_id}">See event details</button>
+        </div>
       </div>
     </div>`;
   }
