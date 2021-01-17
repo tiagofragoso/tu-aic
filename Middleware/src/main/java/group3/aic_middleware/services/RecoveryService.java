@@ -55,10 +55,15 @@ public class RecoveryService {
                 log.info("Requested sensing event doesn't exist in Image Object Storage.");
                 try {
                     retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
+                    if(!hashStored.equals(this.hashingService.getHash(retImage))) {
+                        log.info("Requested sensing event is corrupted in Image File Storage and cannot be recovered.");
+                        return "";
+                    }
                     imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
                     HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
                     URL_IOS = FederationService.IOSConnection + "/images";
                     restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
+                    return retImage;
                 } catch (EventNotFoundException ex) {
                     log.info("Requested sensing event doesn't exist in Image File Storage.");
                     return "";
@@ -76,11 +81,15 @@ public class RecoveryService {
                     this.imageFileService.saveImage(fileName, retImage);
                 } catch (EventNotCreatedException e) {
                     e.printStackTrace();
-                    log.info("Requested sensing event couldn't be recovered in Image File Storage: " + e.getMessage());
+                    log.info("Requested sensing event couldn't be recovered into Image File Storage: " + e.getMessage());
                 }
             } else {
                 try {
                     retImage = this.imageFileService.readImage(fileName).getBase64EncodedImage();
+                    if(!hashStored.equals(this.hashingService.getHash(retImage))) {
+                        log.info("Requested sensing event is corrupted in both Image Storages.");
+                        return "";
+                    }
                     imageObjectServiceCreateDTO = new ImageObjectServiceCreateDTO(fileName, retImage);
                     HttpEntity<ImageObjectServiceCreateDTO> requestCreate = new HttpEntity<>(imageObjectServiceCreateDTO);
                     restTemplate.exchange(URL_IOS, HttpMethod.PUT, requestCreate, Void.class);
