@@ -25,7 +25,7 @@ public class LogEndpoint {
      */
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<LogDTO> getEventsInRadius(@RequestParam(defaultValue = "20") int count) {
+    public List<LogDTO> getLogs(@RequestParam(defaultValue = "20") int count) {
         try {
             return logService.getAllLogs(count);
         } catch (Exception exc) {

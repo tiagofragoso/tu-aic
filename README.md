@@ -3,13 +3,11 @@
 # Advanced Internet Computing WS 2020 - Group 3 Topic 3
 
 ## Team
-- Dominik Fenzl, 01526544
-- Kevin Al-Chater, 
-- Lichner Ivan, 01226385
-- Nils Moynac, 
-- Tiago Fragoso, 
-
-TODO add mtrNmbr
+- Dominik Fenzl, 01526544, 
+- Ivan Lichner, 01226385
+- Kevin Al-Chater, 01325538 
+- Nils Moynac,  12016308
+- Tiago Fragoso, 12005836 
 
 ## Overview
 This application represents a federated storage system which makes use of two different data stores to store images with replication.
@@ -27,12 +25,13 @@ The metadata of such an event can also be edited inside the UI.
 ## Components
 
 ### Middleware
-
 Middleware service that keeps control of the replication, distribution and hashing services. Also it provides a gateway for the IoT devices as well as the user application.
+
 The middleware also includes a rest endpoint to get the newest log messages of the middleware.
+
 Lastly, the image file service is also embedded into this component, since it just calls the api that is already provided by Dropbox.
 
-## Metadata Service
+### Metadata Service
 Takes care of all the metadata for a sensing event.
 Sensing events can be stored, edited, updated and deleted.
 For sensing events tags can also be stored, which have their own hashes so the different images can be compared.
@@ -45,10 +44,20 @@ This service exposes a **REST API** wrapping a **MinIO object server** responsib
 
 ### Workflow Service
 
-This service is charged of managing a basic workflow that shows the application potential. It gets data from the chosen repository, format them and order them chronologically. It sends sensing events to the middleware, changes metadata of sent sensing events, mocks a computing vision algorithm that adds tags to sensing events. It corrupt images to make their tag as "faulty".
+This service is in charge of managing a basic workflow that shows the application potential. 
+
+It gets data from the chosen repository, format them and order them chronologically. Ite performs CRUD operations, mocks a computing vision algorithm that adds tags to sensing events and it corrupts some images to make their status as "faulty"
 
 ### Webapplication
-TODO
+This is the front-end web application that the users will use to work with, with sensing events sent from various IoT devices.
+
+It is implemented in Angular and connected (only) to the middleware.
+It has two main parts: 
+- the overview table where the user can see all the sensing events stored in the storages and 
+- the map, where the sensing events are shown at the place that they were captured
+
+From both parts (table and map) the user can go to the detail view of an event. There he sees all the meta data and also the photo corresponding to this event with the tags images displayed in a carousel.
+At the detail page the user can edit the meta data or delete the sensing event.
 
 ### Swagger
 You can find the swagger ui under: http://127.0.0.1:9999/swagger-ui/index.html
@@ -64,8 +73,12 @@ docker-compose up
 ```
 
 ## How to debug
-
-TODO
+Debugging can be done using the logs stored in the MySQL database.
+The middleware provides an endpoint to request these logs and user
+can access this endpoint trough the Swagger UI or make a direct GET
+request to this endpoint at the address:
+http://127.0.0.1:9999/logs and as request parameter the user can
+specify how many logs he wants to get (by default he will get 20 logs).
 
 
 ## Effort Breakdown
