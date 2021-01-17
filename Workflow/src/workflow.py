@@ -79,6 +79,7 @@ waitingTime = os.getenv("FREQUENCY",30)
 imagesInMiddleware=[]
 for i in range(nbSentImages,nbSentImages+30) :
     postEvent(picturesDic[i])
+    imagesInMiddleware.append(i)
     choice = random.randint(5)
     if choice == 0 :
         print(" -- CHANGE METADATA -- ")
