@@ -100,7 +100,7 @@ public class FederationService {
                     });
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                log.info("Requested sensing event doesn't exist.");
+                log.info("Requested sensing event with the given tag doesn't exist.");
                 throw new EventNotFoundException("Requested sensing event with the given tag doesn't exist.");
             }
         }
