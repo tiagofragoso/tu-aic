@@ -205,19 +205,19 @@ public class CRUDService {
      * @param tag the tag dto.
      */
     public synchronized void updateTag(String event_id, TagDTO tag) {
+
         SensingEvent event = getEventIfExists(event_id);
-
-
         Optional<Tag> foundTag = event.getTags().stream().filter(x -> x.getTagName().equals(tag.getTagName())).findFirst();
 
         if(!foundTag.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find the given tag.");
+            addTag(event_id, tag);
         }
+        else {
+            Tag realTag = foundTag.get();
+            realTag.setImageHash(tag.getImageHash());
 
-        Tag realTag = foundTag.get();
-        realTag.setImageHash(tag.getImageHash());
-
-        eventRepository.save(event);
+            eventRepository.save(event);
+        }
     }
 
     /**

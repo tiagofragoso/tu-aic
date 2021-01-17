@@ -278,7 +278,7 @@ public class FederationService {
         TagDTO tagDTO = new TagDTO(tagDataDTO.getTagName(), this.hashingService.getHash(tagDataDTO.getImage()));
         HttpEntity<TagDTO> request = new HttpEntity<>(tagDTO);
         try {
-            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDTO.class);
+            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.PUT, request, TagDTO.class);
         } catch(HttpClientErrorException e) {
             log.info(convertJsonResponseToLogMessage(e.getMessage()));
             throw new EventNotUpdatedException(e.getMessage());
