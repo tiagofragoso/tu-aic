@@ -5,11 +5,9 @@
 ## Team
 - Dominik Fenzl, 01526544, 
 - Ivan Lichner, 01226385
-- Kevin Al-Chater
-- Nils Moynac, 
-- Tiago Fragoso, 
-
-TODO add mtrNmbr
+- Kevin Al-Chater, 01325538 
+- Nils Moynac,  12016308
+- Tiago Fragoso, 12005836 
 
 ## Overview
 This application represents a federated storage system which makes use of two different data stores to store images with replication.
