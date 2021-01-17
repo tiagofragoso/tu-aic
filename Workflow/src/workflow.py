@@ -21,8 +21,8 @@ picturesDic = getOrderedData()
 
 # -- CREATE IMAGES
 print(" ------ IOT SIMULATOR ------")
-for i in range(4) :
-    time.sleep(3)
+for i in range(20) :
+    time.sleep(1)
     postEvent(picturesDic[i])
 
 # -- CHANGE METADATA TO IMAGES
