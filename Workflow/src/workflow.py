@@ -78,7 +78,6 @@ print(" ----- REQUESTS BOT ------")
 waitingTime = os.getenv("FREQUENCY",30)
 imagesInMiddleware=[]
 for i in range(nbSentImages,nbSentImages+30) :
-    time.sleep(waitingTime)
     postEvent(picturesDic[i])
     choice = random.randint(5)
     if choice == 0 :
@@ -98,3 +97,4 @@ for i in range(nbSentImages,nbSentImages+30) :
         delete(picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
         del imagesInMiddleware[rdmIndex]
     # default : does nothing
+    time.sleep(waitingTime)
