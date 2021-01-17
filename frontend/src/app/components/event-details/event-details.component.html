@@ -134,19 +134,22 @@
       <div class="main-img">
         <ngb-carousel #tagCarousel (slid)="activeSliderId = carousel.activeId" [animation]="false" [interval]="0"
                       [showNavigationIndicators]="false" class="register">
-          <ng-template *ngFor="let tag of tags" ngbSlide>
+          <ng-template *ngFor="let tag of tags" ngbSlide id="{{'ngb-slide-' + tag.index}}">
             <div class="picsum-img-wrapper text-center">
-              <img [src]="'data:image/jpeg;base64,'+tag?.image" alt="{{'Tag number '+findTagIndex(tag)}}">
+              <div *ngIf="tag.loading">
+                <div class="spinner"></div>
+              </div>
+              <img *ngIf="!tag.loading && tag.tag.image !== ''" [src]="'data:image/jpeg;base64,'+tag.tag.image" alt="{{tag.tag.tag_name}}">
             </div>
             <div class="carousel-caption">
               <div class="d-flex justify-content-between px-4">
-                <span *ngIf="tag.tag_name !== 'base'; else original">Tagged as: <b>{{tag.tag_name}}</b></span>
+                <span *ngIf="tag.tag.tag_name !== 'base'; else original">Tagged as: <b>{{tag.tag.tag_name}}</b></span>
                 <ng-template #original>
                   <span>
                     <b>Original image</b>
                   </span>
                 </ng-template>
-                <span *ngIf="tag.tag_name !== 'base'">Tagged at: <b>{{convertDate(tag.created)}}</b></span>
+                <span *ngIf="tag.tag.tag_name !== 'base'">Tagged at: <b>{{convertDate(tag.tag.created)}}</b></span>
               </div>
             </div>
           </ng-template>
@@ -154,14 +157,18 @@
         <div *ngIf="tags===[]" class="text-warning">No tags available!</div>
 
         <ul class="carousel-thumbnail">
-          <li (click)="goToSlide(tag)" *ngFor="let tag of tags" class="carousel-thumbnail__item list-inline-item">
+          <li (click)="goToSlide(tag.index)" *ngFor="let tag of tags" class="carousel-thumbnail__item list-inline-item">
             <div class="thumbnail-overlay d-flex align-items-center justify-content-center">
-              <span><b>{{tag.tag_name !== 'base'? tag.tag_name : 'Original'}}</b></span>
+              <span><b>{{tag.tag.tag_name !== 'base'? tag.tag.tag_name : 'Original'}}</b></span>
             </div>
             <a class="selected">
-              <img [ngClass]="{'thumbnail_selected_border': activeSliderId === ('ngb-slide-'+findTagIndex(tag).toString())}"
-                   [src]="'data:image/jpeg;base64,'+tag?.image" alt="{{'Tag number '+findTagIndex(tag)}}"
-                   class="carousel-thumbnail__img">
+              <div *ngIf="tag.loading" class="carousel-thumbnail__img d-flex align-items-center justify-content-center">
+                <div class="spinner"></div>
+              </div>
+              <img [ngClass]="{'thumbnail_selected_border': activeSliderId === ('ngb-slide-'+tag.index)}"
+                   [src]="'data:image/jpeg;base64,'+tag.tag.image" alt="{{tag.tag.tag_name}}"
+                   class="carousel-thumbnail__img"
+                   *ngIf="!tag.loading && tag.tag.image !== ''">
             </a>
           </li>
         </ul>

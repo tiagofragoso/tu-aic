@@ -11,6 +11,12 @@ import {ToastService} from "../../utils/Toast/toast.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ColorCodes} from "../../utils/Color/color-codes";
 
+export interface TagX {
+  tag: Tag,
+  index: number,
+  loading: boolean
+}
+
 @Component({
   selector: 'app-event-details',
   templateUrl: './event-details.component.html',
@@ -27,7 +33,7 @@ export class EventDetailsComponent implements OnInit {
   tmpEvent!: Event;
   createdTime!: NgbTimeStruct;
   activeSliderId = 'ngb-slide-0';
-  tags: Array<Tag> = [];
+  tags: Array<TagX> = [];
   error = false;
   noChanges = false;
   @ViewChild('tagCarousel', {static: false}) carousel!: NgbCarousel;
@@ -61,20 +67,30 @@ export class EventDetailsComponent implements OnInit {
         }
         this.setCreatedTime(this.event.metadata.created);
         this.fillForm(this.event);
-        this.tags = event.tags;
+        const baseTag = new Tag();
+        baseTag.tag_name = 'base';
+        baseTag.image = event.image;
+        this.tags.push({tag: baseTag, index: 0, loading: false});
 
-        for (let tag in event.tags) {
-          this.tags[Number(tag)].image = this.event.image;
-          this.eventService.getTag(event.metadata.event_id, event.tags[Number(tag)].tag_name).subscribe((tag2: Tag) => {
-              this.tags[Number(tag)].image = tag2.image;
-              if (Number(tag) === (Object.keys(event.tags).length - 1)) {
-                this.loading = false;
-              }
-            },
-            () => {
-              console.error(tag);
-            });
+        for (const tag of event.tags) {
+          if (tag.tag_name === 'base') {
+            continue;
+          }
+          const curr = new Tag();
+          curr.tag_name = tag.tag_name;
+          curr.created = tag.created;
+          const index = this.tags.length;
+          this.tags.push({tag: curr, index, loading: true});
+          this.eventService.getTag(event.metadata.event_id, curr.tag_name).subscribe((tag: Tag) => {
+            this.tags[index].tag.image = tag.image;
+            this.tags[index].loading = false;
+          },
+          () => {
+            this.tags[index].loading = false;
+            console.error(tag);
+          });
         }
+        this.loading = false;
       }, (error) => {
         this.error = true;
         this.loading = false;
@@ -212,15 +228,8 @@ export class EventDetailsComponent implements OnInit {
       };
   }
 
-  findTagIndex(tag: Tag) {
-    return this.event.tags.map(function (e) {
-      return e;
-    }).indexOf(tag);
-  }
-
-  goToSlide(tag: Tag) {
-    const slideId: number = this.event.tags.indexOf(tag);
-    this.carousel.select('ngb-slide-' + slideId);
+  goToSlide(id: number) {
+    this.carousel.select('ngb-slide-' + id);
   }
 
   validateLongitude(longitude: FormControl): ValidationErrors | null {
