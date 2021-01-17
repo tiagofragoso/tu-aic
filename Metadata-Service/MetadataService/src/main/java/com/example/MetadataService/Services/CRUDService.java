@@ -57,7 +57,7 @@ public class CRUDService {
     }
 
     /**
-     * Create an event and store it in the persistence.
+     * Update an event in the persistence.
      * @param event the event that should be stored.
      */
     public void updateEvent(EventDTO event) {
