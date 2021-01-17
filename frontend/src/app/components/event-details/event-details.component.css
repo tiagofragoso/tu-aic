@@ -144,15 +144,21 @@ label {
   text-align: center;
 }
 
+.carousel-thumbnail-wrapper {
+  text-align: -moz-center;
+  text-align: -webkit-center;
+}
+
 .carousel-thumbnail {
   list-style-type: none;
   padding: 0;
   margin: 1rem 0 0;
   display: flex;
-  justify-content: center;
   align-items: center;
-  width: 100%;
+  width: min-content;
+  max-width: 100%;
   overflow: auto;
+  justify-content: flex-start;
 }
 
 .carousel-thumbnail__item {
@@ -230,5 +236,5 @@ ngb-timepicker {
 }
 
 .line-break {
-  white-space: pre-wrap;
+  white-space: pre-line;
 }
