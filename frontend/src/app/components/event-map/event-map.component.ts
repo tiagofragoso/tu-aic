@@ -1,15 +1,14 @@
 import {Component, HostListener, Input} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 
-import {latLng, tileLayer, icon, marker, Layer, LatLng, Map as LMap, circle, point, markerClusterGroup, MarkerCluster, Point, DivIcon} from 'leaflet';
+import {circle, DivIcon, icon, latLng, LatLng, Layer, Map as LMap, marker, MarkerCluster, markerClusterGroup, Point, tileLayer} from 'leaflet';
 
 import {EventService} from 'src/app/services/event.service';
 import {EventTableRow} from '../../models/event-table-data';
 import {convertUnixDateToString} from "../../utils/date";
 import {Event} from 'src/app/models/event';
-import { Observable, Subscription } from 'rxjs';
+import {Subscription} from 'rxjs';
 import {stateToColor} from "../../utils/Color/state-to-color";
-import {State} from "../../models/state";
 
 const CONSTANTS = Object.freeze({
   MIN_ZOOM: 1,
@@ -183,10 +182,6 @@ export class EventMapComponent {
     });
 	}
 
-  public getColor(state: State) {
-    return stateToColor(state);
-  }
-
   private createMarker(event: EventTableRow) {
     const m = marker([event.latitude, event.longitude], {
       icon: icon({
@@ -218,16 +213,6 @@ export class EventMapComponent {
           ${event.name}
         </div>
       </div>
-      <div class="row">
-        <div class="col-4 text-muted">
-          State:
-        </div>
-        <div class="col-8">
-          <span class="text-${stateToColor(event.state)}">
-            ${event.state}
-          </span>
-        </div>
-      </div>
       <div class="row mt-4">
         <div class="col-4 text-muted">
           Place ID:
@@ -257,7 +242,7 @@ export class EventMapComponent {
           Tags:
         </div>
         <div class="col-8">
-          ${event.tags.length > 1 ? event.tags.length - 1 : 'Not tagged yet'}
+          ${event.tags && event.tags.length > 1 ? event.tags.length - 1 : 'Not tagged yet'}
         </div>
       </div>
       <div class="row mt-2 justify-content-center">

@@ -6,7 +6,9 @@
         <label><input [formControl]="queryOptions.searchTerm" class="form-control" placeholder="Search..." type="text"/></label>
       </div>
       <div class="col-auto">
-        <button class="col-auto btn btn-primary" type="submit">GO</button>
+        <button class="col-auto btn btn-primary" type="submit">
+          <i class="fas fa-search"></i>
+        </button>
       </div>
     </div>
   </form>
@@ -25,22 +27,21 @@
     </thead>
     <tbody>
     <tr (click)="eventClicked(event.event_id)" *ngFor="let event of events">
-      <!-- TODO: In case of empty value, add placeholder text  -->
-      <td>{{ event.name ? event.name : 'No name found' }}</td>
-      <td>{{ event.place_ident }}</td>
-      <td>{{ convertDate(event.created) }}</td>
-      <td>{{ convertDate(event.updated) }}</td>
-      <td [class.text-muted]="event.tags.length < 2">{{ convertTagNames(event.tags) }}
-        <span *ngIf="event.tags.length > 3" class="text-muted"> & {{event.tags.length - 3}} more</span>
+      <td>{{event.name ? event.name : 'No name found' }}</td>
+      <td>{{event.place_ident ? event.place_ident : 'No place identifier found'}}</td>
+      <td>{{event.created ? convertDate(event.created) : 'No created date found'}}</td>
+      <td>{{event.updated ? convertDate(event.updated) : 'No updated date found'}}</td>
+      <td [class.text-muted]="event.tags.length < 2">{{ event.tags ? convertTagNames(event.tags) : 'No tags found' }}
+        <span *ngIf="event.tags && event.tags.length > 3" class="text-muted"> & {{event.tags.length - 3}} more</span>
       </td>
-      <td>
+      <td class="fw-bold">
           <span [className]="'text-' + getColor(event.state)">
-            {{event.state}}
+            {{event.state ? event.state : 'No event state found'}}
           </span>
       </td>
       <td>
         <button (click)="eventMapClicked($event, event.event_id)" class="btn btn-primary text-white map-btn" type="button">
-          M
+          <i class="fas fa-map-marker-alt"></i>
         </button>
       </td>
     </tr>
@@ -51,8 +52,8 @@
     <span>No results found</span>
   </div>
 
-  <div *ngIf="loading" class="d-flex justify-content-center">
-    <span>Loading...</span>
+  <div *ngIf="loading" class="spinner-container">
+    <div class="spinner"></div>
   </div>
 
   <div class="row row-cols-lg-auto justify-content-between">
