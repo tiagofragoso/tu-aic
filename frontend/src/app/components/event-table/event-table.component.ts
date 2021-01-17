@@ -82,7 +82,9 @@ export class EventTableComponent implements OnInit {
   }
 
   onPageChange() {
-    this.getEvents();
+    setTimeout(() => {
+      this.getEvents();
+    }, 150);
   }
 
   onSort({column, direction}: SortEvent) {
