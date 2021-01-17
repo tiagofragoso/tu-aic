@@ -6,6 +6,8 @@ import group3.aic_middleware.exceptions.EventNotUpdatedException;
 import group3.aic_middleware.restData.*;
 import group3.aic_middleware.entities.MetaDataEntity;
 import lombok.extern.log4j.Log4j;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -219,32 +221,6 @@ public class FederationService {
         String hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImage());
         MetaDataServiceDTO metaDataDTO = null;
 
-        // check existence of an image using MetaDataService and request old hash
-        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
-        try {
-            responseMDS = restTemplate.exchange(
-                    URL_MDS, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
-                    });
-        } catch (HttpClientErrorException e) {
-            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                metaDataDTO = new MetaDataServiceDTO();
-            } else {
-                log.error("Status code: " + e.getStatusCode() + "; Message: " + e.getMessage());
-                throw new EventNotCreatedException("Status code: " + e.getStatusCode() + "; Message: " + e.getMessage());
-            }
-        } catch (Exception e) {
-            throw new EventNotCreatedException("Reason: " + e.getMessage());
-        }
-
-        if(responseMDS != null) {
-            metaDataDTO = responseMDS.getBody();
-            if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
-                log.info("Sensing event already exists.");
-                throw new EventNotCreatedException("Sensing event already exists.");
-            }
-        }
-
         // save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
         metaDataDTO =  storeEventDTO.getMetadata();
@@ -256,7 +232,7 @@ public class FederationService {
         try {
             restTemplate.exchange(URL_MDS, HttpMethod.POST, request, MetaDataServiceDTO.class);
         } catch(HttpClientErrorException e) {
-            log.info(e.getMessage());
+            log.info(convertJsonResponseToLogMessage(e.getMessage()));
             throw new EventNotCreatedException(e.getMessage());
         }
 
@@ -302,9 +278,9 @@ public class FederationService {
         TagDTO tagDTO = new TagDTO(tagDataDTO.getTagName(), this.hashingService.getHash(tagDataDTO.getImage()));
         HttpEntity<TagDTO> request = new HttpEntity<>(tagDTO);
         try {
-            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.POST, request, TagDTO.class);
+            ResponseEntity<TagDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.PUT, request, TagDTO.class);
         } catch(HttpClientErrorException e) {
-            log.info(e.getMessage());
+            log.info(convertJsonResponseToLogMessage(e.getMessage()));
             throw new EventNotUpdatedException(e.getMessage());
         }
 
@@ -370,7 +346,7 @@ public class FederationService {
             try {
                 ResponseEntity<MetaDataServiceDTO> response = restTemplate.exchange(URL_MDS, HttpMethod.PUT, request, MetaDataServiceDTO.class);
             } catch (HttpClientErrorException e) {
-                log.info(e.getMessage());
+                log.info(convertJsonResponseToLogMessage(e.getMessage()));
                 throw new EventNotUpdatedException(e.getMessage());
             }
         }
@@ -387,7 +363,6 @@ public class FederationService {
      *
      * @param seqId unique identifier of a sensing event
      *
-     * @return
      */
     public void deleteEvent(String seqId) throws EventNotFoundException {
         RestTemplate restTemplate = new RestTemplate();
@@ -659,5 +634,36 @@ public class FederationService {
         }
 
         return "&search=" + search;
+    }
+
+    /**
+     * Convert the json response messages to escaped log messages
+     * @param response the response that should be escaped
+     * @return returns an escaped response message.
+     */
+    private String convertJsonResponseToLogMessage(String response) {
+        String ret = "";
+
+        String work  = "";
+
+        try {
+            if(response.contains(": [")) {
+                work = response.split(":\\s\\[")[1];
+            }
+
+            work = work.replace("[", "").replace("]", "");
+            JSONObject jsonObject = new JSONObject(work);
+
+            if(jsonObject.has("message")) {
+                ret += jsonObject.getString("message");
+            }
+
+            if(jsonObject.has("status"))  {
+                ret += " - status: " + jsonObject.getInt("status");
+            }
+            return ret;
+        }catch (Exception err){
+            return "The response could not be read";
+        }
     }
 }
