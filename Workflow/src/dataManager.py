@@ -40,14 +40,13 @@ def getImageInB64(filePath) :
     return encoded_string
 
 def tagFormatter(dic) :
-    filePath = getImagePathWithDic(dic)
+    filePath = dic["filename"]
     encodedImage = getImageInB64(filePath)
-    tagToAdd = dic["tags"][-1]["tag_name"]
+    tagToAdd = dic["tag_name"]
     dataEncoded = {"tag_name": tagToAdd, "image": encodedImage.decode('utf-8')}
     return dataEncoded
 
 def getImagePathWithDic(dic) :
-    print(dic)
     picName = dic["filename"]
     linkedFile = PATH + "/images/" + picName
     return linkedFile

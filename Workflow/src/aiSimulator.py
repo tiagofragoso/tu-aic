@@ -9,7 +9,6 @@ from apiCalls import putNewTag
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
 def drawCircle(dic) :
     path = getImagePathWithDic(dic)
-
     image = cv2.imread(path)
 
     borders = (image.shape[1], image.shape[0])
@@ -29,16 +28,17 @@ def changeImage(dic) :
 
     tagName = random.choice(POSSIBLE_TAGS)
 
-    if "tags" in dic :
-        dic["tags"].append({"tag_name" : tagName})
-    else :
-        dic["tags"] = []
-        dic["tags"].append({"tag_name" : tagName})
-
     filename = "./data_created/" + str(dic["filename"]).split('.jpg')[0] + tagName + ".jpg"
 
+    tagDic = {
+        "seq_id": dic["seq_id"],
+        "name": dic["name"],
+        "tag_name": tagName,
+        "filename": filename
+    }
+
     cv2.imwrite(filename, image)
-    return dic
+    return tagDic
 
 def addTag(dic) :
     dicWithTag = changeImage(dic)
