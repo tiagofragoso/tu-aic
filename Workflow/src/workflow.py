@@ -27,9 +27,10 @@ print("Data is ordered and ready to be used.")
 
 interactive_sep()
 
+nbSentImages = 20
 # -- CREATE IMAGES
 print(" ------ IOT SIMULATOR ------")
-for i in range(20) :
+for i in range(nbSentImages) :
     # time.sleep(1)
     postEvent(picturesDic[i])
 
@@ -49,8 +50,9 @@ interactive_sep()
 print(" ------ AI SIMULATOR ------")
 for i in range(10) :
     rdm = random.randint(0,5)
+    rdmPic = random.randint(0,nbSentImages)
     for j in range(rdm) :
-        addTag(picturesDic[2*i])
+        addTag(picturesDic[rdmPic])
 
 interactive_sep()
 
@@ -70,4 +72,29 @@ interactive_sep()
 # MAKE 1 IMAGE STATE "MISSING"
 makeMissingImage(picturesDic[-1])
 
-
+print("The next part is the requests bot")
+interactive_sep()
+print(" ----- REQUESTS BOT ------")
+waitingTime = os.getenv("FREQUENCY",30)
+imagesInMiddleware=[]
+for i in range(nbSentImages,nbSentImages+30) :
+    time.sleep(waitingTime)
+    postEvent(picturesDic[i])
+    choice = random.randint(5)
+    if choice == 0 :
+        print(" -- CHANGE METADATA -- ")
+        rdmCat = random.randint(0, len(categoriesToChange) - 1)
+        rdmIndex = random.randint(len(imagesInMiddleware))
+        changeMetadata(picturesDic[imagesInMiddleware[rdmIndex]],categoriesToChange[rdmCat])
+    if choice == 1 :
+        print(" -- ADD TAGS -- ")
+        rdmNbTags = random.randint(5)
+        rdmIndex = random.randint(len(imagesInMiddleware))
+        for j in range(rdmNbTags):
+            addTag(picturesDic[imagesInMiddleware[rdmIndex]])
+    if choice == 2 :
+        print(" -- DELETE IMAGE --")
+        rdmIndex = random.randint(len(imagesInMiddleware))
+        delete(picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
+        del imagesInMiddleware[rdmIndex]
+    # default : does nothing
