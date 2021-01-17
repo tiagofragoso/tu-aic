@@ -7,8 +7,8 @@ export function stateToColor(state: State): string {
     case State.CORRECT:
       return ColorCodes.SUCCESS;
     case State.MISSING:
-      return ColorCodes.WARNING;
-    case State.FAULTY:
       return ColorCodes.DANGER;
+    case State.FAULTY:
+      return ColorCodes.WARNING;
   }
 }

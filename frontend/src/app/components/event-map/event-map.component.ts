@@ -148,7 +148,7 @@ export class EventMapComponent {
     this.events.forEach(e => {
       const coords = e.latitude.toString() + e.longitude.toString();
       if (map.get(coords)) {
-        map.set(coords, [...map.get(coords), e]);
+        map.set(coords, [...map.get(coords)!, e]);
       } else {
         map.set(coords, [e]);
       }
@@ -160,14 +160,12 @@ export class EventMapComponent {
         const markers = markerClusterGroup({
 	        showCoverageOnHover: false,
           zoomToBoundsOnClick: false,
-          iconCreateFunction: (c) => this.clusterIcon(c, arr.find((e) => e.event_id === this.id))
+          iconCreateFunction: (c) => this.clusterIcon(c, arr.find((e) => e.event_id === this.id) !== undefined)
         });
         arr.forEach(e => markers.addLayer(this.createMarker(e)));
         return markers;
       }
     });
-
-    //return this.events.map((e) => this.createMarker(e));
   }
 
   selectEvent(event_id: string) {
