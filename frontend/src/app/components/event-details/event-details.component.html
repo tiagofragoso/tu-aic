@@ -139,7 +139,15 @@
               <img [src]="'data:image/jpeg;base64,'+tag?.image" alt="{{'Tag number '+findTagIndex(tag)}}">
             </div>
             <div class="carousel-caption">
-              <h1 class="no-select">{{tag.tag_name}}</h1>
+              <div class="d-flex justify-content-between px-4">
+                <span *ngIf="tag.tag_name !== 'base'; else original">Tagged as: <b>{{tag.tag_name}}</b></span>
+                <ng-template #original>
+                  <span>
+                    <b>Original image</b>
+                  </span>
+                </ng-template>
+                <span *ngIf="tag.tag_name !== 'base'">Tagged in: <b>{{convertDate(tag.created)}}</b></span>
+              </div>
             </div>
           </ng-template>
         </ngb-carousel>
@@ -147,6 +155,9 @@
 
         <ul class="carousel-thumbnail">
           <li (click)="goToSlide(tag)" *ngFor="let tag of tags" class="carousel-thumbnail__item list-inline-item">
+            <div class="thumbnail-overlay d-flex align-items-center justify-content-center">
+              <span><b>{{tag.tag_name !== 'base'? tag.tag_name : 'Original'}}</b></span>
+            </div>
             <a class="selected">
               <img [ngClass]="{'thumbnail_selected_border': activeSliderId === ('ngb-slide-'+findTagIndex(tag).toString())}"
                    [src]="'data:image/jpeg;base64,'+tag?.image" alt="{{'Tag number '+findTagIndex(tag)}}"
