@@ -221,32 +221,6 @@ public class FederationService {
         String hashOfNewImage = this.hashingService.getHash(storeEventDTO.getImage());
         MetaDataServiceDTO metaDataDTO = null;
 
-        // check existence of an image using MetaDataService and request old hash
-        ResponseEntity<MetaDataServiceDTO> responseMDS = null;
-        try {
-            responseMDS = restTemplate.exchange(
-                    URL_MDS, HttpMethod.GET, null,
-                    new ParameterizedTypeReference<MetaDataServiceDTO>() {
-                    });
-        } catch (HttpClientErrorException e) {
-            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                metaDataDTO = new MetaDataServiceDTO();
-            } else {
-                log.error(convertJsonResponseToLogMessage(e.getMessage()));
-                throw new EventNotCreatedException("Status code: " + e.getStatusCode() + "; Message: " + e.getMessage());
-            }
-        } catch (Exception e) {
-            throw new EventNotCreatedException("Reason: " + e.getMessage());
-        }
-
-        if(responseMDS != null) {
-            metaDataDTO = responseMDS.getBody();
-            if(this.hashingService.compareHash(hashOfNewImage, metaDataDTO.getTags().iterator().next().getImageHash())) {
-                log.info("Sensing event already exists.");
-                throw new EventNotCreatedException("Sensing event already exists.");
-            }
-        }
-
         // save metadata using the MetadataService
         URL_MDS = MDSConnection + "/events";
         metaDataDTO =  storeEventDTO.getMetadata();
