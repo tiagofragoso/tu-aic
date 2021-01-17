@@ -38,15 +38,6 @@ public class FederationService {
     public FederationService() throws NoSuchAlgorithmException {
     }
 
-    /*
-    * Read operations
-    * */
-    // TODO delete before final submission
-    public ReadDetailsEventDTO testStuff() {
-        System.out.println(this.hashingService.getHash("Dnes je pekne ale chladno"));
-        return new ReadDetailsEventDTO();
-    }
-
     /**
      * Function reads the details of a sensing event which includes meta data, image and tags
      *
@@ -109,7 +100,7 @@ public class FederationService {
                     });
         } catch (HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                log.info("Requested sensing event doesn't exist.");
+                log.info("Requested sensing event with the given tag doesn't exist.");
                 throw new EventNotFoundException("Requested sensing event with the given tag doesn't exist.");
             }
         }
@@ -574,6 +565,7 @@ public class FederationService {
         ret.setFrameNum(metaDataServiceDTO.getFrameNum());
         ret.setPlaceIdent(metaDataServiceDTO.getPlaceIdent());
         ret.setEventFrames(metaDataServiceDTO.getEventFrames());
+        ret.setUpdated(metaDataServiceDTO.getUpdated());
         return ret;
     }
 

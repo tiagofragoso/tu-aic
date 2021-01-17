@@ -1,0 +1,31 @@
+table {
+  width: 100%;
+}
+
+td {
+  padding: 12px 8px;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+.tiny-width {
+  width: 5%;
+}
+
+.small-width {
+  width: 10%;
+}
+
+.medium-width {
+  width: 15%;
+}
+
+.long-width {
+  width: 20%;
+}
+
+.map-btn {
+  padding: 0 6px;
+}

@@ -23,4 +23,10 @@ public class TagDataDTO {
     @JsonProperty(required = false, value = "created")
     private long created;
 
+    @Override
+    public String toString() {
+        return "tagName: " + this.tagName + "\n"
+                + "created: " + this.created;
+    }
+
 }

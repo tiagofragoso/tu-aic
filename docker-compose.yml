@@ -119,6 +119,13 @@ services:
     environment:
           DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME}
           DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN}
+
+  frontend:
+    build: ./frontend
+    volumes: 
+      - "./frontend/src:/usr/app/src"
+    ports: 
+      - "8080:4200"
       
 volumes:
   minio_data:

@@ -1,0 +1,12 @@
+.col-margin-left {
+  margin-left: 170px;
+}
+
+.container-width {
+  width: -webkit-fill-available;
+  width: -moz-available;
+}
+
+.sidebar ul.nav > li > a, .sidebar ul.nav > li > a:focus {
+  margin-left: 0 !important;
+}
