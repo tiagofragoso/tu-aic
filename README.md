@@ -44,12 +44,12 @@ This service exposes a **REST API** wrapping a **MinIO object server** responsib
 
 ### Workflow Service
 
-This service is charged of managing a basic workflow that shows the application potential. 
+This service is in charge of managing a basic workflow that shows the application potential. 
 
-It gets data from the chosen repository, format them and order them chronologically. It sends sensing events to the middleware, changes metadata of sent sensing events, mocks a computing vision algorithm that adds tags to sensing events. It corrupt images to make their tag as "faulty".
+It gets data from the chosen repository, format them and order them chronologically. Ite performs CRUD operations, mocks a computing vision algorithm that adds tags to sensing events and it corrupts some images to make their status as "faulty"
 
 ### Webapplication
-This is the front-end web application that the users will use to work with with sensing events sent from various IoT devices.
+This is the front-end web application that the users will use to work with, with sensing events sent from various IoT devices.
 
 It is implemented in Angular and connected (only) to the middleware.
 It has two main parts: 
