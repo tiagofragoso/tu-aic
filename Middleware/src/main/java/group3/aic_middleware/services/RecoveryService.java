@@ -220,7 +220,21 @@ public class RecoveryService {
             return "CORRECT";
         } else {
             log.info("Requested sensing event is corrupted in Image Object Storage.");
-            return "FAULTY";
+            try {
+                imageIFS = this.imageFileService.readImage(fileName);
+                String hashedImageIFS = this.hashingService.getHash(imageIFS.getBase64EncodedImage());
+
+                // compare the hash value of an image from IFS with the stored hash in Metadata Storage
+                if(hashedImageIFS.equals(this.getHashValue(readEventsDTO, "base"))) {
+                    return "FAULTY";
+                } else {
+                    log.info("Requested sensing event is corrupted in Image File Storage.");
+                    return "MISSING";
+                }
+            } catch (EventNotFoundException ex) {
+                log.info("Requested sensing event doesn't exist in any Storage.");
+                return "MISSING";
+            }
         }
     }
 
