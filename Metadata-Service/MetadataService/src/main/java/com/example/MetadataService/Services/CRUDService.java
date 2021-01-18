@@ -76,7 +76,7 @@ public class CRUDService {
                 tagDtos.add(tagRealToDto(tagdt));
             }
             event.setTags(tagDtos);
-            event.setUpdated(Instant.now().getEpochSecond());
+            event.setUpdated(Instant.now().toEpochMilli());
 
             eventRepository.save(sensingDtoToReal(event));
         }
@@ -193,7 +193,7 @@ public class CRUDService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The given tag was already added to this event.");
         }
 
-        event.getTags().add(tagDtoToReal(tag, Instant.now().getEpochSecond()));
+        event.getTags().add(tagDtoToReal(tag, Instant.now().toEpochMilli()));
         event.updateTagsConcatString();
         eventRepository.save(event);
     }

@@ -168,7 +168,7 @@ label {
 
 .carousel-thumbnail__img {
   width: 160px;
-  height: 140px;
+  height: auto;
 }
 
 .thumbnail-overlay {
@@ -211,10 +211,6 @@ ngb-carousel {
   height: 80%;
 }
 
-ngb-timepicker {
-  flex-direction: row-reverse;
-}
-
 :host ::ng-deep .carousel-inner {
   height: 100%;
 }
@@ -237,4 +233,28 @@ ngb-timepicker {
 
 .line-break {
   white-space: pre-line;
+}
+
+.p-2px {
+  padding: 2px;
+}
+
+.right-side {
+  flex-direction: row-reverse;
+}
+
+:host ::ng-deep .ngb-tp-input {
+  padding: 0;
+}
+
+:host ::ng-deep .ngb-tp-input-container {
+  width: min-content;
+}
+
+:host ::ng-deep .date-field {
+  min-width: 85px;
+}
+
+.first-column {
+  min-width: 350px;
 }

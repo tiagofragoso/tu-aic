@@ -103,12 +103,6 @@ export class EventDetailsComponent implements OnInit {
     return convertUnixDateToString(tmpDate);
   }
 
-  convertUpdate(date: any) {
-    console.log(convertUnixDateToDate(Number.parseInt(date)));
-    console.log(convertUnixDateToString(new Date(date)));
-    return convertUnixDateToString(new Date(date));
-  }
-
   openDeleteDialogue(content: any) {
     this.modalService.open(content);
   }
@@ -122,12 +116,19 @@ export class EventDetailsComponent implements OnInit {
           return controlErrors[keyError];
         }).join('\n') + '\n ';
       }
-      Object.keys(this.eventForm.controls).map((key: string) => {
+      Object.keys(this.eventForm.controls).forEach((key: string) => {
         if (this.eventForm.get(key)?.invalid) {
-          error += '"' +
-            key.split('_').map(value => {
-              return value.charAt(0).toUpperCase() + value.substring(1)
-            }).join(' ') + '" cannot be empty!\n ';
+          const controlErrors: ValidationErrors = this.eventForm.get(key)!.errors!;
+          Object.keys(controlErrors).forEach((errorKey: string) => {
+            if (errorKey === 'required') {
+              error += '"' +
+                key.split('_').map(value => {
+                  return value.charAt(0).toUpperCase() + value.substring(1)
+                }).join(' ') + '" cannot be empty!\n ';
+            } else {
+              error += controlErrors[errorKey] + '\n';
+            }
+          });
         }
       });
     }
@@ -198,8 +199,8 @@ export class EventDetailsComponent implements OnInit {
     this.eventForm.get('device_identifier')?.setValidators(Validators.required);
     this.eventForm.get('created_date')?.setValidators(Validators.required);
     this.eventForm.get('created_time')?.setValidators(Validators.required);
-    this.eventForm.get('frame_number')?.setValidators([Validators.required]);
-    this.eventForm.get('event_frames')?.setValidators([Validators.required]);
+    this.eventForm.get('frame_number')?.setValidators([Validators.required, this.validateFrameNum]);
+    this.eventForm.get('event_frames')?.setValidators([Validators.required, this.validateEventFrames]);
     this.eventForm.get('place_identifier')?.setValidators(Validators.required);
     this.eventForm.get('longitude')?.setValidators([Validators.required, this.validateLongitude]);
     this.eventForm.get('latitude')?.setValidators([Validators.required, this.validateLatitude]);
@@ -238,6 +239,22 @@ export class EventDetailsComponent implements OnInit {
     this.carousel.select('ngb-slide-' + id);
   }
 
+  validateFrameNum(frameNum: FormControl): ValidationErrors | null {
+    return (
+      Number.isInteger(frameNum.value) && Number.parseInt(frameNum.value) >= 1
+    ) ?
+      null :
+      {frameNum: '"Frame number" has to be a number greater or equal to 1'};
+  }
+
+  validateEventFrames(eventFrames: FormControl): ValidationErrors | null {
+    return (
+      Number.isInteger(eventFrames.value) && Number.parseInt(eventFrames.value) >= 1
+    ) ?
+      null :
+      {eventFrames: '"Event frames" has to be a number greater or equal to 1!'};
+  }
+
   validateLongitude(longitude: FormControl): ValidationErrors | null {
     return (
       longitude.value.toString().match('^-?\\d+(?:.\\d+)?$') && longitude.value >= -180 && longitude.value <= 180
@@ -273,5 +290,5 @@ export class EventDetailsComponent implements OnInit {
     return fg?.get('frame_number')?.value <= fg?.get('event_frames')?.value
       ? null :
       {frames: '"Frame Number" has to be lesser or equal to "Event Frames"!'};
-  };
+  }
 }
