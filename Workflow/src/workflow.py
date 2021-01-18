@@ -50,7 +50,7 @@ interactive_sep()
 print(" ------ AI SIMULATOR ------")
 for i in range(10) :
     rdm = random.randint(0,5)
-    rdmPic = random.randint(0,nbSentImages)
+    rdmPic = random.randint(0,nbSentImages - 1)
     for j in range(rdm) :
         addTag(picturesDic[rdmPic])
 
@@ -80,21 +80,21 @@ imagesInMiddleware=[]
 for i in range(nbSentImages,nbSentImages+30) :
     postEvent(picturesDic[i])
     imagesInMiddleware.append(i)
-    choice = random.randint(5)
+    choice = random.randint(0,5)
     if choice == 0 :
         print(" -- CHANGE METADATA -- ")
         rdmCat = random.randint(0, len(categoriesToChange) - 1)
-        rdmIndex = random.randint(len(imagesInMiddleware))
+        rdmIndex = random.randint(0,len(imagesInMiddleware) - 1)
         changeMetadata(picturesDic[imagesInMiddleware[rdmIndex]],categoriesToChange[rdmCat])
     if choice == 1 :
         print(" -- ADD TAGS -- ")
-        rdmNbTags = random.randint(5)
-        rdmIndex = random.randint(len(imagesInMiddleware))
+        rdmNbTags = random.randint(0,5)
+        rdmIndex = random.randint(0,len(imagesInMiddleware)-1)
         for j in range(rdmNbTags):
             addTag(picturesDic[imagesInMiddleware[rdmIndex]])
     if choice == 2 :
         print(" -- DELETE IMAGE --")
-        rdmIndex = random.randint(len(imagesInMiddleware))
+        rdmIndex = random.randint(0,len(imagesInMiddleware)-1)
         delete(picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
         del imagesInMiddleware[rdmIndex]
     # default : does nothing
