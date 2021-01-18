@@ -39,6 +39,8 @@ def putMetadata(dic, data, chosenCat, formerAttribute) :
     dataDic["metadata"].pop("device_id")
     dataDic["metadata"].pop("datetime")
     dataDic["metadata"].pop("seq_num_frames")
+    dataDic["metadata"].pop("filename")
+    print(dataDic)
     try:
         print_log("Changing metadata of event " + data["metadata"]["name"] + " (id: " + str(data["metadata"]["seq_id"]) + ")")
         putResp = requests.put(url, json=dataDic)
