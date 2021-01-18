@@ -33,11 +33,14 @@ def putMetadata(dic, data, chosenCat, formerAttribute) :
     dataDic = copy.deepcopy(data);
     dataDic["metadata"]["event_id"] = data["metadata"]["seq_id"]
     dataDic["metadata"]["dev_id"] = data["metadata"]["device_id"]
+    dataDic["metadata"]["event_frames"] = data["metadata"]["seq_num_frames"]
+    dataDic["metadata"]["created"] = int(datetime.strptime(data["metadata"]["datetime"], '%d-%b-%Y (%H:%M:%S.%f)').timestamp() * 1000)
     dataDic["metadata"].pop("seq_id")
     dataDic["metadata"].pop("device_id")
+    dataDic["metadata"].pop("datetime")
+    dataDic["metadata"].pop("seq_num_frames")
     try:
-        print_log("Changing " + chosenCat + " of event " + dataDic["metadata"]["name"] + " (id: " + str(dataDic["metadata"]["event_id"]) + ")")
-        # print(str(formerAttribute) + " -> " + str(dic[chosenCat]))
+        print_log("Changing metadata of event " + data["metadata"]["name"] + " (id: " + str(data["metadata"]["seq_id"]) + ")")
         putResp = requests.put(url, json=dataDic)
     except requests.exceptions.RequestException as e:
         print("Error sending image: ", e)
@@ -59,10 +62,10 @@ def putNewTag(data, dic) :
     if status_code != 200:
         print("Error tagging event. Got HTTP" + str(status_code))
 
-def delete(id) :
+def delete(name, id) :
     url = str(API_ENDPOINT) + "/events/" + str(id)
     try:
-        print_log("Deleting event with id: " + str(id))
+        print_log("Deleting event " + name + " (id: " + str(id) + ")")
         deleteResp = requests.delete(url)
     except requests.exceptions.RequestException as e:
         print_log("Error deleting event: ", e)

@@ -34,15 +34,11 @@ for i in range(nbSentImages) :
     # time.sleep(1)
     postEvent(picturesDic[i])
 
+interactive_sep()
+
 # -- CHANGE METADATA TO IMAGES
 print(" ------ METADATA MODIFIER ------")
-# # Either precise the new attribute
-changeMetadata(picturesDic[0],"name","my_device_new_name")
-
-# # Either not
-# for i in range(10) :
-#     rdmIndex = random.randint(0,len(categoriesToChange)-1)
-#     changeMetadata(picturesDic[2*i+1],categoriesToChange[rdmIndex])
+changeMetadata(picturesDic[0], "name", "MAMMOTH CAVE X")
 
 interactive_sep()
 
@@ -58,7 +54,7 @@ interactive_sep()
 
 # DELETING 1 IMAGE
 print(" ------ IMAGE ERASER ------")
-delete(picturesDic[1]["seq_id"])
+delete(picturesDic[1]["name"], picturesDic[1]["seq_id"])
 
 interactive_sep()
 
@@ -94,8 +90,8 @@ for i in range(nbSentImages,nbSentImages+30) :
             addTag(picturesDic[imagesInMiddleware[rdmIndex]])
     if choice == 2 :
         print(" -- DELETE IMAGE --")
-        rdmIndex = random.randint(0,len(imagesInMiddleware)-1)
-        delete(picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
+        rdmIndex = random.randint(0, len(imagesInMiddleware) - 1 )
+        delete(picturesDic[imagesInMiddleware[rdmIndex]]["name"], picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
         del imagesInMiddleware[rdmIndex]
     # default : does nothing
     time.sleep(waitingTime)

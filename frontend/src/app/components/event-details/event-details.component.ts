@@ -1,7 +1,7 @@
 import {Component, OnInit, Output, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {Event} from "../../models/event";
-import {convertStringDateToDate, convertUnixDateToDate, convertUnixDateToString} from "../../utils/date";
+import {convertUnixDateToDate, convertUnixDateToString} from "../../utils/date";
 import {State} from "../../models/state";
 import {NgbCarousel, NgbDateStruct, NgbModal, NgbTimeStruct} from "@ng-bootstrap/ng-bootstrap";
 import {EventService} from "../../services/event.service";
@@ -35,7 +35,6 @@ export class EventDetailsComponent implements OnInit {
   activeSliderId = 'ngb-slide-0';
   tags: Array<TagX> = [];
   error = false;
-  noChanges = false;
   @ViewChild('tagCarousel', {static: false}) carousel!: NgbCarousel;
 
   constructor(public router: Router, public toastService: ToastService,
@@ -45,6 +44,7 @@ export class EventDetailsComponent implements OnInit {
       device_identifier: new FormControl(''),
       created_date: new FormControl(''),
       created_time: new FormControl(''),
+      // update: new FormControl(''),
       frame_number: new FormControl(''),
       event_frames: new FormControl(''),
       place_identifier: new FormControl(''),
@@ -53,20 +53,11 @@ export class EventDetailsComponent implements OnInit {
     });
   }
 
-  // TODO: thumbnail overflow should display all images
-
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     if (this.id != null) {
       this.eventService.getById(this.id).subscribe((event: Event) => {
-        this.event = this.tmpEvent = event;
-        if (this.event.image && this.event.image.length === 0) {
-          this.event.metadata.state = State.MISSING;
-        } else {
-          this.event.metadata.state = State.CORRECT;
-        }
-        this.setCreatedTime(this.event.metadata.created);
-        this.fillForm(this.event);
+        this.setup(event);
         const baseTag = new Tag();
         baseTag.tag_name = 'base';
         baseTag.image = event.image;
@@ -108,12 +99,14 @@ export class EventDetailsComponent implements OnInit {
 
   convertDate(date: any) {
     let tmpDate: Date;
-    if (Number.isInteger(date)) {
-      tmpDate = convertUnixDateToDate(Number.parseInt(date));
-    } else {
-      tmpDate = convertStringDateToDate(date);
-    }
+    tmpDate = convertUnixDateToDate(Number.parseInt(date));
     return convertUnixDateToString(tmpDate);
+  }
+
+  convertUpdate(date: any) {
+    console.log(convertUnixDateToDate(Number.parseInt(date)));
+    console.log(convertUnixDateToString(new Date(date)));
+    return convertUnixDateToString(new Date(date));
   }
 
   openDeleteDialogue(content: any) {
@@ -127,26 +120,46 @@ export class EventDetailsComponent implements OnInit {
         const controlErrors: ValidationErrors = this.eventForm.errors;
         error = Object.keys(controlErrors).map(keyError => {
           return controlErrors[keyError];
-        }).join('\n');
+        }).join('\n') + '\n ';
       }
-      Object.keys(this.eventForm.controls).map((key: string) => {
+      Object.keys(this.eventForm.controls).forEach((key: string) => {
         if (this.eventForm.get(key)?.invalid) {
-          error += '"' +
-            key.split('_').map(value => {
-              return value.charAt(0).toUpperCase() + value.substring(1)
-            }).join(' ') + '" cannot be empty!\n';
+          const controlErrors: ValidationErrors = this.eventForm.get(key)!.errors!;
+          Object.keys(controlErrors).forEach((errorKey: string) => {
+            if (errorKey === 'required') {
+              error += '"' +
+                key.split('_').map(value => {
+                  return value.charAt(0).toUpperCase() + value.substring(1)
+                }).join(' ') + '" cannot be empty!\n ';
+            } else {
+              error += controlErrors[errorKey] + '\n';
+            }
+          });
         }
       });
     }
     return error;
   }
 
+  setup(event: Event) {
+    this.event = this.tmpEvent = event;
+    if (this.event.image.length === 0) {
+      this.event.metadata.state = State.MISSING;
+    } else {
+      this.event.metadata.state = State.CORRECT;
+    }
+    this.setCreatedTime(this.event.metadata.created);
+    this.fillForm(this.event);
+  }
+
   saveUpdate() {
     this.eventService.update(this.id!, this.getEventFormValues()).subscribe(() => {
         this.toastService.showToast('Event was successfully updated!', ColorCodes.SUCCESS);
         // TODO: Make map refresh itself if new latitude/longitude got set
-        this.tmpEvent = this.event = this.getEventFormValues();
-        this.edit = false;
+        this.eventService.getById(this.id!).subscribe((event: Event) => {
+          this.setup(event);
+          this.edit = false;
+        });
       },
       (error: HttpErrorResponse) => {
         let message: string;
@@ -192,8 +205,8 @@ export class EventDetailsComponent implements OnInit {
     this.eventForm.get('device_identifier')?.setValidators(Validators.required);
     this.eventForm.get('created_date')?.setValidators(Validators.required);
     this.eventForm.get('created_time')?.setValidators(Validators.required);
-    this.eventForm.get('frame_number')?.setValidators([Validators.required]);
-    this.eventForm.get('event_frames')?.setValidators([Validators.required]);
+    this.eventForm.get('frame_number')?.setValidators([Validators.required, this.validateFrameNum]);
+    this.eventForm.get('event_frames')?.setValidators([Validators.required, this.validateEventFrames]);
     this.eventForm.get('place_identifier')?.setValidators(Validators.required);
     this.eventForm.get('longitude')?.setValidators([Validators.required, this.validateLongitude]);
     this.eventForm.get('latitude')?.setValidators([Validators.required, this.validateLatitude]);
@@ -232,6 +245,22 @@ export class EventDetailsComponent implements OnInit {
     this.carousel.select('ngb-slide-' + id);
   }
 
+  validateFrameNum(frameNum: FormControl): ValidationErrors | null {
+    return (
+      Number.isInteger(frameNum.value) && Number.parseInt(frameNum.value) >= 1
+    ) ?
+      null :
+      {frameNum: '"Frame number" has to be a number greater or equal to 1'};
+  }
+
+  validateEventFrames(eventFrames: FormControl): ValidationErrors | null {
+    return (
+      Number.isInteger(eventFrames.value) && Number.parseInt(eventFrames.value) >= 1
+    ) ?
+      null :
+      {eventFrames: '"Event frames" has to be a number greater or equal to 1!'};
+  }
+
   validateLongitude(longitude: FormControl): ValidationErrors | null {
     return (
       longitude.value.toString().match('^-?\\d+(?:.\\d+)?$') && longitude.value >= -180 && longitude.value <= 180
@@ -267,5 +296,5 @@ export class EventDetailsComponent implements OnInit {
     return fg?.get('frame_number')?.value <= fg?.get('event_frames')?.value
       ? null :
       {frames: '"Frame Number" has to be lesser or equal to "Event Frames"!'};
-  };
+  }
 }
