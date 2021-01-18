@@ -4,7 +4,7 @@ label {
 
 .content-wrapper.preview {
   height: 250px;
-  min-width: 27.7vw;
+  width: 100%;
 }
 
 .map-wrapper {

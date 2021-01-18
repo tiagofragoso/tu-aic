@@ -25,7 +25,7 @@
   </div>
 
   <div class="row">
-    <div class="col-4 h-100">
+    <div class="col-4 h-100 first-column">
       <div class="row m-1">
         <table class=" table table-borderless table-sm">
           <tbody [formGroup]="eventForm">
@@ -45,11 +45,11 @@
           </tr>
           <tr>
             <td class="fw-bold">Number of Tags:</td>
-            <td class="fw-bold">{{event?.tags ? event.tags.length - 1 : 'No tags found'}}</td>
+            <td class="fw-bold">{{event?.tags && event.tags.length > 1 ? event.tags.length - 1 : 'No tags found'}}</td>
           </tr>
           <tr>
             <td class="fw-bold">Last Updated:</td>
-            <td class="fw-bold">{{event?.metadata?.updated ? convertUpdate(event.metadata.updated) : 'No updated date found'}}</td>
+            <td class="fw-bold">{{event?.metadata?.updated ? convertDate(event.metadata.updated) : 'No updated date found'}}</td>
           </tr>
           <tr>
             <td></td>
@@ -78,12 +78,13 @@
             <td [ngClass]="{'created-padding-top': edit}">Created:</td>
             <td *ngIf="!edit">{{event?.metadata?.created ? convertDate(event?.metadata?.created) : ''}}</td>
             <td *ngIf="edit" class="d-flex">
-              <label class="w-50 d-flex align-items-center">
-                <input #d="ngbDatepicker" autocomplete="off" class="form-control w-50 h-25" formControlName="created_date" name="dp" ngbDatepicker
+              <label class="w-100 d-flex align-items-center">
+                <input #d="ngbDatepicker" autocomplete="off" class="form-control w-50 h-25 date-field" formControlName="created_date" name="dp"
+                       ngbDatepicker
                        placeholder="yyyy-mm-dd">
-                <button (click)="d.toggle()" class="btn btn-outline-secondary calendar btn-sm h-25" type="button">📅</button>
+                <button (click)="d.toggle()" class="btn btn-outline-secondary calendar btn-sm h-25 p-2px" type="button">📅</button>
               </label>
-              <label class="w-50 d-flex">
+              <label class="w-50 d-flex right-side">
                 <ngb-timepicker [(ngModel)]="createdTime" formControlName="created_time"></ngb-timepicker>
               </label>
             </td>
@@ -93,7 +94,8 @@
             <td *ngIf="!edit">{{event?.metadata ? event?.metadata?.frame_num + '/' + event?.metadata?.event_frames : ''}}</td>
             <td *ngIf="edit">
               <div class="d-flex">
-                <label><input aria-describedby="inputFrameNum" autocomplete="off" class="form-control w-50 space-right" formControlName="frame_number"
+                <label><input aria-describedby="inputFrameNum" autocomplete="off" class="form-control w-50 space-right right-side"
+                              formControlName="frame_number"
                               id="inputFrameNum"
                               min="1" title="Frame of this specific event" type="number"></label>
                 <span>/</span>
@@ -142,7 +144,8 @@
               <div *ngIf="tag.loading">
                 <div class="spinner"></div>
               </div>
-              <img *ngIf="!tag.loading" [src]="tag.tag.image?'data:image/jpeg;base64,'+tag.tag.image:'https://via.placeholder.com/600'"
+              <img *ngIf="!tag.loading"
+                   [src]="tag.tag.image?'data:image/jpeg;base64,'+tag.tag.image:'https://via.placeholder.com/600?text=Image+Not+Found'"
                    alt="{{tag.tag.tag_name}}">
             </div>
             <div class="carousel-caption">
@@ -171,7 +174,7 @@
                 </div>
                 <img *ngIf="!tag.loading"
                      [ngClass]="{'thumbnail_selected_border': activeSliderId === ('ngb-slide-'+tag.index)}"
-                     [src]="tag.tag.image?'data:image/jpeg;base64,'+tag.tag.image:'https://via.placeholder.com/160x140'"
+                     [src]="tag.tag.image?'data:image/jpeg;base64,'+tag.tag.image:'https://via.placeholder.com/160x103?text=Image+Not+Found'"
                      alt="{{tag.tag.tag_name}}"
                      class="carousel-thumbnail__img">
               </a>
