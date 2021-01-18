@@ -83,16 +83,6 @@ services:
       - mongodb
     ports:
       - 1331:8080
-    
-#  iot-simulator-service:
-#    build: ./IOT-Simulator
-#    command: sh -c './wait-for middleware:8080 -t 300 -- python -u ./src/sim.py'
-#    depends_on:
-#        - middleware
-#    volumes:
-#      - "${PATH_TO_IMAGE_DIR}:/app/data"
-#    environment:
-#          API_ENDPOINT: ${API_ENDPOINT}
           
   workflow-service:
     build: ./Workflow

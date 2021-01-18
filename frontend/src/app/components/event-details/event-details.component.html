@@ -132,7 +132,7 @@
         <div *ngIf="eventForm.invalid" class="text-danger line-break">
           {{getFormControlError()}}
         </div>
-        <app-event-map [class.map-m-top]="!edit" [showSearchCircle]="false" [singleEvent]="event" class="w-100 p-0"></app-event-map>
+        <app-event-map #mapPreview [class.map-m-top]="!edit" [showSearchCircle]="false" [singleEvent]="event" class="w-100 p-0"></app-event-map>
       </div>
     </div>
     <div class="col-8">
