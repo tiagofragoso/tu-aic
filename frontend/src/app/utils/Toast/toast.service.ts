@@ -9,6 +9,10 @@ export class ToastService {
     this.toasts = this.toasts.filter(t => t !== toast);
   }
 
+  clear() {
+    this.toasts = [];
+  }
+
   showToast(message: string, color: ColorCodes): void {
     this.show(message, {
       classname: 'bg-' + color + ' text-light',
