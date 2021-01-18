@@ -1,5 +1,6 @@
-import datetime
+from datetime import datetime
 import random
+import copy
 
 from dataManager import dicAndImageFormatter, getImagePathWithDic
 from apiCalls import putMetadata
@@ -66,7 +67,8 @@ def changeWithAttributeGiven(metadataToChange,chosenAtt, chosenCat ="name") :
     return (metadataToChange,attToChange)
 
 
-def changeMetadata(metadataToChange, chosenCat="name", newAttribute=None):
+def changeMetadata(metadata, chosenCat="name", newAttribute=None):
+    metadataToChange = copy.deepcopy(metadata);
     if newAttribute == None :
         (changedMetadata,changedAttribute) = changeWithAttributeNotGiven(metadataToChange, chosenCat)
     else :
@@ -74,6 +76,15 @@ def changeMetadata(metadataToChange, chosenCat="name", newAttribute=None):
 
     imagePath = getImagePathWithDic(changedMetadata)
 
+    changedMetadata["event_id"] = changedMetadata["seq_id"]
+    changedMetadata["dev_id"] = changedMetadata["device_id"]
+    changedMetadata["event_frames"] = changedMetadata["seq_num_frames"]
+    changedMetadata["created"] = int(datetime.strptime(changedMetadata["datetime"], '%d-%b-%Y (%H:%M:%S.%f)').timestamp() * 1000)
+    changedMetadata.pop("seq_id")
+    changedMetadata.pop("device_id")
+    changedMetadata.pop("datetime")
+    changedMetadata.pop("seq_num_frames")
+
     dataFormatted = dicAndImageFormatter(changedMetadata, imagePath)
 
-    putMetadata(changedMetadata, dataFormatted, chosenCat, changedAttribute)
+    putMetadata(metadata, dataFormatted, chosenCat, changedAttribute)

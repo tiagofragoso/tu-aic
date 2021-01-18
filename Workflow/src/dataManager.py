@@ -66,5 +66,4 @@ def metadataServiceFormatter(dic) :
     dic.pop("datetime")
     dic["event_frames"] = dic["seq_num_frames"]
     dic.pop("seq_num_frames")
-    dic["tags"] = []
     return dic

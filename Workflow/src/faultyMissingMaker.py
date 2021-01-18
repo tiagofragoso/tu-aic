@@ -18,5 +18,8 @@ def makeFaultyImage(dic) :
     putFaultyImage(dataFormatted,dic)
 
 def makeMissingImage(dic) :
-    dataFormatted = metadataServiceFormatter(dic)
-    postMissingImage(dataFormatted)
+    tag = {
+        "tag_name": "base",
+        "image_hash": "123"
+    }
+    postMissingImage(dic, tag)
