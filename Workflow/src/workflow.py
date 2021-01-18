@@ -38,14 +38,14 @@ interactive_sep()
 
 # -- CHANGE METADATA TO IMAGES
 print(" ------ METADATA MODIFIER ------")
-changeMetadata(picturesDic[0], "name", "MAMMOTH CAVE X")
+changeMetadata(picturesDic[1], "name", "MACON 27 XX")
 
 interactive_sep()
 
 # ADD TAGS TO IMAGES
-print(" ------ AI SIMULATOR ------")
+print(" ------ CV SIMULATOR ------")
 for i in range(10) :
-    rdm = random.randint(0,5)
+    rdm = random.randint(0,4)
     rdmPic = random.randint(0,nbSentImages)
     for j in range(rdm) :
         addTag(picturesDic[rdmPic])
@@ -53,45 +53,19 @@ for i in range(10) :
 interactive_sep()
 
 # DELETING 1 IMAGE
-print(" ------ IMAGE ERASER ------")
+print(" ------ EVENT ERASER ------")
 delete(picturesDic[1]["name"], picturesDic[1]["seq_id"])
 
 interactive_sep()
 
 # CORRUPT 1 IMAGE (STATE "FAULTY")
-print(" ------ IMAGE CORRUPTER ------")
+print(" ------ EVENT CORRUPTER ------")
 
 makeFaultyImage(picturesDic[3])
 
 interactive_sep()
 
 # MAKE 1 IMAGE STATE "MISSING"
-makeMissingImage(picturesDic[-1])
+makeMissingImage(picturesDic[4])
 
-print("The next part is the requests bot")
 interactive_sep()
-print(" ----- REQUESTS BOT ------")
-waitingTime = os.getenv("FREQUENCY",30)
-imagesInMiddleware=[]
-for i in range(nbSentImages,nbSentImages+30) :
-    postEvent(picturesDic[i])
-    imagesInMiddleware.append(i)
-    choice = random.randint(5)
-    if choice == 0 :
-        print(" -- CHANGE METADATA -- ")
-        rdmCat = random.randint(0, len(categoriesToChange) - 1)
-        rdmIndex = random.randint(len(imagesInMiddleware))
-        changeMetadata(picturesDic[imagesInMiddleware[rdmIndex]],categoriesToChange[rdmCat])
-    if choice == 1 :
-        print(" -- ADD TAGS -- ")
-        rdmNbTags = random.randint(5)
-        rdmIndex = random.randint(len(imagesInMiddleware))
-        for j in range(rdmNbTags):
-            addTag(picturesDic[imagesInMiddleware[rdmIndex]])
-    if choice == 2 :
-        print(" -- DELETE IMAGE --")
-        rdmIndex = random.randint(len(imagesInMiddleware))
-        delete(picturesDic[imagesInMiddleware[rdmIndex]]["name"], picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
-        del imagesInMiddleware[rdmIndex]
-    # default : does nothing
-    time.sleep(waitingTime)
