@@ -71,7 +71,8 @@ makeMissingImage(picturesDic[-1])
 print("The next part is the requests bot")
 interactive_sep()
 print(" ----- REQUESTS BOT ------")
-waitingTime = os.getenv("FREQUENCY",30)
+waitingTime = int(os.getenv("FREQUENCY",10))
+
 imagesInMiddleware=[]
 for i in range(nbSentImages,nbSentImages+30) :
     postEvent(picturesDic[i])
