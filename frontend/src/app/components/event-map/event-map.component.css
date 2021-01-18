@@ -1,0 +1,51 @@
+label {
+  white-space: nowrap;
+}
+
+.content-wrapper.preview {
+  height: 250px;
+  width: 100%;
+}
+
+.map-wrapper {
+  height: 90%;
+}
+
+.content-wrapper {
+  height: 100%;
+  width: 80%;
+  border: 1px solid #eceff1;
+}
+
+.events-list {
+  height: 100%;
+  width: 20%;
+  box-shadow: inset 5px 0 19px -12px rgba(176, 176, 176, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.event-list-header {
+  display: flex;
+  justify-content: center;
+  border-bottom: 4px solid #eceff1;
+}
+
+.event-list-item {
+  cursor: pointer;
+  padding: 12px 8px;
+  border-bottom: 1px solid #eceff1;
+  border-left: 6px solid transparent;
+  font-size: small;
+}
+
+.event-list-item.curr {
+  border-left: 6px solid rgb(85, 171, 61);
+  background-color: rgb(243, 243, 243);
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

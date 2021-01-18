@@ -72,7 +72,7 @@ services:
   #    - "1334:80"
   #  depends_on:
   #    - logdb
-      
+
   metadata-service:
     build: ./Metadata-Service/MetadataService
     image: metadata-service
@@ -83,12 +83,12 @@ services:
       - mongodb
     ports:
       - 1331:8080
-      
+
   iot-simulator-service:
     build: ./IOT-Simulator
     depends_on:
         - middleware
-  
+
   middleware:
     build: ./Middleware
     depends_on:
@@ -100,6 +100,13 @@ services:
     environment:
           DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME}
           DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN}
+
+  frontend:
+    build: ./frontend
+    volumes: 
+      - "./frontend/src:/usr/app/src"
+    ports: 
+      - "8080:4200"
       
 volumes:
   minio_data:

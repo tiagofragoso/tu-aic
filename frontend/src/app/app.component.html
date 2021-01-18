@@ -1,0 +1,44 @@
+<div class="wrapper">
+  <div class="header">
+    <div class="row mx-0">
+      <div class="col-9 px-0">
+        <div (click)="logoClicked()" class="logo"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content-wrapper full-height">
+    <div class="container-fluid full-height" role="main">
+      <div class="content full-height">
+        <div class="row full-height">
+          <div class="px-0 sidebar-bg width">
+            <div class="sidebar">
+              <ul class="nav nav-pills flex-column">
+                <li
+                  *ngIf="router.url.includes('events/') && !router.url.endsWith('events/') && !router.url.endsWith('events') && !router.url.includes('events/map')"
+                  [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'"
+                  role="presentation">
+                  <a (click)="goBack()" class="return nav-link" routerLink="/events/{{id}}">Back</a>
+                </li>
+                <li [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="'active'" role="presentation">
+                  <a class="nav-link" routerLink="events">Event Table</a>
+                </li>
+                <li [routerLinkActiveOptions]="{exact: false}" [routerLinkActive]="'active'" role="presentation">
+                  <a class="nav-link" routerLink="events/map">Event Map</a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+          <div class="px-0 main-content full-height col-margin-left padding container-width">
+            <div class="full-height">
+              <div class="main-container">
+                <router-outlet (activate)="onActivate($event)"></router-outlet>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
