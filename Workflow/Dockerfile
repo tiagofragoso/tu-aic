@@ -12,4 +12,4 @@ COPY ./wait-for ./
 RUN chmod 777 ./wait-for
 
 # The -u flag is important if you want to observe the logs, otherwise python buffers the output
-CMD [ "python", "-u", "./sim.py" ]
+CMD [ "python", "-u", "./src/workflow.py" ]

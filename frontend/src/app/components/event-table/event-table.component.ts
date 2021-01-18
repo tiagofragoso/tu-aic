@@ -67,12 +67,14 @@ export class EventTableComponent implements OnInit {
               private eventService: EventService,
               private toastService: ToastService) {
     if (this.router.getCurrentNavigation()?.extras.state?.deletedEventId) {
-      this.toastService.showToast('Event ' + this.router.getCurrentNavigation()?.extras.state?.deletedEventId + 'was successfully deleted!', ColorCodes.SUCCESS);
+      this.toastService.showToast('Event ' + this.router.getCurrentNavigation()?.extras.state?.deletedEventId + ' was successfully deleted!', ColorCodes.SUCCESS);
     }
                 this.queryOptions = {
                   page: 1,
                   pageSize: 10,
-                  searchTerm: new FormControl('')
+                  searchTerm: new FormControl(''),
+                  sortColumn: 'updated',
+                  sortDirection: 'desc'
                 };
                 this.headers = new QueryList<SortableHeader>();
               }
@@ -82,7 +84,9 @@ export class EventTableComponent implements OnInit {
   }
 
   onPageChange() {
-    this.getEvents();
+    setTimeout(() => {
+      this.getEvents();
+    }, 150);
   }
 
   onSort({column, direction}: SortEvent) {

@@ -103,6 +103,12 @@ export class EventDetailsComponent implements OnInit {
     return convertUnixDateToString(tmpDate);
   }
 
+  convertUpdate(date: any) {
+    console.log(convertUnixDateToDate(Number.parseInt(date)));
+    console.log(convertUnixDateToString(new Date(date)));
+    return convertUnixDateToString(new Date(date));
+  }
+
   openDeleteDialogue(content: any) {
     this.modalService.open(content);
   }

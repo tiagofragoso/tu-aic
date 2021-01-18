@@ -6,15 +6,9 @@ import requests
 import sys
 import time
 import datetime
-from dotenv import load_dotenv
-from pathlib import Path  # Python 3.6+ only
 import os
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
-# PATH = "../data/iwildcam_synthesized_idaho"
-# for the moment, we take data from the little_data_repo
-PATH = "../little_data/iwildcam_synthesized_idaho"
-API_ENDPOINT = os.getenv("API_ENDPOINT")
+PATH = "./data"
+API_ENDPOINT = os.getenv("API_ENDPOINT", "http://localhost:3000")
 
 def sortDataChronologically(dicToSort) :
     linkDateToIndex = []
@@ -59,17 +53,12 @@ def post(url, data):
 with open(PATH+"/metadata.json") as f:
     picturesDic = json.load(f)
 
-# Change the PORT if specified in the command
-if __name__ == '__main__':
-    if len(sys.argv) > 1 :
-        PORT = int(sys.argv[1])
 
 picturesDic = sortDataChronologically(picturesDic)
 # Script to send the pictures to the PORT
-for i in range(len(picturesDic)) :
-    waitingTime = 20 # a picture is sent every waitingTime second
+for i in range(min(len(picturesDic),200)) :
+    waitingTime = 5 # a picture is sent every waitingTime second
     time.sleep(waitingTime)
     data = getdata_encoded(picturesDic[i])
     post(str(API_ENDPOINT) + "/events", data)
 
-# Help with mockoon post : https://mockoon.com/docs/latest/templating/
