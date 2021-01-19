@@ -8,6 +8,11 @@ from dataManager import getOrderedData
 from metadataModifier import changeMetadata
 from apiCalls import delete
 from faultyMissingMaker import makeFaultyImage, makeMissingImage
+'''
+the main script that is launched. 
+It manages the create, update and delete of the sensing events
+'''
+
 if not os.path.exists('./data_created'):
     os.makedirs('./data_created')
 

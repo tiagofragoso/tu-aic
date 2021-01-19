@@ -5,7 +5,9 @@ import copy
 from dataManager import dicAndImageFormatter, getImagePathWithDic
 from apiCalls import putMetadata
 
-
+'''
+is charged to update the metadata, based on the workflow input
+'''
 def changeString(metadataToChange,cat) :
     changedCat = metadataToChange[cat] + "_new"
     metadataToChange[cat] = changedCat
