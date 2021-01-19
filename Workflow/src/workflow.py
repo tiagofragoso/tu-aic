@@ -74,7 +74,7 @@ print(" ----- REQUESTS BOT ------")
 waitingTime = int(os.getenv("REQUEST_INTERVAL",10))
 imagesInMiddleware=[]
 
-for i in range(nbSentImages,nbSentImages+30) :
+for i in range(nbSentImages,len(picturesDic)) :
 
     choice = random.randint(0,4)
     if choice == 0 or choice == 1 or len(imagesInMiddleware) == 0 :
