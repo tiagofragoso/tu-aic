@@ -34,3 +34,6 @@ This contains a script that showcases sending of sensing events, updating and de
 
 The path is currently to */aic/g2*. To change it, go to the .env file in the root folder and change *PATH_TO_IMAGE_DIR* to the directory you want, the position has to be taken from the root folder.
 
+## How to change the interval of time to send random requests
+
+The interval is currently to 5 seconds. To change it, go to the .env file in the root folder and change *REQUEST_INTERVAL* to the value you want. The unit is in seconds.
