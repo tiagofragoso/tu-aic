@@ -49,3 +49,13 @@ label {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+:host ::ng-deep .btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+:host ::ng-deep a.leaflet-popup-close-button {
+  padding-right: 20px;
+  padding-top: 5px;
+}

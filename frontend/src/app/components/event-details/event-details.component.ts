@@ -10,6 +10,7 @@ import {Tag} from "../../models/tag";
 import {ToastService} from "../../utils/Toast/toast.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ColorCodes} from "../../utils/Color/color-codes";
+import {EventMapComponent} from "../event-map/event-map.component";
 
 export interface TagX {
   tag: Tag,
@@ -36,6 +37,7 @@ export class EventDetailsComponent implements OnInit {
   tags: Array<TagX> = [];
   error = false;
   @ViewChild('tagCarousel', {static: false}) carousel!: NgbCarousel;
+  @ViewChild('mapPreview') mapPreview!: EventMapComponent;
 
   constructor(public router: Router, public toastService: ToastService,
               public activatedRoute: ActivatedRoute, private modalService: NgbModal, private eventService: EventService) {
@@ -73,13 +75,13 @@ export class EventDetailsComponent implements OnInit {
           const index = this.tags.length;
           this.tags.push({tag: curr, index, loading: true});
           this.eventService.getTag(event.metadata.event_id, curr.tag_name).subscribe((tag: Tag) => {
-            this.tags[index].tag.image = tag.image;
-            this.tags[index].loading = false;
-          },
-          () => {
-            this.tags[index].loading = false;
-            console.error(tag);
-          });
+              this.tags[index].tag.image = tag.image;
+              this.tags[index].loading = false;
+            },
+            () => {
+              this.tags[index].loading = false;
+              console.error(tag);
+            });
         }
         this.loading = false;
       }, (error) => {
@@ -101,12 +103,6 @@ export class EventDetailsComponent implements OnInit {
     let tmpDate: Date;
     tmpDate = convertUnixDateToDate(Number.parseInt(date));
     return convertUnixDateToString(tmpDate);
-  }
-
-  convertUpdate(date: any) {
-    console.log(convertUnixDateToDate(Number.parseInt(date)));
-    console.log(convertUnixDateToString(new Date(date)));
-    return convertUnixDateToString(new Date(date));
   }
 
   openDeleteDialogue(content: any) {
@@ -152,12 +148,25 @@ export class EventDetailsComponent implements OnInit {
     this.fillForm(this.event);
   }
 
+  updateMap(newEvent: Event) {
+    if (this.mapPreview && this.mapPreview.events && this.mapPreview.events.length > 0) {
+      const previousEvent = this.mapPreview.events.find(event => event.event_id === this.id);
+      if (previousEvent && newEvent.metadata?.longitude && newEvent.metadata?.latitude &&
+        previousEvent.latitude && previousEvent.longitude &&
+        (newEvent.metadata.longitude != previousEvent.longitude ||
+          newEvent.metadata.latitude != previousEvent.latitude)) {
+        this.mapPreview.id = newEvent.metadata.event_id;
+        this.mapPreview.onMapReady(this.mapPreview.map!);
+      }
+    }
+  }
+
   saveUpdate() {
     this.eventService.update(this.id!, this.getEventFormValues()).subscribe(() => {
         this.toastService.showToast('Event was successfully updated!', ColorCodes.SUCCESS);
-        // TODO: Make map refresh itself if new latitude/longitude got set
-        this.eventService.getById(this.id!).subscribe((event: Event) => {
-          this.setup(event);
+        this.eventService.getById(this.id!).subscribe((newEvent: Event) => {
+          this.setup(newEvent);
+          this.updateMap(newEvent);
           this.edit = false;
         });
       },

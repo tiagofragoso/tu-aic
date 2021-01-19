@@ -68,6 +68,8 @@ export class EventTableComponent implements OnInit {
               private toastService: ToastService) {
     if (this.router.getCurrentNavigation()?.extras.state?.deletedEventId) {
       this.toastService.showToast('Event ' + this.router.getCurrentNavigation()?.extras.state?.deletedEventId + ' was successfully deleted!', ColorCodes.SUCCESS);
+    } else {
+      this.toastService.clear();
     }
                 this.queryOptions = {
                   page: 1,

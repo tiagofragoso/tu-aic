@@ -21,8 +21,6 @@ services:
     build: ./Image-Object-Service
     ports:
       - "8000:${IMAGE_OBJECT_SERVICE_PORT}"
-    volumes:
-      - "./Image-Object-Service/src:/usr/app/src"
     environment:
       PORT: ${IMAGE_OBJECT_SERVICE_PORT}
       MINIO_PORT: ${MINIO_PORT}
@@ -60,18 +58,6 @@ services:
        MYSQL_PASSWORD: pw
     ports:
       - "1234:3306"
-      
-      
-  #phpAdmin:
-  #  image: phpmyadmin/phpmyadmin:5.0.1
-  #  environment:
-  #    PMA_HOST: logdb
-  #    PMA_USER: root
-  #    PMA_PASSWORD: pw
-  #  ports:
-  #    - "1334:80"
-  #  depends_on:
-  #    - logdb
 
   metadata-service:
     build: ./Metadata-Service/MetadataService
@@ -83,16 +69,6 @@ services:
       - mongodb
     ports:
       - 1331:8080
-    
-#  iot-simulator-service:
-#    build: ./IOT-Simulator
-#    command: sh -c './wait-for middleware:8080 -t 300 -- python -u ./src/sim.py'
-#    depends_on:
-#        - middleware
-#    volumes:
-#      - "${PATH_TO_IMAGE_DIR}:/app/data"
-#    environment:
-#          API_ENDPOINT: ${API_ENDPOINT}
           
   workflow-service:
     build: ./Workflow
@@ -123,8 +99,6 @@ services:
 
   frontend:
     build: ./frontend
-    volumes: 
-      - "./frontend/src:/usr/app/src"
     ports: 
       - "8080:4200"
       

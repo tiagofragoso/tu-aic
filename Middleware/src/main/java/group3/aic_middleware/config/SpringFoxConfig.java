@@ -21,7 +21,7 @@ public class SpringFoxConfig {
                 PathSelectors.any()).build().pathMapping("/").apiInfo(new ApiInfoBuilder()
                 .title("Federated Storage Middleware")
                 .description("Federated Storage for IOT Sensing Events")
-                .build());
+                .build()).select().apis(RequestHandlerSelectors.basePackage("group3.aic_middleware")).build();
     }
 
 //    @Bean

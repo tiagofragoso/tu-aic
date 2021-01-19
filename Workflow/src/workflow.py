@@ -38,14 +38,14 @@ interactive_sep()
 
 # -- CHANGE METADATA TO IMAGES
 print(" ------ METADATA MODIFIER ------")
-changeMetadata(picturesDic[0], "name", "MAMMOTH CAVE X")
+changeMetadata(picturesDic[1], "name", "MACON 27 XX")
 
 interactive_sep()
 
 # ADD TAGS TO IMAGES
-print(" ------ AI SIMULATOR ------")
+print(" ------ CV SIMULATOR ------")
 for i in range(10) :
-    rdm = random.randint(0,5)
+    rdm = random.randint(0,4)
     rdmPic = random.randint(0,nbSentImages - 1)
     for j in range(rdm) :
         addTag(picturesDic[rdmPic])
@@ -53,20 +53,20 @@ for i in range(10) :
 interactive_sep()
 
 # DELETING 1 IMAGE
-print(" ------ IMAGE ERASER ------")
+print(" ------ EVENT ERASER ------")
 delete(picturesDic[1]["name"], picturesDic[1]["seq_id"])
 
 interactive_sep()
 
 # CORRUPT 1 IMAGE (STATE "FAULTY")
-print(" ------ IMAGE CORRUPTER ------")
+print(" ------ EVENT CORRUPTER ------")
 
 makeFaultyImage(picturesDic[3])
 
 interactive_sep()
 
 # MAKE 1 IMAGE STATE "MISSING"
-makeMissingImage(picturesDic[-1])
+makeMissingImage(picturesDic[4])
 
 print("The next part is the requests bot")
 interactive_sep()
