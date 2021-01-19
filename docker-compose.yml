@@ -106,7 +106,7 @@ services:
           API_ENDPOINT: ${API_ENDPOINT}
           IOS_ENDPOINT: "http://image-object-service:${IMAGE_OBJECT_SERVICE_PORT}"
           METADATA_ENDPOINT: "http://metadata-service:8080"
-          FREQUENCY: ${FREQUENCY}
+          REQUEST_INTERVAL: ${REQUEST_INTERVAL}
 
   middleware:
     build: ./Middleware
