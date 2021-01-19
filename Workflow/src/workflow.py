@@ -88,7 +88,7 @@ for i in range(nbSentImages,nbSentImages+30) :
         changeMetadata(picturesDic[imagesInMiddleware[rdmIndex]],categoriesToChange[rdmCat])
     if choice == 3 :
         print(" -- ADD TAGS -- ")
-        rdmNbTags = random.randint(0,5)
+        rdmNbTags = random.randint(1,5)
         rdmIndex = random.randint(0,len(imagesInMiddleware)-1)
         for j in range(rdmNbTags):
             addTag(picturesDic[imagesInMiddleware[rdmIndex]])
