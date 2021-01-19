@@ -71,25 +71,28 @@ makeMissingImage(picturesDic[-1])
 print("The next part is the requests bot")
 interactive_sep()
 print(" ----- REQUESTS BOT ------")
-waitingTime = int(os.getenv("FREQUENCY",10))
-
+waitingTime = int(os.getenv("REQUEST_INTERVAL",10))
 imagesInMiddleware=[]
+
 for i in range(nbSentImages,nbSentImages+30) :
-    postEvent(picturesDic[i])
-    imagesInMiddleware.append(i)
-    choice = random.randint(0,5)
-    if choice == 0 :
+
+    choice = random.randint(0,4)
+    if choice == 0 or choice == 1 or len(imagesInMiddleware) == 0 :
+        print(" -- SEND EVENT -- ")
+        postEvent(picturesDic[i])
+        imagesInMiddleware.append(i)
+    if choice == 2 :
         print(" -- CHANGE METADATA -- ")
         rdmCat = random.randint(0, len(categoriesToChange) - 1)
         rdmIndex = random.randint(0,len(imagesInMiddleware) - 1)
         changeMetadata(picturesDic[imagesInMiddleware[rdmIndex]],categoriesToChange[rdmCat])
-    if choice == 1 :
+    if choice == 3 :
         print(" -- ADD TAGS -- ")
         rdmNbTags = random.randint(0,5)
         rdmIndex = random.randint(0,len(imagesInMiddleware)-1)
         for j in range(rdmNbTags):
             addTag(picturesDic[imagesInMiddleware[rdmIndex]])
-    if choice == 2 :
+    if choice == 4 :
         print(" -- DELETE IMAGE --")
         rdmIndex = random.randint(0, len(imagesInMiddleware) - 1 )
         delete(picturesDic[imagesInMiddleware[rdmIndex]]["name"], picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
