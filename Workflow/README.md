@@ -16,7 +16,7 @@ This contains a script that showcases sending of sensing events, updating and de
   * **workflow.py** : the main script that is launched. It manages the create, update and delete of the sensing events
   * **iotSimulator** : is charged of formatting and sending events to the middleware
   * **aiSimulator** : is charged to add tags to the pictures and create new pictures with a simulated computer vision program
-  * **metadaModifier** : is charged to update the metadata, based on the workflow input
+  * **metadataModifier** : is charged to update the metadata, based on the workflow input
   * **dataManager** : manages the data manipulation (sorting, formatting)
   * **apiCalls** : is charged of the middleware calls
 

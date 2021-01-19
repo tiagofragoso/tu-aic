@@ -10,19 +10,18 @@
 - Tiago Fragoso, 12005836 
 
 ## Overview
-This application represents a federated storage system which makes use of two different data stores (MinIO, Dropbox) to store images with replication.
+This application represents a federated storage system which makes use of two different data stores (MinIO, DropBox) to store images with a replication functionality.
 
-The replication is needed in case some of the images get corrupted, so the images can still be retrieved.
+The replication is needed in case images get corrupted, so that they can be recovered and therefore still be retrieved.
 
 Additionally, the status of the image of an event is given, so the user can see which images are correctly stored or if something went wrong.
 
-There is a user interface (WebUI) which displays the events in the form of a table and in a map.
+An user interface (WebUI) exists as well, which displays the events in the form of an interactive table and map.
+The latter includes an adjustable radius for which the contained events are displayed.
 
-The map shows a radius for which the events are found, this can also be adjusted by the user.
+Lastly, there exists a details view which shows the metadata of an event as well as their respective tags and images.
 
-Lastly, there is a details view which shows the details of an event and their respective tags and images.
-
-The metadata of such an event can also be edited inside the WebUI.
+In this component some metadata attributes of an event can be edited and the whole event deleted as well.
 
 ## Architecture
 
@@ -34,22 +33,22 @@ The metadata of such an event can also be edited inside the WebUI.
 
 This service exposes a **REST API** using **Java Spring**.
 
-Middleware service that keeps control of the replication, distribution and hashing services. Also it provides a gateway for the IoT devices as well as the `WebUI`.
+It embodies a Middleware service that controls the replication, distribution and hashing services. Also it provides a gateway for the IoT devices as well as the `WebUI`.
 
-The middleware also includes a rest endpoint to get the latest log messages.
+The middleware also includes a REST endpoint to get the latest log messages.
 
-Lastly, the `Image File Service` is also embedded into this component, since it uses the `Dropbox API JAVA SDK`.
+Lastly, the `Image File Service` is also embedded into this component since it uses the `Dropbox API JAVA SDK`.
 
 ### Metadata Service
 
 This service exposes a **REST API** wrapping a **MongoDB** database.
 
-Takes care of all the metadata for a sensing event.
+It takes care of all the metadata for a sensing event.
 
-Sensing events can be stored, edited, updated and deleted.
-For sensing events tags can also be stored, which have their own hashes so the different images can be compared.
+These can be stored, edited, updated and deleted.
+Tags of sensing events can be stored as well; they have their own hashes, so that different images can be compared.
 
-Sensing events can be retrieved with the usage of pages.
+Sensing events can be retrieved by searching (without a search string all will be returned); since there can be a lot of them, an adjustable pagination of the results is used.
 
 Another way to retrieve events is to use coordinates and a radius to get all events in this radius.
 
@@ -59,27 +58,31 @@ This service exposes a **REST API** wrapping a **MinIO object server** responsib
 
 ### Workflow Service
 
-This service is in charge of managing a basic workflow that shows the application potential. 
+This service is in charge of managing a basic, representative application flow. 
 
-It gets data from the chosen repository, formats them and orders them chronologically. Ite performs CRUD operations, mocks a computer vision algorithm that adds tags to sensing events and corrupts some images to make their status as `faulty` or `missing`.
+It gets data from the chosen repository, formats and orders it chronologically. 
+
+Afterwards this service performs CRUD operations, mocks a computer vision algorithm - which adds tags to sensing events - and corrupts some images to change their status to `faulty` or `missing`.
 
 ### Web UI
 
-Running in **Angular** w/ **Boostrap** for styling and **Leafletjs** for the map interface.
+Running in **Angular** including **Boostrap** for styling and **Leafletjs** for the map interface.
 
-This is the front-end web application that the users will use to work with, with sensing events sent from various IoT devices.
+This is the frontend web application, which enables users to display, update and delete sensing events sent from various IoT devices.
 
-It is connected (only) to the middleware and consists of two main parts: 
-- **Events table**: where the user can see all the sensing events stored in the system
-- **Events map**: where the sensing events are shown at the place that they were captured
+It is connected (only) to the middleware and consists of two main components:
+- **Events table**: Here the user can see all the sensing events (divided into pages), that are stored in the system; additionally all displayed values can be sifted through with a search string (empty per default)
+- **Events map**: Here the sensing events are displayed in an interactive map at the place at which they were captured
 
-From both parts (table and map) the user can go to the detail view of an event. There he sees all the metadata and also the images (and tags) for this event, using a carousel.
+Via both components above the user can navigate to the details view of an event and from there (and the table) they can visit the map with the corresponding event in the center as the selected one
 
-At the detail page the user can edit the metadata or delete the sensing event.
+In the event details view all of the metadata, an interactive smaller map and the images (and tags) for this event (navigable by using a carousel) are displayed.
+
+In there the user can edit the metadata or delete the sensing event.
 
 ### Swagger UI
 
-You can find the Swagger Ui under: [http://127.0.0.1:9999/swagger-ui/index.html](http://127.0.0.1:9999/swagger-ui/index.html)
+You can find the Swagger Ui at: [http://127.0.0.1:9999/swagger-ui/index.html](http://127.0.0.1:9999/swagger-ui/index.html)
 
 ## How to run
 
@@ -89,7 +92,7 @@ You can find the Swagger Ui under: [http://127.0.0.1:9999/swagger-ui/index.html]
 # Duplicate .env.example as .env and populate it
 cp .env.example .env
 
-# Run compose to launch all services
+# Run docker-compose to launch all services
 docker-compose up
 ```
 
@@ -99,27 +102,29 @@ docker-compose up
 # Duplicate .env.example as .env and populate it
 cp .env.example .env
 
-# Run compose to launch core services
+# Run docker-compose to launch the core services
 docker-compose up middleware logdb image-object-service metadata-service frontend
 
-# In another shell run compose for workflow
+# In another shell run docker-compose for the workflow
 docker-compose run -e INTERACTIVE=True workflow-service
 ```
 
 ## How to debug
 
-Debugging can be done using the log output from the different containers. However, as one might not have access to this sheel,
+Debugging can be done using the log output from the different containers. However, as one might not have access to this shell,
 one can use the logs stored in the MySQL database.
 
 The `middleware` provides an endpoint to request these logs and a user
-can access this endpoint trough the `Swagger UI` or make a direct `GET`
-request to this endpoint at the address:
-[http://127.0.0.1:9999/logs](http://127.0.0.1:9999/logs) and as request parameter `count` the user can specify how many logs he wants to get (by default he will get 20 logs).
+can access them via the `Swagger UI` or make a direct `GET`
+request to this endpoint at:
+[http://127.0.0.1:9999/logs](http://127.0.0.1:9999/logs).
+ 
+ In the latter the user can specify how many logs they want to receive with the request parameter `count` (default: 20).
 
 
 ## Effort Breakdown
 
-|                      | DF  | IL | KA  | NM  | TF |
+|                      | DF   | IL  | KA  | NM  | TF |
 |----------------------|------|-----|-----|-----|----|
 |Middleware            |      |  x  |     |     |    |
 |Metadata Service      |  x   |     |     |     |    |
@@ -127,8 +132,8 @@ request to this endpoint at the address:
 |Image File Service    |      |     |  x  |     |    |
 |Web Application       |      |     |  x  |     |  x |
 |Workflow Script       |      |     |     |  x  |  x |
-|Integration Fixes     |  x   |  x  |     |     |  x |
-|Presentation          |  x   |   x |  x  |  x  |  x |
+|Integration Fixes     |  x   |  x  |  x  |  x  |  x |
+|Presentation          |  x   |  x  |  x  |  x  |  x |
 |Architecture Planning |  x   |     |     |     |    |
 |Manual Testing        |      |     |     |  x  |    |
 
