@@ -86,7 +86,9 @@ You can find the Swagger Ui at: [http://127.0.0.1:9999/swagger-ui/index.html](ht
 
 ## How to run
 
-### Quick setup
+The `REQUEST_INTERVAL` variable in the `.env` file can be used to configure the interval between each request in the request bot present in the `workflow` service.
+
+### Quick setup (non-interactive)
 
 ```bash
 # Duplicate .env.example as .env and populate it
@@ -96,7 +98,7 @@ cp .env.example .env
 docker-compose up
 ```
 
-### Running an interactive workflow
+### Running an interactive workflow (as seen in presentation)
 
 ```bash
 # Duplicate .env.example as .env and populate it
