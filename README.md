@@ -1,6 +1,6 @@
 ![DSG](./docs/dsg_logo.png)
 
-# Advanced Internet Computing WS 2020 - Group 3 Topic 3
+# Advanced Internet Computing WS 2020 - Group 3 Topic 2
 
 ## Team
 - Dominik Fenzl, 01526544, 
