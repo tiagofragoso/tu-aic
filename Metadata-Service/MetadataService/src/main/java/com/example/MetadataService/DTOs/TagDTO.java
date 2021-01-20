@@ -14,4 +14,7 @@ public class TagDTO {
 
     @JsonProperty(required = true, value = "image_hash")
     private String imageHash;
+
+    @JsonProperty(value="created")
+    private long created;
 }

@@ -7,5 +7,7 @@ RUN mvn package
 
 FROM openjdk:8-jre-alpine as runner
 COPY --from=builder /tmp/target/*.jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar
+COPY ./wait-for .
+RUN chmod 777 ./wait-for
 EXPOSE 8080
 CMD ["java", "-jar", "/app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar"]

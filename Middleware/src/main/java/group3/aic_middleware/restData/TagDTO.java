@@ -1,5 +1,6 @@
 package group3.aic_middleware.restData;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -7,6 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TagDTO {
+
+    public TagDTO(String tagName, String imageHash) {
+        this.tagName = tagName;
+        this.imageHash = imageHash;
+    }
 
     @Getter
     @Setter
@@ -16,6 +22,18 @@ public class TagDTO {
     @Getter
     @Setter
     @JsonProperty(required = true, value = "image_hash")
-    private int imageHash;
+    private String imageHash;
+
+    @Getter
+    @Setter
+    @JsonProperty(required = false, value = "created")
+    private long created;
+
+    @Override
+    public String toString() {
+        return "tagName: " + this.tagName + "\n"
+                + "imageHash: " + this.imageHash + "\n"
+                + "created: " + this.created;
+    }
 
 }

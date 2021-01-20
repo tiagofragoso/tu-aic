@@ -1,17 +1,21 @@
 package com.example.MetadataService.Services;
 
-import com.example.MetadataService.DTOs.EventDTO;
-import com.example.MetadataService.DTOs.TagDTO;
+import com.example.MetadataService.DTOs.*;
 import com.example.MetadataService.Entities.SensingEvent;
 import com.example.MetadataService.Entities.Tag;
 import com.example.MetadataService.Repositories.SensingEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+
+import javax.swing.text.html.Option;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +48,7 @@ public class CRUDService {
      */
     public void createEvent(EventDTO event) {
         try {
+            event.setUpdated(event.getTimestamp());
             eventRepository.insert(sensingDtoToReal(event));
         }
         catch (DuplicateKeyException e) {
@@ -52,11 +57,27 @@ public class CRUDService {
     }
 
     /**
-     * Create an event and store it in the persistence.
+     * Update an event in the persistence.
      * @param event the event that should be stored.
      */
     public void updateEvent(EventDTO event) {
         try {
+
+            Optional<SensingEvent> storedOpt = eventRepository.findById(event.getSensingEventId());
+
+            if(!storedOpt.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The specified event could not be found!");
+            }
+
+            SensingEvent stored = storedOpt.get();
+
+            ArrayList<TagDTO> tagDtos = new ArrayList<>();
+            for(Tag tagdt : stored.getTags()) {
+                tagDtos.add(tagRealToDto(tagdt));
+            }
+            event.setTags(tagDtos);
+            event.setUpdated(Instant.now().toEpochMilli());
+
             eventRepository.save(sensingDtoToReal(event));
         }
         catch (DuplicateKeyException e) {
@@ -87,15 +108,37 @@ public class CRUDService {
      * @return returns all events.
      * @throws Exception Throws an exception if location data was wrongly stored.
      */
-    public List<EventDTO> getAllEvents() throws Exception {
+    public PageMetaPlusItemDTO getAllEvents(Pageable pageRequest, String search) throws Exception {
 
-        List<EventDTO> ret = new ArrayList<>();
+        List<SimpleEventDTO> ret = new ArrayList<>();
 
-        for(SensingEvent event : eventRepository.findAll()) {
-            ret.add(sensingRealToDto(event));
+        List<Sort.Order> orders = new ArrayList<>();
+        for (Iterator<Sort.Order> it = pageRequest.getSort().stream().iterator(); it.hasNext(); ) {
+            Sort.Order order = it.next();
+
+            try {
+                orders.add(Sort.Order.by(AttributeMapper.mapJsonAttributeToInternalAttributes(order.getProperty())).with(order.getDirection()));
+            }
+            catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given attribute for sorting is not valid.");
+            }
         }
 
-        return ret;
+        Pageable modifiedPageRequest = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(), Sort.by(orders));
+
+        Page<SensingEvent> page;
+        if(search != null) {
+            page = findEventFullSearch(search, modifiedPageRequest);
+        }
+        else {
+            page = eventRepository.findAll(modifiedPageRequest);
+        }
+
+        for(SensingEvent event : page.getContent()) {
+            ret.add(sensingRealToSimpleDto(event));
+        }
+
+        return new PageMetaPlusItemDTO(ret, page.getNumber(), page.getTotalElements(), page.getTotalPages());
     }
 
     /**
@@ -106,11 +149,11 @@ public class CRUDService {
      * @return returns all event dtos found in the radius
      * @throws Exception
      */
-    public List<EventDTO> getAllEventsInRadius(double size, double lon, double lat) throws Exception {
-        List<EventDTO> ret = new ArrayList<>();
+    public List<SimpleEventDTO> getAllEventsInRadius(double size, double lon, double lat) throws Exception {
+        List<SimpleEventDTO> ret = new ArrayList<>();
 
         for(SensingEvent event : eventRepository.findSensingEventInCircle(size, lon, lat)) {
-            ret.add(sensingRealToDto(event));
+            ret.add(sensingRealToSimpleDto(event));
         }
 
         return ret;
@@ -133,6 +176,7 @@ public class CRUDService {
         }
 
         event.getTags().remove(tag);
+        event.updateTagsConcatString();
         eventRepository.save(event);
     }
 
@@ -149,7 +193,8 @@ public class CRUDService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The given tag was already added to this event.");
         }
 
-        event.getTags().add(tagDtoToReal(tag));
+        event.getTags().add(tagDtoToReal(tag, Instant.now().toEpochMilli()));
+        event.updateTagsConcatString();
         eventRepository.save(event);
     }
 
@@ -162,17 +207,17 @@ public class CRUDService {
     public synchronized void updateTag(String event_id, TagDTO tag) {
 
         SensingEvent event = getEventIfExists(event_id);
-
         Optional<Tag> foundTag = event.getTags().stream().filter(x -> x.getTagName().equals(tag.getTagName())).findFirst();
 
         if(!foundTag.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find the given tag.");
+            addTag(event_id, tag);
         }
+        else {
+            Tag realTag = foundTag.get();
+            realTag.setImageHash(tag.getImageHash());
 
-        Tag realTag = foundTag.get();
-        realTag.setImageHash(tag.getImageHash());
-
-        eventRepository.save(event);
+            eventRepository.save(event);
+        }
     }
 
     /**
@@ -197,13 +242,12 @@ public class CRUDService {
      * @return returns a real sensing event object
      */
     private SensingEvent sensingDtoToReal(EventDTO dto) {
-
         List<Tag> tags = new ArrayList<>();
         for(TagDTO tag : dto.getTags()) {
-            tags.add(tagDtoToReal(tag));
+            tags.add(tagDtoToReal(tag, dto.getTimestamp()));
         }
 
-        SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames());
+        SensingEvent realEvent = new SensingEvent(dto.getSensingEventId(), dto.getName(), dto.getDeviceIdentifier(), dto.getTimestamp(), tags, dto.getLongitude(), dto.getLatitude(), dto.getFrameNum(), dto.getPlaceIdent(), dto.getEventFrames(), dto.getUpdated());
         return realEvent;
     }
 
@@ -212,8 +256,8 @@ public class CRUDService {
      * @param dto the dto that should be converted.mongorepos
      * @return returns a tag
      */
-    private Tag tagDtoToReal(TagDTO dto) {
-        return new Tag(dto.getTagName(), dto.getImageHash());
+    private Tag tagDtoToReal(TagDTO dto, long created) {
+        return new Tag(dto.getTagName(), dto.getImageHash(), created);
     }
 
     /**
@@ -229,7 +273,7 @@ public class CRUDService {
             tags.add(tagRealToDto(tag));
         }
 
-        return new EventDTO(event.getId(), event.getName(), event.getDeviceIdentifier(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getFrameNum(), event.getPlaceIdent(), event.getEventFrames());
+        return new EventDTO(event.getId(), event.getName(), event.getDeviceIdentifier(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getFrameNum(), event.getPlaceIdent(), event.getEventFrames(), event.getUpdated());
     }
 
     /**
@@ -238,6 +282,36 @@ public class CRUDService {
      * @return returns a tag dto.
      */
     private TagDTO tagRealToDto(Tag tag) {
-        return new TagDTO(tag.getTagName(), tag.getImageHash());
+        return new TagDTO(tag.getTagName(), tag.getImageHash(), tag.getCreated());
+    }
+
+    /**
+     * Converts a tag to a simple tag dto
+     * @param tag the tag that should be converted.
+     * @return returns a tag dto.
+     */
+    private SimpleTagDTO tagRealToSimpleDto(Tag tag) {
+        return new SimpleTagDTO(tag.getTagName(), tag.getImageHash());
+    }
+
+    /**
+     * Convert a sensing event to a simple dto
+     * @param event the event that should be converted.
+     * @return returns the dto
+     * @throws Exception throws an exception if the location was wrongly stored.
+     */
+    private SimpleEventDTO sensingRealToSimpleDto(SensingEvent event) throws Exception {
+        List<SimpleTagDTO> tags = new ArrayList<>();
+
+        for(Tag tag : event.getTags()) {
+            tags.add(tagRealToSimpleDto(tag));
+        }
+
+        return new SimpleEventDTO(event.getId(), event.getName(), event.getPlaceIdent(), event.getTimestamp(), event.getLongitude(), event.getLatitude(), tags, event.getUpdated());
+    }
+
+    private Page<SensingEvent> findEventFullSearch(String searchText, Pageable pageable) {
+        return eventRepository.findByNameContainingIgnoreCaseOrPlaceIdentContainingIgnoreCaseOrCreatedHumanReadableContainingIgnoreCaseOrUpdatedHumanReadableContainingIgnoreCaseOrTagConcatContainingIgnoreCase(searchText, searchText, searchText, searchText, searchText, pageable);
+
     }
 }

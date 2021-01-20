@@ -1,0 +1,77 @@
+<h2>Event Table</h2>
+<div>
+  <form (ngSubmit)="onSubmitSearch()" novalidate>
+    <div class="row row-cols-lg-auto g-3">
+      <div class="col-auto">
+        <label><input [formControl]="queryOptions.searchTerm" class="form-control" placeholder="Search..." type="text"/></label>
+      </div>
+      <div class="col-auto">
+        <button class="col-auto btn btn-primary" type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <table class="table table-hover my-4">
+    <thead>
+    <tr>
+      <th (sort)="onSort($event)" class="long-width" scope="col" sortable="name">Name</th>
+      <th (sort)="onSort($event)" class="medium-width" scope="col" sortable="place_ident">Place ID</th>
+      <th (sort)="onSort($event)" class="medium-width" scope="col" sortable="created">Created</th>
+      <th (sort)="onSort($event)" class="medium-width" scope="col" sortable="updated" direction="desc">Last updated</th>
+      <th class="long-width" scope="col">Tags</th>
+      <th class="small-width" scope="col">State</th>
+      <th class="tiny-width" scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr (click)="eventClicked(event.event_id)" *ngFor="let event of events">
+      <td>{{event.name ? event.name : 'No name found' }}</td>
+      <td>{{event.place_ident ? event.place_ident : 'No place identifier found'}}</td>
+      <td>{{event.created ? convertDate(event.created) : 'No created date found'}}</td>
+      <td>{{event.updated ? convertDate(event.updated) : 'No updated date found'}}</td>
+      <td [class.text-muted]="event.tags.length < 2">{{ event.tags ? convertTagNames(event.tags) : 'No tags found' }}
+        <span *ngIf="event.tags && event.tags.length > 3" class="text-muted"> & {{event.tags.length - 3}} more</span>
+      </td>
+      <td class="fw-bold">
+          <span [className]="'text-' + getColor(event.state)">
+            {{event.state ? event.state : 'No event state found'}}
+          </span>
+      </td>
+      <td>
+        <button (click)="eventMapClicked($event, event.event_id)" class="btn btn-primary text-white map-btn" type="button">
+          <i class="fas fa-map-marker-alt"></i>
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && totalResults == 0" class="d-flex justify-content-center text-danger">
+    <span>No results found</span>
+  </div>
+
+  <div *ngIf="loading" class="spinner-container">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="row row-cols-lg-auto justify-content-between">
+    <div class="col-auto">
+      <ngb-pagination (pageChange)="onPageChange()" [(page)]="queryOptions.page" [collectionSize]="totalResults" [pageSize]="queryOptions.pageSize">
+      </ngb-pagination>
+    </div>
+
+    <div class="col-auto">
+      <label><select (ngModelChange)="onPageChange()" [(ngModel)]="queryOptions.pageSize" class="form-select">
+        <option [ngValue]="5">5 items per page</option>
+        <option [ngValue]="10">10 items per page</option>
+        <option [ngValue]="15">15 items per page</option>
+        <option [ngValue]="20">20 items per page</option>
+      </select>
+      </label>
+    </div>
+  </div>
+</div>
+
+<bc-app-toasts aria-atomic="true" aria-live="polite" class="toasty"></bc-app-toasts>

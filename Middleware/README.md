@@ -15,7 +15,9 @@ Middleware service that keeps control of the replication, distribution and hashi
 
   ```
   docker build -t middleware .
-  docker run -dp 8080:8082 middleware
+  docker run -dp 8080:9999 middleware
   ```
 
 
+## Swagger
+You can find the swagger ui under: http://127.0.0.1:9999/swagger-ui/index.html

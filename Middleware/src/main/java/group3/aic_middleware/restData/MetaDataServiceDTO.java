@@ -3,6 +3,7 @@ package group3.aic_middleware.restData;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Data
@@ -22,12 +23,12 @@ public class MetaDataServiceDTO {
 
     @Getter
     @Setter
-    @JsonProperty(required = true, value = "dev_id")
+    @JsonProperty(required = false, value = "dev_id")
     private String deviceIdentifier;
 
     @Getter
     @Setter
-    @JsonProperty(required = true, value = "timestamp")
+    @JsonProperty(required = true, value = "created")
     private long timestamp;
 
     @Getter
@@ -60,4 +61,19 @@ public class MetaDataServiceDTO {
     @JsonProperty(required = false, value="event_frames")
     private long eventFrames;
 
+    @Getter
+    @Setter
+    @JsonProperty(required = false, value="updated")
+    private long updated;
+
+    public long getCreated(String tagName) {
+        Iterator<TagDTO> it = this.tags.iterator();
+        while(it.hasNext()) {
+            TagDTO tagDTO = it.next();
+            if(tagDTO.getTagName().equals(tagName)) {
+                return tagDTO.getCreated();
+            }
+        }
+        return -1;
+    }
 }

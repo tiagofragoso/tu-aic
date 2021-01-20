@@ -21,8 +21,6 @@ services:
     build: ./Image-Object-Service
     ports:
       - "8000:${IMAGE_OBJECT_SERVICE_PORT}"
-    volumes:
-      - "./Image-Object-Service/src:/usr/app/src"
     environment:
       PORT: ${IMAGE_OBJECT_SERVICE_PORT}
       MINIO_PORT: ${MINIO_PORT}
@@ -45,6 +43,22 @@ services:
     volumes:
       - mongodb_data_container:/data/db
 
+  logdb:
+    build: ./Middleware/LoggingDB
+    image: logger-mysql
+    volumes:
+      - logger_container:/data/logdb
+    logging:
+        driver: none
+    command: --init-file /data/logdb/init.sql 
+    environment:
+       MYSQL_ROOT_PASSWORD: pw
+       MYSQL_DATABASE: logDb
+       MYSQL_USER: user
+       MYSQL_PASSWORD: pw
+    ports:
+      - "1234:3306"
+
   metadata-service:
     build: ./Metadata-Service/MetadataService
     image: metadata-service
@@ -55,23 +69,40 @@ services:
       - mongodb
     ports:
       - 1331:8080
-      
-  iot-simulator-service:
-    build: ./IOT-Simulator
+          
+  workflow-service:
+    build: ./Workflow
+    command: sh -c './wait-for middleware:8080 -t 300 -- python -u ./src/workflow.py'
     depends_on:
         - middleware
-  
+        - image-object-service
+    volumes:
+      - "${PATH_TO_IMAGE_DIR}:/app/data"
+    environment:
+          API_ENDPOINT: ${API_ENDPOINT}
+          IOS_ENDPOINT: "http://image-object-service:${IMAGE_OBJECT_SERVICE_PORT}"
+          METADATA_ENDPOINT: "http://metadata-service:8080"
+          REQUEST_INTERVAL: ${REQUEST_INTERVAL}
+
   middleware:
     build: ./Middleware
+    command: sh -c './wait-for logdb:3306 -t 200 -- java -jar /app/AICMIDDLEWARE-0.0.1-SNAPSHOT.jar'
     depends_on:
       - metadata-service
       - image-object-service
+      - logdb
     ports:
       - "9999:8080"
     environment:
           DROPBOX_FOLDERNAME: ${DROPBOX_FOLDERNAME}
           DROPBOX_ACCESSTOKEN: ${DROPBOX_ACCESSTOKEN}
+
+  frontend:
+    build: ./frontend
+    ports: 
+      - "8080:4200"
       
 volumes:
   minio_data:
   mongodb_data_container:
+  logger_container:

@@ -1,14 +1,23 @@
 package com.example.MetadataService.Entities;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.stream.Collectors;
 
 
+@NoArgsConstructor
 @Document
 public class SensingEvent {
 
@@ -31,7 +40,6 @@ public class SensingEvent {
     private long timestamp;
 
     @Getter
-    @Setter
     private List<Tag> tags;
 
     @Getter
@@ -46,11 +54,27 @@ public class SensingEvent {
     @Setter
     private long eventFrames;
 
+    @Getter
+    @Setter
+    private String createdHumanReadable;
+
+    @Getter
+    @Setter
+    private String updatedHumanReadable;
+
     private double longitude;
     private double latitude;
 
     @GeoSpatialIndexed
     private double[] gpsLocation = new double[2];
+
+    @Getter
+    @Setter
+    private long updated;
+
+    @Getter
+    @Setter
+    private String tagConcat;
 
     public double getLongitude() throws Exception{
         if(gpsLocation.length > 0) {
@@ -76,7 +100,12 @@ public class SensingEvent {
         this.latitude = latitude;
     }
 
-    public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude, long frameNum, String placeIdent, long eventFrames) {
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+        updateTagsConcatString();
+    }
+
+    public SensingEvent(String id, String name, String deviceIdentifier, long timestamp, List<Tag> tags, double longitude, double latitude, long frameNum, String placeIdent, long eventFrames, long updated) {
         this.id = id;
         this.name = name;
         this.deviceIdentifier = deviceIdentifier;
@@ -87,5 +116,17 @@ public class SensingEvent {
         this.eventFrames = eventFrames;
         this.setLongitude(longitude);
         this.setLatitude(latitude);
+        this.updated = updated;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy - HH:mm").withZone(ZoneId.systemDefault()).withLocale(Locale.getDefault());
+
+        this.createdHumanReadable = formatter.format(Instant.ofEpochSecond(timestamp));
+        this.updatedHumanReadable = formatter.format(Instant.ofEpochSecond(timestamp));
+
+        updateTagsConcatString();
+    }
+
+    public void updateTagsConcatString() {
+        this.tagConcat = tags.stream().map(Tag::getTagName).collect(Collectors.joining(","));
     }
 }
