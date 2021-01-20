@@ -73,7 +73,6 @@ interactive_sep()
 # MAKE 1 IMAGE STATE "MISSING"
 makeMissingImage(picturesDic[4])
 
-print("The next part is the requests bot")
 interactive_sep()
 print(" ----- REQUESTS BOT ------")
 waitingTime = int(os.getenv("REQUEST_INTERVAL",10))
