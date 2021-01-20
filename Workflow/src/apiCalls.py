@@ -2,6 +2,9 @@ import requests
 import os
 from datetime import datetime
 
+'''
+ is charged of the middleware calls, mongoDB calls (for creating missing events) and Image Object Service calls (for creating faulty events)
+ '''
 # https://docs.python.org/3/library/os.html#os.getenv
 # os.getenv(key, default=None)
 API_ENDPOINT = os.getenv("API_ENDPOINT", "http://localhost:3000")

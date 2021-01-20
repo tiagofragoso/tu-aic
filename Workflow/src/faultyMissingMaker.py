@@ -8,7 +8,9 @@ from dataManager import imageObjectServiceFormatter
 
 from dataManager import metadataServiceFormatter
 
-
+'''
+is charged of corrupting the images as *FAULTY* or *MISSING*
+'''
 def makeFaultyImage(dic) :
     image = drawCircle(dic)
     imName = dic["seq_id"] + "_base.jpg"

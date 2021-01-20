@@ -3,6 +3,9 @@ import datetime
 import json
 import os
 
+'''
+manages the data manipulation (sorting, formatting)
+'''
 PATH = "./data"
 
 def getOrderedData():
@@ -28,7 +31,7 @@ def getOrderedData():
     return dataSortedList
 
 
-# Encode the data to send it to the port
+# Format the data for the 'post event' to the middlewware
 def dicAndImageFormatter(my_dic,imagePath):
     encodedString = getImageInB64(imagePath)
     dataEncoded = {"image": encodedString.decode('utf-8'), "metadata": my_dic}  # add the metadata to send a json
@@ -39,6 +42,7 @@ def getImageInB64(filePath) :
         encoded_string = base64.b64encode(image_file.read())
     return encoded_string
 
+# Format the data for adding tags to the middleware
 def tagFormatter(dic) :
     filePath = dic["filename"]
     encodedImage = getImageInB64(filePath)

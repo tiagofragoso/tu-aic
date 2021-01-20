@@ -8,6 +8,11 @@ from dataManager import getOrderedData
 from metadataModifier import changeMetadata
 from apiCalls import delete
 from faultyMissingMaker import makeFaultyImage, makeMissingImage
+'''
+the main script that is launched. 
+It manages the create, update and delete of the sensing events
+'''
+
 if not os.path.exists('./data_created'):
     os.makedirs('./data_created')
 
@@ -46,7 +51,7 @@ interactive_sep()
 print(" ------ CV SIMULATOR ------")
 for i in range(10) :
     rdm = random.randint(0,4)
-    rdmPic = random.randint(0,nbSentImages)
+    rdmPic = random.randint(0,nbSentImages - 1)
     for j in range(rdm) :
         addTag(picturesDic[rdmPic])
 
@@ -69,3 +74,32 @@ interactive_sep()
 makeMissingImage(picturesDic[4])
 
 interactive_sep()
+print(" ----- REQUESTS BOT ------")
+waitingTime = int(os.getenv("REQUEST_INTERVAL",10))
+imagesInMiddleware=[]
+
+for i in range(nbSentImages,len(picturesDic)) :
+
+    choice = random.randint(0,4)
+    if choice == 0 or choice == 1 or len(imagesInMiddleware) == 0 :
+        print(" -- SEND EVENT -- ")
+        postEvent(picturesDic[i])
+        imagesInMiddleware.append(i)
+    if choice == 2 :
+        print(" -- CHANGE METADATA -- ")
+        rdmCat = random.randint(0, len(categoriesToChange) - 1)
+        rdmIndex = random.randint(0,len(imagesInMiddleware) - 1)
+        changeMetadata(picturesDic[imagesInMiddleware[rdmIndex]],categoriesToChange[rdmCat])
+    if choice == 3 :
+        print(" -- ADD TAGS -- ")
+        rdmNbTags = random.randint(1,5)
+        rdmIndex = random.randint(0,len(imagesInMiddleware)-1)
+        for j in range(rdmNbTags):
+            addTag(picturesDic[imagesInMiddleware[rdmIndex]])
+    if choice == 4 :
+        print(" -- DELETE IMAGE --")
+        rdmIndex = random.randint(0, len(imagesInMiddleware) - 1 )
+        delete(picturesDic[imagesInMiddleware[rdmIndex]]["name"], picturesDic[imagesInMiddleware[rdmIndex]]["seq_id"])
+        del imagesInMiddleware[rdmIndex]
+    # default : does nothing
+    time.sleep(waitingTime)

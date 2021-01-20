@@ -5,8 +5,12 @@ import cv2
 from dataManager import tagFormatter, getImagePathWithDic
 from apiCalls import putNewTag
 
-
+'''
+is charged to add tags to the pictures and create new pictures
+ with a simulated computer vision program
+'''
 POSSIBLE_TAGS = ["Antelope","Elephant","Wolf","Deer","Fox","Monkey","Wild_Boar","Squirrel","Rabbit"]
+
 def drawCircle(dic) :
     path = getImagePathWithDic(dic)
     image = cv2.imread(path)
